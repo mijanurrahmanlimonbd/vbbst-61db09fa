@@ -64,7 +64,7 @@ const EditableText = ({ fieldKey, value, fallback = "", as: Tag = "p", className
         onInput={handleInput}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        className={`${className} outline-none ring-2 ring-primary/30 ring-offset-2 rounded-sm cursor-text hover:ring-primary/60 focus:ring-primary transition-all`}
+        className={`${className} outline-none border-2 border-dashed border-transparent focus:border-blue-500 hover:border-blue-300 rounded-sm cursor-text transition-all`}
         dangerouslySetInnerHTML={richText ? { __html: displayValue } : undefined}
       >
         {!richText ? displayValue : undefined}
