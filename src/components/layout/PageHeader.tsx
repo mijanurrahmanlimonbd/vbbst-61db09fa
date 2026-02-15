@@ -35,7 +35,7 @@ const PageHeader = ({
 
   return (
     <section
-      className="relative h-[120px] md:h-[160px] lg:h-[280px] flex items-center justify-center text-center overflow-hidden"
+      className="relative h-[140px] md:h-[170px] lg:h-[280px] flex items-center justify-center text-center overflow-hidden"
       style={
         hasImage
           ? {
