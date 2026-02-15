@@ -4,8 +4,10 @@
  */
 
 import { Helmet } from "react-helmet-async";
+import { useState, useEffect } from "react";
 import { useSchemaConfig } from "@/hooks/useSchemaConfig";
 import { useBranding } from "@/hooks/useBranding";
+import { supabase } from "@/integrations/supabase/client";
 import {
   combineSchemas,
   generateOrganization,
@@ -16,26 +18,24 @@ import {
   generateProduct,
   generateArticle,
   generateFAQPage,
+  generateReadAction,
   type BrandingData,
 } from "@/lib/jsonLdSchemas";
 import { getSiteUrl } from "@/lib/config";
 import { useLocation } from "react-router-dom";
 
 interface JsonLdSchemaProps {
-  /** Page-level overrides */
   pageTitle?: string;
   pageDescription?: string;
   pageImage?: string;
   datePublished?: string;
   dateModified?: string;
-  /** Breadcrumb items (auto-generated from URL if not provided) */
   breadcrumbs?: { name: string; url: string }[];
-  /** Product data for product pages */
   product?: any;
-  /** Blog post data for article pages */
   article?: any;
-  /** FAQ data for pages with FAQs */
   faqs?: { question: string; answer: string }[];
+  /** Custom JSON-LD script from admin settings */
+  customJsonLd?: string;
 }
 
 const JsonLdSchema = ({
@@ -48,11 +48,19 @@ const JsonLdSchema = ({
   product,
   article,
   faqs,
+  customJsonLd,
 }: JsonLdSchemaProps) => {
   const { config, loading } = useSchemaConfig();
   const { branding } = useBranding();
   const location = useLocation();
   const siteUrl = getSiteUrl();
+  const [adminCustomJsonLd, setAdminCustomJsonLd] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.rpc("get_setting", { setting_key: "custom_json_ld" }).then(({ data }) => {
+      if (data) setAdminCustomJsonLd(data);
+    });
+  }, []);
 
   if (loading) return null;
 
@@ -115,14 +123,56 @@ const JsonLdSchema = ({
     schemas.push(generateFAQPage(faqs));
   }
 
+  // 9. ReadAction for search/interaction points
+  if (config.readAction) {
+    schemas.push({
+      "@context": "https://schema.org",
+      "@type": "ReadAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${siteUrl}/search?q={search_term_string}`,
+        actionPlatform: [
+          "https://schema.org/DesktopWebPlatform",
+          "https://schema.org/MobileWebPlatform",
+        ],
+      },
+      name: "Search VBB STORE",
+      "query-input": {
+        "@type": "PropertyValueSpecification",
+        valueRequired: true,
+        valueName: "search_term_string",
+      },
+    });
+  }
+
   const combined = combineSchemas(...schemas);
-  if (!combined) return null;
+
+  // Parse custom JSON-LD from admin settings or prop
+  const rawCustom = adminCustomJsonLd || customJsonLd;
+  let customScript: string | null = null;
+  if (rawCustom) {
+    try {
+      JSON.parse(rawCustom);
+      customScript = rawCustom;
+    } catch {
+      // invalid JSON, skip
+    }
+  }
+
+  if (!combined && !customScript) return null;
 
   return (
     <Helmet>
-      <script type="application/ld+json">
-        {JSON.stringify(combined)}
-      </script>
+      {combined && (
+        <script type="application/ld+json">
+          {JSON.stringify(combined)}
+        </script>
+      )}
+      {customScript && (
+        <script type="application/ld+json">
+          {customScript}
+        </script>
+      )}
     </Helmet>
   );
 };
