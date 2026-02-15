@@ -183,15 +183,21 @@ const AIChatWidget = () => {
             {messages.length === 0 && (
               <div className="text-center py-8 space-y-3">
                 <Bot className="w-10 h-10 mx-auto text-primary/50" />
-                <p className="text-sm text-muted-foreground">Hi! 👋 I'm the VBB Store AI Assistant. Ask me anything about our products, pricing, or how to get started!</p>
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {["What products do you sell?", "Best BM for agencies?", "How do I order?"].map((q) => (
+               <p className="text-sm text-muted-foreground">Hi! 👋 I'm the VBB Store AI Assistant. Ask me anything about our products, pricing, or how to get started!</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { icon: "🛒", q: "What products do you sell?" },
+                    { icon: "🏢", q: "Best BM for agencies?" },
+                    { icon: "📦", q: "How do I order?" },
+                    { icon: "💰", q: "What are the prices?" },
+                  ].map(({ icon, q }) => (
                     <button
                       key={q}
                       onClick={() => sendMessage(q)}
-                      className="text-xs px-3 py-1.5 rounded-full border border-border hover:bg-accent transition-colors"
+                      className="flex items-start gap-2 text-left p-2.5 rounded-xl border border-border bg-card hover:bg-accent hover:border-primary/30 transition-all text-xs leading-snug"
                     >
-                      {q}
+                      <span className="text-base shrink-0">{icon}</span>
+                      <span className="text-foreground">{q}</span>
                     </button>
                   ))}
                 </div>
