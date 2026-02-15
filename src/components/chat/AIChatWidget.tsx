@@ -187,7 +187,7 @@ const AIChatWidget = () => {
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { icon: "🛒", q: "What products do you sell?" },
-                    { icon: "🏢", q: "Best BM for agencies?" },
+                    { icon: "📱", q: "Tell me about WhatsApp API" },
                     { icon: "📦", q: "How do I order?" },
                     { icon: "💰", q: "What are the prices?" },
                   ].map(({ icon, q }) => (
