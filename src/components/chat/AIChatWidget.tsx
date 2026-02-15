@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { Bot, X, Send, Loader2, MessageCircle, User } from "lucide-react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { Bot, X, Send, Loader2, MessageCircle, User, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
@@ -336,39 +336,82 @@ const AIChatWidget = () => {
                     </div>
                   </div>
                 )}
-                {messages.map((m, i) => (
-                  <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                    <div
-                      className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm whitespace-pre-wrap ${
-                        m.role === "user"
-                          ? "bg-primary text-primary-foreground rounded-br-md"
-                          : m.role === "admin"
-                          ? "bg-[hsl(210,100%,95%)] text-[hsl(210,50%,20%)] rounded-bl-md border border-[hsl(210,100%,85%)]"
-                          : "bg-muted text-foreground rounded-bl-md"
-                      }`}
-                    >
-                      {m.role === "admin" && (
-                        <span className="text-[10px] font-semibold text-[hsl(210,100%,50%)] block mb-0.5">Admin</span>
-                      )}
-                      {m.role === "user" ? (
-                        m.content
-                      ) : (
-                        <ReactMarkdown
-                          components={{
-                            a: ({ href, children }) => (
-                              <a href={href} target="_blank" rel="noopener noreferrer" className="underline font-medium text-primary-foreground/90 hover:text-primary-foreground">
-                                {children}
-                              </a>
-                            ),
-                            p: ({ children }) => <span>{children}</span>,
-                          }}
+                {messages.map((m, i) => {
+                  // Extract product links for "View Product" buttons
+                  const productLinks: { label: string; href: string }[] = [];
+                  if (m.role !== "user") {
+                    const linkRegex = /\[([^\]]*)\]\((https?:\/\/[^)]*\/shop\/[^)]+)\)/g;
+                    let match;
+                    while ((match = linkRegex.exec(m.content)) !== null) {
+                      productLinks.push({ label: match[1], href: match[2] });
+                    }
+                  }
+
+                  const isExternal = (href: string) =>
+                    href.includes("wa.me") || href.includes("t.me") || href.includes("telegram") || href.includes("whatsapp");
+
+                  return (
+                    <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                      <div className="max-w-[85%] space-y-1.5">
+                        <div
+                          className={`px-3 py-1.5 rounded-2xl text-sm whitespace-pre-wrap ${
+                            m.role === "user"
+                              ? "bg-primary text-primary-foreground rounded-br-md"
+                              : m.role === "admin"
+                              ? "bg-[hsl(210,100%,95%)] text-[hsl(210,50%,20%)] rounded-bl-md border border-[hsl(210,100%,85%)]"
+                              : "bg-muted text-foreground rounded-bl-md"
+                          }`}
                         >
-                          {m.content}
-                        </ReactMarkdown>
-                      )}
+                          {m.role === "admin" && (
+                            <span className="text-[10px] font-semibold text-[hsl(210,100%,50%)] block mb-0.5">Admin</span>
+                          )}
+                          {m.role === "user" ? (
+                            m.content
+                          ) : (
+                            <ReactMarkdown
+                              components={{
+                                a: ({ href, children }) => {
+                                  const external = isExternal(href || "");
+                                  return (
+                                    <a
+                                      href={href}
+                                      target={external ? "_blank" : "_self"}
+                                      rel={external ? "noopener noreferrer" : undefined}
+                                      className="underline font-medium text-primary hover:text-primary/80"
+                                    >
+                                      {children}
+                                    </a>
+                                  );
+                                },
+                                p: ({ children }) => <span className="block mb-1 last:mb-0">{children}</span>,
+                                strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                                ul: ({ children }) => <ul className="list-disc pl-4 my-1 space-y-0.5">{children}</ul>,
+                                li: ({ children }) => <li className="text-sm">{children}</li>,
+                              }}
+                            >
+                              {m.content}
+                            </ReactMarkdown>
+                          )}
+                        </div>
+                        {/* Quick Action Product Buttons */}
+                        {productLinks.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 pl-1">
+                            {productLinks.map((link, idx) => (
+                              <a
+                                key={idx}
+                                href={link.href}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors shadow-sm"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                View Product
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {adminTyping && (
                   <div className="flex justify-start">
                     <div className="bg-[hsl(210,100%,95%)] border border-[hsl(210,100%,85%)] px-3 py-2 rounded-2xl rounded-bl-md text-xs text-[hsl(210,50%,40%)] italic">
