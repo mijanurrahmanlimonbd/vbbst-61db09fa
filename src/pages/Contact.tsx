@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
+import SEOHead from "@/components/seo/SEOHead";
 import PageHeader from "@/components/layout/PageHeader";
 import { MessageCircle, Send, Mail, Facebook, Users, Clock, Globe, Star, Headphones, Shield, Zap, RefreshCw, BadgeCheck, ArrowRight } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -59,6 +60,7 @@ const Contact = () => {
 
   return (
     <Layout>
+      <SEOHead title="Contact Us - 24/7 Support" description="Get in touch with VBB STORE 24/7 via WhatsApp, Telegram, or email. Average response time under 2 minutes. Serving 50+ countries worldwide." />
       <PageHeader
         breadcrumb="Contact Us"
         subtitle="24/7 SUPPORT"

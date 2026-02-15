@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MediaLibraryModal from "@/components/admin/MediaLibraryModal";
+import SEOSettingsPanel from "@/components/admin/SEOSettingsPanel";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -73,6 +74,9 @@ const AdminPostEditor = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>(["Verified BM"]);
   const [author, setAuthor] = useState("Admin");
   const [readTime, setReadTime] = useState("5 min read");
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+  const [focusKeyword, setFocusKeyword] = useState("");
   const [titleError, setTitleError] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"saved" | "unsaved" | "saving">("saved");
@@ -131,6 +135,9 @@ const AdminPostEditor = () => {
           setStatus((data as any).status || "draft");
           setAuthor((data as any).author || "Admin");
           setReadTime(data.read_time || "5 min read");
+          setMetaTitle((data as any).meta_title || "");
+          setMetaDescription((data as any).meta_description || "");
+          setFocusKeyword((data as any).focus_keyword || "");
           setSelectedCategories([data.category]);
           if (editor && data.content) {
             editor.commands.setContent(data.content);
@@ -181,6 +188,9 @@ const AdminPostEditor = () => {
     category: selectedCategories[0] || "Verified BM",
     read_time: readTime || "5 min read",
     author: author || "Admin",
+    meta_title: metaTitle || null,
+    meta_description: metaDescription || null,
+    focus_keyword: focusKeyword || null,
     status: overrideStatus || status,
     published_at: (overrideStatus || status) === "published" ? new Date().toISOString() : null,
   });
@@ -509,6 +519,18 @@ const AdminPostEditor = () => {
                   />
                 </div>
               </div>
+
+              {/* SEO Settings */}
+              <SEOSettingsPanel
+                metaTitle={metaTitle}
+                metaDescription={metaDescription}
+                focusKeyword={focusKeyword}
+                postTitle={title}
+                slug={slug}
+                onMetaTitleChange={(v) => { setMetaTitle(v); markUnsaved(); }}
+                onMetaDescriptionChange={(v) => { setMetaDescription(v); markUnsaved(); }}
+                onFocusKeywordChange={(v) => { setFocusKeyword(v); markUnsaved(); }}
+              />
             </div>
           </div>
         </div>
