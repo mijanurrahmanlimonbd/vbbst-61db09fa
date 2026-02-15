@@ -69,7 +69,7 @@ const Search = () => {
 
   return (
     <Layout>
-      <SEOHead title={hasQuery ? `Search: ${query}` : "Search"} description="Search Verified BM service for products, blog posts, and guides." noIndex />
+      <SEOHead title={hasQuery ? `Search: ${query}` : "Search"} description="Search Verified BM services for products, blog posts, and guides." noIndex />
       
       <section className="py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
