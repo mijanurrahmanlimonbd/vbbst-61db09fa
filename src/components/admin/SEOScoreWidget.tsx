@@ -125,6 +125,51 @@ export function runSEOAudit(data: SEOAuditData): { score: number; checks: SEOChe
   else if (descLen > 160) checks.push({ id: "meta-len", label: "Meta Description length", status: "warning", detail: `${descLen}/160 characters — too long.` });
   else checks.push({ id: "meta-len", label: "Meta Description length", status: "error", detail: "No meta description set." });
 
+  // 10. Readability (sentence length)
+  const plainText = stripHtml(data.content);
+  const sentences = plainText.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+  const avgSentenceLen = sentences.length > 0 ? Math.round(plainText.split(/\s+/).length / sentences.length) : 0;
+  if (sentences.length === 0) {
+    checks.push({ id: "readability", label: "Readability", status: "error", detail: "No content to analyze." });
+  } else if (avgSentenceLen <= 20) {
+    checks.push({ id: "readability", label: "Readability", status: "good", detail: `Average sentence length: ${avgSentenceLen} words — easy to read.` });
+  } else if (avgSentenceLen <= 25) {
+    checks.push({ id: "readability", label: "Readability", status: "warning", detail: `Average sentence length: ${avgSentenceLen} words — consider shorter sentences.` });
+  } else {
+    checks.push({ id: "readability", label: "Readability", status: "error", detail: `Average sentence length: ${avgSentenceLen} words — too long. Break up sentences.` });
+  }
+
+  // 11. Internal links
+  const internalLinks = (data.content.match(/<a[^>]*href=["'][^"']*["'][^>]*>/gi) || [])
+    .filter((a) => !a.match(/href=["']https?:\/\//i));
+  const externalLinks = (data.content.match(/<a[^>]*href=["']https?:\/\/[^"']*["'][^>]*>/gi) || []);
+  if (internalLinks.length >= 1) {
+    checks.push({ id: "internal-links", label: "Internal links", status: "good", detail: `${internalLinks.length} internal link(s) found.` });
+  } else {
+    checks.push({ id: "internal-links", label: "Internal links", status: "warning", detail: "No internal links found. Add links to other pages on your site." });
+  }
+  if (externalLinks.length >= 1) {
+    checks.push({ id: "external-links", label: "External links", status: "good", detail: `${externalLinks.length} external link(s) found.` });
+  } else {
+    checks.push({ id: "external-links", label: "External links", status: "warning", detail: "No external links. Adding credible outbound links can boost SEO." });
+  }
+
+  // 12. Keyword density
+  if (kw && wordCount > 0) {
+    const kwRegex = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    const kwCount = (plainText.match(kwRegex) || []).length;
+    const density = (kwCount / wordCount) * 100;
+    if (density >= 0.5 && density <= 2.5) {
+      checks.push({ id: "kw-density", label: "Keyword density", status: "good", detail: `${density.toFixed(1)}% — optimal range (0.5-2.5%).` });
+    } else if (density > 0 && density < 0.5) {
+      checks.push({ id: "kw-density", label: "Keyword density", status: "warning", detail: `${density.toFixed(1)}% — too low. Use the keyword more naturally.` });
+    } else if (density > 2.5) {
+      checks.push({ id: "kw-density", label: "Keyword density", status: "warning", detail: `${density.toFixed(1)}% — too high. Reduce to avoid keyword stuffing.` });
+    } else {
+      checks.push({ id: "kw-density", label: "Keyword density", status: "error", detail: "Keyword not found in content." });
+    }
+  }
+
   // Calculate score
   const total = checks.length;
   const goodCount = checks.filter((c) => c.status === "good").length;
