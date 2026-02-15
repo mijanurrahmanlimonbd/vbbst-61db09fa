@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Outlet, Link, useLocation, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBranding } from "@/hooks/useBranding";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/hooks/use-toast";
 import {
   LayoutDashboard,
   FileText,
@@ -27,6 +29,7 @@ import {
   MessageCircle,
   HelpCircle,
   ExternalLink,
+  RefreshCw,
 } from "lucide-react";
 import {
   Tooltip,
@@ -55,11 +58,56 @@ const navItems = [
 const AdminLayout = () => {
   const { user, profile, role, loading, signOut, canAccess } = useAuth();
   const { branding } = useBranding();
+  const queryClient = useQueryClient();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
+  const [syncing, setSyncing] = useState(false);
   const location = useLocation();
+
+  const handleSyncSite = useCallback(async () => {
+    setSyncing(true);
+    try {
+      // 1. Update site_version timestamp in settings
+      await supabase.from("site_settings").upsert(
+        { key: "site_version", value: new Date().toISOString() },
+        { onConflict: "key" }
+      );
+
+      // 2. Invalidate all React Query caches
+      await queryClient.invalidateQueries();
+
+      // 3. Clear localStorage caches (page content etc.)
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && (k.startsWith("page_") || k.startsWith("cache_") || k.startsWith("content_"))) {
+          keysToRemove.push(k);
+        }
+      }
+      keysToRemove.forEach((k) => localStorage.removeItem(k));
+
+      // 4. Fetch with no-cache to bust Hostinger/CDN cache
+      await fetch(window.location.origin, {
+        method: "HEAD",
+        headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+      }).catch(() => {});
+
+      toast({
+        title: "Site Cache Cleared & Data Synced!",
+        description: "All caches have been invalidated and data refreshed.",
+      });
+    } catch (err) {
+      toast({
+        title: "Sync failed",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSyncing(false);
+    }
+  }, [queryClient]);
 
   useEffect(() => {
     const fetchPending = async () => {
@@ -255,7 +303,20 @@ const AdminLayout = () => {
             </h1>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleSyncSite}
+                  disabled={syncing}
+                  className="p-2 rounded-lg text-muted-foreground hover:bg-accent transition-colors relative disabled:opacity-50"
+                >
+                  <RefreshCw className={cn("w-5 h-5", syncing && "animate-spin")} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>{syncing ? "Syncing..." : "Clear Cache & Sync Site"}</TooltipContent>
+            </Tooltip>
+
             <button className="p-2 rounded-lg text-muted-foreground hover:bg-accent transition-colors relative">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
