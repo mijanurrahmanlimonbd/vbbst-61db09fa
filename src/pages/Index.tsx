@@ -30,7 +30,7 @@ const Index = () => {
   return (
     <Layout>
       <SEOHead
-        title="Buy Verified Business Manager"
+        title="Buy Verified BM and WhatsApp Business API"
         description="Buy verified BM, WhatsApp API, Facebook Ads accounts from VBB STORE. Instant delivery, 7-day guarantee, 24/7 support. Trusted by 10,000+ advertisers."
       />
       <JsonLdSchema

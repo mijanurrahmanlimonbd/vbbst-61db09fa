@@ -29,7 +29,7 @@ const SEOHead = ({
     <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={description.slice(0, 160)} />
-      {noIndex && <meta name="robots" content="noindex,nofollow" />}
+      <meta name="robots" content={noIndex ? "noindex,nofollow" : "index,follow"} />
       <link rel="canonical" href={canonicalUrl} />
 
       {/* Hreflang */}
