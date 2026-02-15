@@ -184,7 +184,7 @@ const SEOSettingsPanel = ({
             <Input
               value={canonicalUrl}
               onChange={(e) => onCanonicalUrlChange?.(e.target.value)}
-              placeholder="https://vbbstore.com/blog/original-post"
+              placeholder={`${window.location.origin}/blog/original-post`}
               className="text-sm font-mono"
             />
             <p className="text-[11px] text-muted-foreground mt-1">Leave empty to use the default URL. Set this if this page is a duplicate of another.</p>

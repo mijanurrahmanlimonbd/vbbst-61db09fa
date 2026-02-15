@@ -15,7 +15,13 @@ Deno.serve(async (req) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, supabaseKey);
-  const siteUrl = "https://vbbstore.com";
+  // Dynamic: read from site_settings or fall back to SITE_URL env var
+  const { data: siteUrlRow } = await supabase
+    .from("site_settings")
+    .select("value")
+    .eq("key", "site_url")
+    .single();
+  const siteUrl = (siteUrlRow?.value || Deno.env.get("SITE_URL") || "https://vbbstore.com").replace(/\/$/, "");
   const today = new Date().toISOString().split("T")[0];
 
   // Load sitemap settings
