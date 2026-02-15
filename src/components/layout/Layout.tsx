@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import WhatsAppButton from "./WhatsAppButton";
+import MobileBottomNav from "./MobileBottomNav";
 import NewsletterPopup from "@/components/newsletter/NewsletterPopup";
 import TrackingScripts from "@/components/tracking/TrackingScripts";
 import FloatingEditBar from "@/components/editor/FloatingEditBar";
@@ -121,6 +122,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       <Navbar />
       <main ref={mainRef} className="flex-1">{children}</main>
       <Footer />
+      <MobileBottomNav />
       <WhatsAppButton />
       <NewsletterPopup />
       <TrackingScripts />
