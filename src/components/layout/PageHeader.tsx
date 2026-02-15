@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
-import { Home, ChevronRight, Facebook, Instagram, Youtube, Send, MessageCircle } from "lucide-react";
+import { Home, ChevronRight } from "lucide-react";
+import { usePageHero } from "@/hooks/usePageHero";
 
 interface PageHeaderProps {
   breadcrumb: string;
-  subtitle: string;
   title: string;
-  description: string;
+  subtitle?: string;
+  description?: string;
   showSearch?: boolean;
   searchValue?: string;
   onSearchChange?: (val: string) => void;
@@ -13,52 +14,80 @@ interface PageHeaderProps {
   showSocials?: boolean;
 }
 
-const PageHeader = ({ breadcrumb, subtitle, title, description, showSearch, searchValue, onSearchChange, showCTAs, showSocials }: PageHeaderProps) => {
+const PageHeader = ({
+  breadcrumb,
+  title,
+  subtitle,
+  description,
+  showSearch,
+  searchValue,
+  onSearchChange,
+}: PageHeaderProps) => {
+  const { settings } = usePageHero();
+  const hasImage = !!settings.image;
+
   return (
-    <section className="bg-primary text-primary-foreground py-16 md:py-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-2 text-sm text-primary-foreground/80 mb-6">
-          <Link to="/" className="flex items-center gap-1 hover:text-primary-foreground"><Home className="w-4 h-4" /> Home</Link>
+    <section
+      className="relative min-h-[350px] md:min-h-[450px] flex items-center justify-center text-center"
+      style={
+        hasImage
+          ? {
+              backgroundImage: `url(${settings.image})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }
+          : undefined
+      }
+    >
+      {/* Overlay or solid fallback */}
+      <div
+        className="absolute inset-0"
+        style={
+          hasImage
+            ? { backgroundColor: `rgba(0,0,0,${settings.overlay / 100})` }
+            : undefined
+        }
+      >
+        {!hasImage && <div className="absolute inset-0 bg-primary" />}
+      </div>
+
+      <div className="relative z-10 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        {/* Breadcrumbs */}
+        <div className="flex items-center justify-center gap-2 text-sm text-primary-foreground/80 mb-6">
+          <Link to="/" className="flex items-center gap-1 hover:text-primary-foreground">
+            <Home className="w-4 h-4" /> Home
+          </Link>
           <ChevronRight className="w-4 h-4" />
-          <span className="font-medium">{breadcrumb}</span>
+          <span className="font-medium text-primary-foreground">{breadcrumb}</span>
         </div>
 
-        <p className="text-sm font-semibold tracking-widest uppercase text-primary-foreground/80 mb-4">{subtitle}</p>
-        <h1 className="text-4xl md:text-6xl font-bold mb-4">{title}</h1>
-        <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto text-center mt-2">{description}</p>
-
-        {showCTAs && (
-          <div className="flex flex-wrap justify-center gap-4 mt-8">
-            <a href="https://wa.me/8801302669333" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary-foreground text-primary font-medium hover:bg-primary-foreground/90 transition-colors">
-              <MessageCircle className="w-5 h-5" /> Chat on WhatsApp
-            </a>
-            <a href="https://t.me/Verifiedbmbuy" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-primary-foreground/30 text-primary-foreground font-medium hover:bg-primary-foreground/10 transition-colors">
-              <Send className="w-5 h-5" /> Message on Telegram
-            </a>
-          </div>
+        {subtitle && (
+          <p className="text-sm font-semibold tracking-widest uppercase text-primary-foreground/80 mb-4">
+            {subtitle}
+          </p>
         )}
 
-        {showSocials && (
-          <div className="flex justify-center gap-3 mt-8">
-            {[
-              { href: "https://www.facebook.com/verifiedbmbuy", icon: <Facebook className="w-5 h-5" />, bg: "bg-[hsl(220,46%,48%)]" },
-              { href: "https://www.instagram.com/verifiedbmbuy", icon: <Instagram className="w-5 h-5" />, bg: "bg-[hsl(340,75%,54%)]" },
-              { href: "https://x.com/verifiedbmbuy", icon: <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>, bg: "bg-foreground" },
-              { href: "https://www.youtube.com/@verifiedbmbuy", icon: <Youtube className="w-5 h-5" />, bg: "bg-[hsl(0,100%,50%)]" },
-              { href: "https://t.me/Verifiedbmbuy", icon: <Send className="w-5 h-5" />, bg: "bg-[hsl(200,100%,40%)]" },
-              { href: "https://wa.me/8801302669333", icon: <MessageCircle className="w-5 h-5" />, bg: "bg-[hsl(142,70%,45%)]" },
-            ].map((s, i) => (
-              <a key={i} href={s.href} target="_blank" rel="noopener noreferrer" className={`w-10 h-10 ${s.bg} rounded-full flex items-center justify-center text-primary-foreground hover:opacity-80 transition-opacity`}>
-                {s.icon}
-              </a>
-            ))}
-          </div>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground leading-tight">
+          {title}
+        </h1>
+
+        {description && (
+          <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto mt-4">
+            {description}
+          </p>
         )}
 
         {showSearch && (
           <div className="mt-8 max-w-lg mx-auto">
             <div className="relative">
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              <svg
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
               <input
                 type="text"
                 placeholder="Search products..."

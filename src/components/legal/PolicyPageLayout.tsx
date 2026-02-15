@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Home, ChevronRight, Printer, Calendar } from "lucide-react";
+import { ChevronRight, Printer, Calendar } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
 import JsonLdSchema from "@/components/seo/JsonLdSchema";
+import PageHeader from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -76,30 +77,27 @@ const PolicyPageLayout = ({
         breadcrumbs={[{ name: "Home", url: "/" }, { name: breadcrumb, url: `#` }]}
       />
 
-      {/* Header */}
-      <section className="bg-primary text-primary-foreground py-12 md:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 text-sm text-primary-foreground/80 mb-4">
-            <Link to="/" className="flex items-center gap-1 hover:text-primary-foreground"><Home className="w-4 h-4" /> Home</Link>
-            <ChevronRight className="w-4 h-4" />
-            <span className="font-medium">{breadcrumb}</span>
-          </div>
-          <p className="text-xs font-semibold tracking-widest uppercase text-primary-foreground/70 mb-2">{subtitle}</p>
-          <h1 className="text-3xl md:text-5xl font-bold">{title}</h1>
-          <p className="text-primary-foreground/80 mt-3 max-w-2xl">{description}</p>
-          <div className="flex items-center gap-4 mt-6">
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-primary-foreground/15 backdrop-blur-sm px-3 py-1.5 rounded-full">
-              <Calendar className="w-3.5 h-3.5" /> Last Updated: {lastUpdated}
-            </span>
-            <button
-              onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 text-xs font-medium bg-primary-foreground/15 backdrop-blur-sm px-3 py-1.5 rounded-full hover:bg-primary-foreground/25 transition-colors print:hidden"
-            >
-              <Printer className="w-3.5 h-3.5" /> Print / Save PDF
-            </button>
-          </div>
+      <PageHeader
+        breadcrumb={breadcrumb}
+        title={title}
+        subtitle={subtitle}
+        description={description}
+      />
+
+      {/* Meta bar */}
+      <div className="border-b border-border py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-4">
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-secondary px-3 py-1.5 rounded-full">
+            <Calendar className="w-3.5 h-3.5" /> Last Updated: {lastUpdated}
+          </span>
+          <button
+            onClick={handlePrint}
+            className="inline-flex items-center gap-1.5 text-xs font-medium bg-secondary px-3 py-1.5 rounded-full hover:bg-accent transition-colors print:hidden"
+          >
+            <Printer className="w-3.5 h-3.5" /> Print / Save PDF
+          </button>
         </div>
-      </section>
+      </div>
 
       {/* Body */}
       <section className="py-10 md:py-16">
