@@ -36,6 +36,11 @@ import AdminWorkSamples from "./pages/admin/AdminWorkSamples";
 import AdminTestimonials from "./pages/admin/AdminTestimonials";
 import AdminFAQs from "./pages/admin/AdminFAQs";
 import Checkout from "./pages/Checkout";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import RefundPolicy from "./pages/RefundPolicy";
+import ReplacementGuarantee from "./pages/ReplacementGuarantee";
+import FAQ from "./pages/FAQ";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +64,11 @@ const App = () => (
             <Route path="/product/:slug" element={<ProductDetail />} />
             <Route path="/search" element={<Search />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
+            <Route path="/replacement-guarantee" element={<ReplacementGuarantee />} />
+            <Route path="/faq" element={<FAQ />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />

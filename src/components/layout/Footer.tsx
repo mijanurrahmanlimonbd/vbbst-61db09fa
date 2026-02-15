@@ -31,7 +31,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           <div>
             <div className="mb-4">
               {logoElement}
@@ -57,6 +57,17 @@ const Footer = () => {
               <li><Link to="/blog" className="hover:text-primary-foreground transition-colors">Blog</Link></li>
               <li><Link to="/contact" className="hover:text-primary-foreground transition-colors">Contact Us</Link></li>
               <li><Link to="/about" className="hover:text-primary-foreground transition-colors">About Us</Link></li>
+              <li><Link to="/faq" className="hover:text-primary-foreground transition-colors">FAQ</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-4">Policies</h4>
+            <ul className="space-y-2 text-sm text-primary-foreground/70">
+              <li><Link to="/terms" className="hover:text-primary-foreground transition-colors">Terms of Service</Link></li>
+              <li><Link to="/privacy" className="hover:text-primary-foreground transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/refund-policy" className="hover:text-primary-foreground transition-colors">Refund Policy</Link></li>
+              <li><Link to="/replacement-guarantee" className="hover:text-primary-foreground transition-colors">Replacement Guarantee</Link></li>
             </ul>
           </div>
 
