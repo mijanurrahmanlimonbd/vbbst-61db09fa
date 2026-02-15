@@ -14,7 +14,7 @@ const FloatingEditBar = ({ slug }: FloatingEditBarProps) => {
   const changesCount = Object.keys(pendingChanges).length;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[9998] animate-in slide-in-from-bottom-4">
+    <div data-floating-bar className="fixed bottom-0 left-0 right-0 z-[9998] animate-in slide-in-from-bottom-4">
       <div className="max-w-3xl mx-auto px-4 pb-4">
         <div className="bg-popover border border-border rounded-xl shadow-2xl px-5 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
