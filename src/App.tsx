@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { EditModeProvider } from "@/contexts/EditModeContext";
 import MaintenanceGuard from "@/components/MaintenanceGuard";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import CartDrawer from "@/components/cart/CartDrawer";
 import Index from "./pages/Index";
 
@@ -66,6 +67,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <AuthProvider>
           <CartProvider>
           <EditModeProvider>
