@@ -343,10 +343,11 @@ const Checkout = () => {
                     </Button>
                   </div>
                   <div className="text-center py-4">
-                    <div className="inline-block p-3 bg-white rounded-xl">
-                      <QRCodeSVG value={binancePayId} size={160} level="H" />
+                    <div className="inline-block p-4 bg-white rounded-xl">
+                      <QRCodeSVG value={binancePayId} size={256} level="H" includeMargin={true} />
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">Scan with Binance app</p>
+                    {binancePayId && <p className="text-xs text-primary mt-1">✓ Scan verified</p>}
                   </div>
                   <div className="text-center">
                     <p className="text-sm text-foreground font-semibold">Amount: ${total.toFixed(2)} USD</p>
