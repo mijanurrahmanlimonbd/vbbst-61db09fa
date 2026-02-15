@@ -15,6 +15,8 @@ import {
   Bell,
   Users,
   Lock,
+  Package,
+  MessageSquare,
 } from "lucide-react";
 import {
   Tooltip,
@@ -27,6 +29,8 @@ const navItems = [
   { title: "Dashboard", path: "/admin", icon: LayoutDashboard, section: "dashboard" },
   { title: "Posts", path: "/admin/posts", icon: FileText, section: "posts" },
   { title: "Pages", path: "/admin/pages", icon: File, section: "pages" },
+  { title: "Products", path: "/admin/products", icon: Package, section: "dashboard" },
+  { title: "Comments", path: "/admin/comments", icon: MessageSquare, section: "posts" },
   { title: "Media", path: "/admin/media", icon: Image, section: "media" },
   { title: "Users", path: "/admin/users", icon: Users, section: "users" },
   { title: "Settings", path: "/admin/settings", icon: Settings, section: "settings" },

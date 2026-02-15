@@ -20,6 +20,8 @@ import AdminPosts from "./pages/admin/AdminPosts";
 import AdminPostEditor from "./pages/admin/AdminPostEditor";
 import AdminPages from "./pages/admin/AdminPages";
 import AdminMedia from "./pages/admin/AdminMedia";
+import AdminProducts from "./pages/admin/AdminProducts";
+import AdminComments from "./pages/admin/AdminComments";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -51,6 +53,8 @@ const App = () => (
               <Route path="posts/:id/edit" element={<AdminPostEditor />} />
               <Route path="pages" element={<AdminPages />} />
               <Route path="media" element={<AdminMedia />} />
+              <Route path="products" element={<AdminProducts />} />
+              <Route path="comments" element={<AdminComments />} />
               <Route path="settings" element={<AdminSettings />} />
               <Route path="users" element={<AdminUsers />} />
             </Route>
