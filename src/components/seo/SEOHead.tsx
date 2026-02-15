@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 import { SITE_NAME, getSiteUrl, DEFAULT_DESCRIPTION } from "@/lib/config";
+import { useInternationalSEO } from "@/hooks/useInternationalSEO";
 
 interface SEOHeadProps {
   title?: string;
@@ -22,6 +23,7 @@ const SEOHead = ({
   const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
   const canonicalUrl = `${siteUrl}${location.pathname}`;
   const resolvedOgImage = ogImage || `${siteUrl}/og-default.png`;
+  const { geoRegion, geoPlacename, targetLang } = useInternationalSEO();
 
   return (
     <Helmet>
@@ -30,6 +32,14 @@ const SEOHead = ({
       {noIndex && <meta name="robots" content="noindex,nofollow" />}
       <link rel="canonical" href={canonicalUrl} />
 
+      {/* Hreflang */}
+      <link rel="alternate" hrefLang={targetLang || "en"} href={canonicalUrl} />
+      <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
+
+      {/* Geo Meta Tags */}
+      {geoRegion && <meta name="geo.region" content={geoRegion} />}
+      {geoPlacename && <meta name="geo.placename" content={geoPlacename} />}
+
       {/* Open Graph */}
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description.slice(0, 160)} />
@@ -37,6 +47,7 @@ const SEOHead = ({
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:image" content={resolvedOgImage} />
       <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:locale" content="en_US" />
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
