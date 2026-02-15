@@ -77,7 +77,7 @@ const BlogPost = () => {
             <ArrowLeft className="w-4 h-4" /> Back to Blog
           </Link>
           <span className="inline-block px-3 py-1 bg-primary-foreground/20 rounded-full text-xs font-semibold uppercase mb-4">{post.category}</span>
-          <h1 className="text-3xl md:text-5xl font-bold leading-tight">{post.title}</h1>
+          <h1 className="text-2xl md:text-5xl font-bold leading-tight break-words">{post.title}</h1>
           <div className="flex items-center gap-4 mt-4 text-primary-foreground/80 text-sm">
             <span className="flex items-center gap-1"><User className="w-4 h-4" /> {post.author}</span>
             <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {post.read_time}</span>
@@ -98,7 +98,7 @@ const BlogPost = () => {
             />
           )}
           <div
-            className="prose prose-lg max-w-none text-foreground prose-headings:text-foreground prose-a:text-primary prose-strong:text-foreground prose-blockquote:border-primary"
+            className="prose prose-base md:prose-lg max-w-none text-foreground prose-headings:text-foreground prose-headings:break-words prose-h1:text-2xl prose-h1:md:text-4xl prose-h2:text-xl prose-h2:md:text-3xl prose-h3:text-lg prose-h3:md:text-2xl prose-a:text-primary prose-strong:text-foreground prose-blockquote:border-primary prose-img:rounded-xl"
             dangerouslySetInnerHTML={{ __html: post.content || "" }}
           />
         </div>

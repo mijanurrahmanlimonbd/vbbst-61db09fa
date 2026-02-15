@@ -68,7 +68,7 @@ const Index = () => {
               </Link>
               <div>
                 <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold uppercase mb-4">{latestPost.category}</span>
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-4">
+                <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-4 break-words">
                   <Link to={`/blog/${latestPost.slug}`} className="hover:text-primary transition-colors">{latestPost.title}</Link>
                 </h1>
                 {latestPost.excerpt && <p className="text-muted-foreground text-lg mb-6 line-clamp-3">{latestPost.excerpt}</p>}
