@@ -146,6 +146,33 @@ export type Database = {
         }
         Relationships: []
       }
+      faqs: {
+        Row: {
+          answer: string
+          created_at: string
+          faq_group: string
+          id: string
+          question: string
+          sort_order: number | null
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          faq_group?: string
+          id?: string
+          question: string
+          sort_order?: number | null
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          faq_group?: string
+          id?: string
+          question?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       media_files: {
         Row: {
           alt_text: string | null
@@ -307,6 +334,7 @@ export type Database = {
       }
       pages: {
         Row: {
+          components: Json | null
           content: string | null
           created_at: string
           id: string
@@ -318,6 +346,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          components?: Json | null
           content?: string | null
           created_at?: string
           id?: string
@@ -329,6 +358,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          components?: Json | null
           content?: string | null
           created_at?: string
           id?: string
@@ -506,6 +536,42 @@ export type Database = {
         }
         Relationships: []
       }
+      testimonials: {
+        Row: {
+          avatar_url: string | null
+          client_name: string
+          created_at: string
+          id: string
+          job_title: string | null
+          rating: number
+          sort_order: number | null
+          status: string
+          testimonial_text: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          client_name: string
+          created_at?: string
+          id?: string
+          job_title?: string | null
+          rating?: number
+          sort_order?: number | null
+          status?: string
+          testimonial_text: string
+        }
+        Update: {
+          avatar_url?: string | null
+          client_name?: string
+          created_at?: string
+          id?: string
+          job_title?: string | null
+          rating?: number
+          sort_order?: number | null
+          status?: string
+          testimonial_text?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -521,6 +587,42 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      work_samples: {
+        Row: {
+          category: string
+          client_name: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          is_featured: boolean
+          link: string | null
+          sort_order: number | null
+          title: string
+        }
+        Insert: {
+          category?: string
+          client_name?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean
+          link?: string | null
+          sort_order?: number | null
+          title: string
+        }
+        Update: {
+          category?: string
+          client_name?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean
+          link?: string | null
+          sort_order?: number | null
+          title?: string
         }
         Relationships: []
       }

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -23,12 +24,13 @@ interface Page {
   status: string;
   meta_title: string | null;
   meta_description: string | null;
+  components: { work_samples?: boolean; testimonials?: boolean; faqs?: boolean } | null;
   created_at: string;
   updated_at: string;
 }
 
 const emptyPage = (): Partial<Page> => ({
-  title: "", slug: "", content: "", status: "draft", meta_title: "", meta_description: "",
+  title: "", slug: "", content: "", status: "draft", meta_title: "", meta_description: "", components: {},
 });
 
 const AdminPages = () => {
@@ -65,6 +67,7 @@ const AdminPages = () => {
         status: page.status ?? "draft",
         meta_title: page.meta_title ?? "",
         meta_description: page.meta_description ?? "",
+        components: (page.components as any) ?? {},
       });
     } else {
       setEditPage(emptyPage());
@@ -91,6 +94,7 @@ const AdminPages = () => {
         status: editPage.status || "draft",
         meta_title: editPage.meta_title || null,
         meta_description: editPage.meta_description || null,
+        components: editPage.components || {},
       };
 
       if (editPage.id) {
@@ -251,6 +255,28 @@ const AdminPages = () => {
                 rows={3}
                 className="mt-1.5"
               />
+            </div>
+            <div>
+              <Label className="text-sm font-semibold">Page Components</Label>
+              <p className="text-xs text-muted-foreground mb-3">Select sections to display at the bottom of this page.</p>
+              <div className="space-y-3">
+                {([
+                  { key: "work_samples", label: "Display Work Samples" },
+                  { key: "testimonials", label: "Display Testimonials" },
+                  { key: "faqs", label: "Display FAQs" },
+                ] as const).map(({ key, label }) => (
+                  <div key={key} className="flex items-center gap-2">
+                    <Checkbox
+                      checked={!!(editPage.components as any)?.[key]}
+                      onCheckedChange={(v) => setEditPage({
+                        ...editPage,
+                        components: { ...(editPage.components || {}), [key]: !!v },
+                      })}
+                    />
+                    <Label className="text-sm font-normal cursor-pointer">{label}</Label>
+                  </div>
+                ))}
+              </div>
             </div>
             <Button onClick={handleSave} disabled={saving} className="w-full gap-2">
               {saving && <Loader2 className="w-4 h-4 animate-spin" />}

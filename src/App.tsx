@@ -28,6 +28,9 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminSEO from "./pages/admin/AdminSEO";
+import AdminWorkSamples from "./pages/admin/AdminWorkSamples";
+import AdminTestimonials from "./pages/admin/AdminTestimonials";
+import AdminFAQs from "./pages/admin/AdminFAQs";
 import Checkout from "./pages/Checkout";
 
 const queryClient = new QueryClient();
@@ -65,6 +68,9 @@ const App = () => (
               <Route path="settings" element={<AdminSettings />} />
               <Route path="seo" element={<AdminSEO />} />
               <Route path="users" element={<AdminUsers />} />
+              <Route path="work-samples" element={<AdminWorkSamples />} />
+              <Route path="testimonials" element={<AdminTestimonials />} />
+              <Route path="faqs" element={<AdminFAQs />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
