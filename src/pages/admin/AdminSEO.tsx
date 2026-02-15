@@ -358,21 +358,21 @@ const AdminSEO = () => {
                 <Label>Homepage Title Pattern</Label>
                 <Input value={titleHome} onChange={(e) => setTitleHome(e.target.value)} className="mt-1.5 font-mono text-sm" />
                 <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1">
-                  <Eye className="w-3 h-3" /> Preview: <span className="font-medium">VBB STORE — Your trusted source</span>
+                  <Eye className="w-3 h-3" /> Preview: <span className="font-medium">Verified BM services — Your trusted source</span>
                 </p>
               </div>
               <div>
                 <Label>Blog Post Title Pattern</Label>
                 <Input value={titlePost} onChange={(e) => setTitlePost(e.target.value)} className="mt-1.5 font-mono text-sm" />
                 <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1">
-                  <Eye className="w-3 h-3" /> Preview: <span className="font-medium">How to Buy Verified BM | VBB STORE</span>
+                  <Eye className="w-3 h-3" /> Preview: <span className="font-medium">How to Buy Verified BM | Verified BM services</span>
                 </p>
               </div>
               <div>
                 <Label>Product Title Pattern</Label>
                 <Input value={titleProduct} onChange={(e) => setTitleProduct(e.target.value)} className="mt-1.5 font-mono text-sm" />
                 <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1">
-                  <Eye className="w-3 h-3" /> Preview: <span className="font-medium">Premium BM — Buy at VBB STORE</span>
+                  <Eye className="w-3 h-3" /> Preview: <span className="font-medium">Premium BM — Buy at Verified BM services</span>
                 </p>
               </div>
             </div>
@@ -397,7 +397,7 @@ const AdminSEO = () => {
             <div className="space-y-4">
               <div>
                 <Label>Default OG Title</Label>
-                <Input value={ogTitle} onChange={(e) => setOgTitle(e.target.value)} placeholder="VBB STORE — Verified Facebook Business Managers" className="mt-1.5" />
+                <Input value={ogTitle} onChange={(e) => setOgTitle(e.target.value)} placeholder="Verified BM services — Verified Facebook Business Managers" className="mt-1.5" />
               </div>
               <div>
                 <Label>Default OG Description</Label>
@@ -699,7 +699,7 @@ const InternationalSEOPanel = () => {
 
 // ─── Crawler & Indexing Panel ───────────────────────────────────────────────
 const DEFAULT_ROBOTS = `# =============================================
-# robots.txt — VBB STORE
+# robots.txt — Verified BM services
 # =============================================
 
 User-agent: Googlebot
@@ -726,7 +726,7 @@ Disallow: /checkout
 Disallow: /api/
 
 # Sitemap
-Sitemap: https://vbbstore.com/sitemap.xml`;
+Sitemap: https://verifiedbmservices.com/sitemap.xml`;
 
 const CrawlerIndexingPanel = ({ saveSetting }: { saveSetting: (key: string, value: string) => Promise<void> }) => {
   const [robotsTxt, setRobotsTxt] = useState(DEFAULT_ROBOTS);

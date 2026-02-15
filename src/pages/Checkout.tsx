@@ -208,7 +208,7 @@ const Checkout = () => {
 
   return (
     <Layout>
-      <SEOHead title="Checkout - VBB Store" description="Complete your purchase" />
+      <SEOHead title="Checkout - Verified BM services" description="Complete your purchase" />
       <section className="py-12">
         <div className="max-w-2xl mx-auto px-4">
           <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary mb-8">

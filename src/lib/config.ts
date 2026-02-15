@@ -19,4 +19,4 @@ export const getSiteUrl = (): string => {
 };
 
 export const DEFAULT_DESCRIPTION =
-  "Buy Verified Business Manager, WhatsApp API, Facebook Ads accounts. Instant delivery, 7-day guarantee, 24/7 support.";
+  "Secure, high-limit Verified Business Managers and WhatsApp Business API solutions for your advertising needs. Instant delivery at Verified BM services.";

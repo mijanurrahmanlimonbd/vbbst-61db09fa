@@ -495,7 +495,7 @@ const AdminProducts = () => {
                 <Textarea
                   value={editProduct.meta_description || ""}
                   onChange={(e) => setEditProduct({ ...editProduct, meta_description: e.target.value })}
-                  placeholder={`Buy ${editProduct.title || "this product"} from VBB STORE. Instant delivery and 7-day guarantee.`}
+                  placeholder={`Buy ${editProduct.title || "this product"} from Verified BM services. Instant delivery and 7-day guarantee.`}
                   rows={3}
                   className="mt-1.5"
                   maxLength={160}
@@ -506,7 +506,7 @@ const AdminProducts = () => {
                 <p className="text-xs font-medium text-muted-foreground mb-1">Search Preview</p>
                 <p className="text-sm text-primary font-medium truncate">{editProduct.meta_title || `${editProduct.title || "Product"} - Buy Online`}</p>
                 <p className="text-xs text-[hsl(142,70%,45%)]">verifiedbmbuy.com/product/{editProduct.slug || "..."}</p>
-                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{editProduct.meta_description || `Buy ${editProduct.title || "this product"} from VBB STORE.`}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{editProduct.meta_description || `Buy ${editProduct.title || "this product"} from Verified BM services.`}</p>
               </div>
             </TabsContent>
           </Tabs>

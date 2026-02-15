@@ -22,7 +22,7 @@ const SEOHead = ({
   const siteUrl = getSiteUrl();
   const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
   const canonicalUrl = `${siteUrl}${location.pathname}`;
-  const resolvedOgImage = ogImage || `${siteUrl}/og-default.png`;
+  const resolvedOgImage = ogImage || `https://verifiedbmservices.com/favicon.png`;
   const { geoRegion, geoPlacename, targetLang } = useInternationalSEO();
 
   return (

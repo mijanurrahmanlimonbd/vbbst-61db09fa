@@ -32,8 +32,8 @@ const Contact = () => {
   const channels = [
     { icon: <MessageCircle className="w-6 h-6 text-[hsl(142,70%,45%)]" />, title: "WhatsApp", badge: "Fastest", desc: "Instant chat support", detail: "+880 1302 669333", href: "https://wa.me/8801302669333" },
     { icon: <Send className="w-6 h-6 text-[hsl(200,100%,40%)]" />, title: "Telegram", desc: "Message us anytime", detail: "@Verifiedbmbuy", href: "https://t.me/Verifiedbmbuy" },
-    { icon: <Mail className="w-6 h-6 text-primary" />, title: "Email", desc: "For detailed inquiries", detail: "support@vbbstore.com", href: "mailto:support@vbbstore.com" },
-    { icon: <Facebook className="w-6 h-6 text-primary" />, title: "Messenger", desc: "Facebook Messenger", detail: "VBB Store", href: "https://m.me/101736778209833" },
+     { icon: <Mail className="w-6 h-6 text-primary" />, title: "Email", desc: "For detailed inquiries", detail: "support@verifiedbmservices.com", href: "mailto:support@verifiedbmservices.com" },
+    { icon: <Facebook className="w-6 h-6 text-primary" />, title: "Messenger", desc: "Facebook Messenger", detail: "Verified BM services", href: "https://m.me/101736778209833" },
   ];
 
   const trustReasons = [
@@ -63,10 +63,10 @@ const Contact = () => {
 
   return (
     <Layout>
-      <SEOHead title="Contact Us - 24/7 Support" description="Get in touch with VBB STORE 24/7 via WhatsApp, Telegram, or email. Average response time under 2 minutes. Serving 50+ countries worldwide." />
+       <SEOHead title="Contact Us - 24/7 Support" description="Get in touch with Verified BM services 24/7 via WhatsApp, Telegram, or email. Average response time under 2 minutes. Serving 50+ countries worldwide." />
       <JsonLdSchema
         pageTitle="Contact Us - 24/7 Support"
-        pageDescription="Get in touch with VBB STORE 24/7 via WhatsApp, Telegram, or email."
+        pageDescription="Get in touch with Verified BM services 24/7 via WhatsApp, Telegram, or email."
         breadcrumbs={[{ name: "Home", url: "/" }, { name: "Contact", url: "/contact" }]}
         faqs={faqs.map((f) => ({ question: f.q, answer: f.a }))}
       />
@@ -127,7 +127,7 @@ const Contact = () => {
 
               <div className="bg-card border border-border rounded-lg p-4 mt-4">
                 <h4 className="font-bold text-foreground">Store Address</h4>
-                <p className="text-sm text-muted-foreground">VBB STORE, Madergonj, Pirgonj, Rangpur, Bangladesh - 5470</p>
+                <p className="text-sm text-muted-foreground">Verified BM services, Madergonj, Pirgonj, Rangpur, Bangladesh - 5470</p>
               </div>
 
               <div className="bg-card border border-border rounded-lg p-4">
@@ -176,7 +176,7 @@ const Contact = () => {
       <section className="py-16 bg-secondary/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-sm font-semibold tracking-widest uppercase text-primary text-center">Why Us</p>
-          <h2 className="text-3xl font-bold text-foreground text-center mt-2">Why Customers Trust VBB STORE</h2>
+          <h2 className="text-3xl font-bold text-foreground text-center mt-2">Why Customers Trust Verified BM services</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
             {trustReasons.map((r, i) => (
               <div key={i} className="bg-card border border-border rounded-xl p-6">

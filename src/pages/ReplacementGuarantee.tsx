@@ -9,7 +9,7 @@ const sections: PolicySection[] = [
     icon: <Shield className="w-4 h-4" />,
     content: (
       <>
-        <p>Every product purchased from VBB STORE comes with our industry-leading <strong>7-Day Free Replacement Guarantee</strong>. If your account stops working within 7 days of delivery — through no fault of your own — we will replace it completely free of charge.</p>
+        <p>Every product purchased from Verified BM services comes with our industry-leading <strong>7-Day Free Replacement Guarantee</strong>. If your account stops working within 7 days of delivery — through no fault of your own — we will replace it completely free of charge.</p>
         <SuccessBox><Shield className="w-5 h-5 text-[hsl(142,70%,45%)] shrink-0 mt-0.5" /><span><strong>Zero Risk Purchase.</strong> We stand behind every product we sell. Your satisfaction is our top priority, and our guarantee reflects our confidence in the quality of our accounts.</span></SuccessBox>
       </>
     ),
@@ -113,8 +113,8 @@ const ReplacementGuarantee = () => (
     lastUpdated="February 15, 2026"
     sections={sections}
     breadcrumb="Replacement Guarantee"
-    seoTitle="7-Day Replacement Guarantee - VBB STORE"
-    seoDescription="VBB STORE offers a 7-day free replacement guarantee on all products. Learn how our guarantee works and how to claim a replacement."
+    seoTitle="7-Day Replacement Guarantee - Verified BM services"
+    seoDescription="Verified BM services offers a 7-day free replacement guarantee on all products. Learn how our guarantee works and how to claim a replacement."
   />
 );
 

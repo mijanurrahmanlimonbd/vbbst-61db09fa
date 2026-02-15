@@ -1,5 +1,5 @@
 # =============================================
-# robots.txt — VBB STORE
+# robots.txt — Verified BM services
 # =============================================
 
 User-agent: Googlebot
@@ -25,4 +25,4 @@ Disallow: /admin/
 Disallow: /checkout
 
 # Sitemap
-Sitemap: https://vbbstore.com/sitemap.xml
+Sitemap: https://verifiedbmservices.com/sitemap.xml

@@ -1,6 +1,6 @@
 const testimonials = [
   {
-    quote: "Best verified BM provider I've ever used. Account was delivered in minutes and works flawlessly. Scaled our ad spend 5x within the first week. Highly recommend VBB STORE!",
+    quote: "Best verified BM provider I've ever used. Account was delivered in minutes and works flawlessly. Scaled our ad spend 5x within the first week. Highly recommend Verified BM services!",
     name: "James W.",
     role: "Agency buyer • USA",
     initial: "J",
@@ -24,7 +24,7 @@ const TestimonialsSection = () => (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <p className="text-sm font-semibold tracking-widest uppercase text-primary text-center">Testimonials</p>
       <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mt-2">Customer Success Stories</h2>
-      <p className="text-muted-foreground text-center mt-4">Thousands of advertisers trust VBB STORE. Here's what they have to say.</p>
+      <p className="text-muted-foreground text-center mt-4">Thousands of advertisers trust Verified BM services. Here's what they have to say.</p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
         {testimonials.map((t, i) => (
