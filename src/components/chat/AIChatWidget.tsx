@@ -66,6 +66,23 @@ async function streamChat({
   onDone();
 }
 
+const SESSION_STORAGE_KEY = "vbb_chat_session";
+const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+function saveSession(sessionId: string, visitorName: string) {
+  localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ sessionId, visitorName, ts: Date.now() }));
+}
+
+function loadSession(): { sessionId: string; visitorName: string } | null {
+  try {
+    const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (Date.now() - data.ts > SESSION_TTL_MS) { localStorage.removeItem(SESSION_STORAGE_KEY); return null; }
+    return data;
+  } catch { return null; }
+}
+
 const AIChatWidget = () => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -89,6 +106,27 @@ const AIChatWidget = () => {
 
   useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
   useEffect(() => { if (open && formSubmitted) inputRef.current?.focus(); }, [open, formSubmitted]);
+
+  // Restore session from localStorage on mount
+  useEffect(() => {
+    const saved = loadSession();
+    if (saved) {
+      setSessionId(saved.sessionId);
+      setVisitorName(saved.visitorName);
+      setFormSubmitted(true);
+      // Fetch message history
+      supabase
+        .from("chat_messages")
+        .select("role, content")
+        .eq("session_id", saved.sessionId)
+        .order("created_at", { ascending: true })
+        .then(({ data }) => {
+          if (data && data.length > 0) {
+            setMessages(data.map((m) => ({ role: m.role as Msg["role"], content: m.content })));
+          }
+        });
+    }
+  }, []);
 
   // Listen for mobile nav trigger
   useEffect(() => {
@@ -145,6 +183,7 @@ const AIChatWidget = () => {
     }
     setSessionId(data.id);
     setFormSubmitted(true);
+    saveSession(data.id, visitorName.trim());
   };
 
   const sendTelegramNotification = async (message: string) => {
