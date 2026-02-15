@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ShoppingCart, User, Menu, X, Search, LogOut } from "lucide-react";
 import { useBranding } from "@/hooks/useBranding";
+import vbbStoreLogo from "@/assets/vbb-store-logo.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import AuthModal from "@/components/auth/AuthModal";
@@ -73,22 +74,17 @@ const Navbar = () => {
     setMobileOpen(false);
   }, [user, navigate]);
 
-  const logoElement = branding.header_logo ? (
+  const logoElement = (
     <img
-      src={branding.header_logo}
-      alt={branding.site_title}
+      src={vbbStoreLogo}
+      alt={branding.site_title || "VBB STORE"}
       width={160}
-      height={32}
+      height={38}
       loading="eager"
       fetchPriority="high"
       decoding="sync"
-      className="h-8 w-auto max-w-[160px] object-contain"
+      className="h-9 w-auto max-w-[160px] object-contain"
     />
-  ) : (
-    <div className="flex items-center" style={{ minWidth: 160, minHeight: 32 }}>
-      <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-bold text-sm">VS</div>
-      <span className="ml-2 text-lg font-bold text-foreground tracking-tight">VBB <span className="text-primary">STORE</span></span>
-    </div>
   );
 
   const userInitial = profile?.full_name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || "U";
