@@ -9,8 +9,8 @@ import SocialShareButtons from "@/components/shared/SocialShareButtons";
 import {
   Star, Shield, Zap, Headphones, MessageCircle, Send,
   ChevronRight, Home, CheckCircle, XCircle, Lock, Truck,
-  RefreshCw, Clock, Globe, Award, Users, FileText, ShieldCheck,
-  Wallet, Bitcoin, ArrowRight, ChevronDown
+  RefreshCw, Clock, Globe, Award, FileText, ShieldCheck,
+  Wallet, ArrowRight, ChevronDown, Package, CreditCard, Mail
 } from "lucide-react";
 
 const ProductDetail = () => {
@@ -53,12 +53,15 @@ const ProductDetail = () => {
   const finalPrice = product.sale_price || product.price;
   const allImages = [product.image_url, ...(product.gallery_images || [])].filter(Boolean);
   const inStock = product.stock_status === "in_stock";
+  const attrs = product.attributes && typeof product.attributes === "object" ? product.attributes : {};
+  const attrEntries = Object.entries(attrs);
+  const hasAttributes = attrEntries.length > 0;
 
   return (
     <Layout>
       <SEOHead
-        title={product.meta_title || `${product.title} - Buy Online`}
-        description={product.meta_description || product.description || product.short_description || `Buy ${product.title} from Verified BM services. Instant delivery and 7-day guarantee.`}
+        title={product.meta_title || `${product.title} - Buy Online | Verified BM Services`}
+        description={product.meta_description || product.short_description || `Buy ${product.title} from Verified BM services. Instant delivery and 7-day guarantee.`}
         ogImage={product.image_url || undefined}
         ogType="product"
       />
@@ -74,10 +77,10 @@ const ProductDetail = () => {
         ]}
       />
 
-      {/* Breadcrumbs */}
+      {/* ─── Breadcrumbs ─── */}
       <div className="bg-muted/30 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+          <nav className="flex items-center gap-2 text-sm text-muted-foreground" aria-label="Breadcrumb">
             <Link to="/" className="flex items-center gap-1 hover:text-foreground transition-colors">
               <Home className="w-4 h-4" /> Home
             </Link>
@@ -89,29 +92,46 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      {/* Main Product Section */}
-      <section className="py-10">
+      {/* ─── 1. HERO SECTION & BUY BOX ─── */}
+      <section className="py-8 md:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
 
-            {/* Left: Image + Trust Badges */}
+            {/* Left: Product Image Gallery */}
             <div>
-              <div className="aspect-square bg-secondary rounded-2xl overflow-hidden border border-border">
+              <div className="relative aspect-square bg-secondary rounded-2xl overflow-hidden border border-border">
                 {activeImage ? (
-                  <img src={activeImage} alt={product.title} className="w-full h-full object-cover" loading="eager" />
+                  <img
+                    src={activeImage}
+                    alt={product.title}
+                    className="w-full h-full object-cover"
+                    loading="eager"
+                    fetchPriority="high"
+                  />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">{product.category}</div>
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground text-lg">{product.category}</div>
+                )}
+                {/* Verified Badge Overlay */}
+                {product.badge && (
+                  <span className="absolute top-4 right-4 z-10 bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                    {product.badge}
+                  </span>
+                )}
+                {discount && (
+                  <span className="absolute top-4 left-4 z-10 bg-[hsl(15,90%,55%)] text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                    {discount}% OFF
+                  </span>
                 )}
               </div>
               {allImages.length > 1 && (
-                <div className="flex gap-2 mt-3 overflow-x-auto">
+                <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
                   {allImages.map((img: string, i: number) => (
                     <button
                       key={i}
                       onClick={() => setActiveImage(img)}
-                      className={`w-16 h-16 rounded-lg overflow-hidden border-2 shrink-0 transition-colors ${activeImage === img ? "border-primary" : "border-border hover:border-primary/50"}`}
+                      className={`w-16 h-16 rounded-lg overflow-hidden border-2 shrink-0 transition-all ${activeImage === img ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/50"}`}
                     >
-                      <img src={img} alt={`${product.title} ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                      <img src={img} alt={`${product.title} view ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
                     </button>
                   ))}
                 </div>
@@ -119,25 +139,28 @@ const ProductDetail = () => {
 
               {/* Trust Badges Below Image */}
               <div className="grid grid-cols-3 gap-3 mt-6">
-                <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4">
-                  <Lock className="w-6 h-6 text-primary" />
-                  <span className="text-xs font-medium text-muted-foreground text-center">Secure Payment</span>
-                </div>
-                <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4">
-                  <Truck className="w-6 h-6 text-primary" />
-                  <span className="text-xs font-medium text-muted-foreground text-center">Instant Delivery</span>
-                </div>
-                <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4">
-                  <RefreshCw className="w-6 h-6 text-primary" />
-                  <span className="text-xs font-medium text-muted-foreground text-center">7-Day Guarantee</span>
-                </div>
+                {[
+                  { icon: Lock, label: "Secure Payment" },
+                  { icon: Truck, label: "Instant Delivery" },
+                  { icon: RefreshCw, label: "7-Day Guarantee" },
+                ].map((badge, i) => (
+                  <div key={i} className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-3 md:p-4">
+                    <badge.icon className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+                    <span className="text-[10px] md:text-xs font-medium text-muted-foreground text-center leading-tight">{badge.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Right: Product Info */}
-            <div>
-              <span className="text-xs font-bold tracking-widest uppercase text-primary border-b-2 border-primary pb-1">{product.category}</span>
+            {/* Right: Buy Box */}
+            <div className="flex flex-col">
+              <span className="text-xs font-bold tracking-widest uppercase text-primary border-b-2 border-primary pb-1 self-start">{product.category}</span>
+
               <h1 className="text-2xl md:text-3xl font-bold text-foreground mt-4 leading-tight">{product.title}</h1>
+
+              {product.sku && (
+                <p className="text-xs text-muted-foreground mt-1.5 font-mono">SKU: {product.sku}</p>
+              )}
 
               {/* Rating + Stock */}
               <div className="flex items-center gap-4 mt-3 flex-wrap">
@@ -149,8 +172,8 @@ const ProductDetail = () => {
                   <span className="text-muted-foreground text-sm">(128 Reviews)</span>
                 </div>
                 {inStock ? (
-                  <span className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1 rounded-full bg-[hsl(142,70%,45%)]/10 text-[hsl(142,70%,45%)]">
-                    <span className="w-2 h-2 rounded-full bg-[hsl(142,70%,45%)]" /> In Stock
+                  <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-[hsl(142,70%,45%)]/10 text-[hsl(142,70%,45%)]">
+                    <span className="w-2 h-2 rounded-full bg-[hsl(142,70%,45%)] animate-pulse" /> In Stock
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1 rounded-full bg-destructive/10 text-destructive">
@@ -160,12 +183,14 @@ const ProductDetail = () => {
               </div>
 
               {/* Price Card */}
-              <div className="mt-6 rounded-xl border border-border bg-muted/30 p-5">
+              <div className="mt-5 rounded-xl border border-border bg-muted/30 p-5">
                 {product.sale_price ? (
                   <div>
                     <div className="flex items-baseline gap-3">
                       <span className="text-lg text-muted-foreground line-through">${product.price}</span>
-                      <span className="text-sm font-medium text-[hsl(142,70%,45%)]">Save ${(product.price - product.sale_price).toFixed(2)} ({discount}%)</span>
+                      <span className="text-sm font-medium text-[hsl(142,70%,45%)]">
+                        Save ${(product.price - product.sale_price).toFixed(2)} ({discount}%)
+                      </span>
                     </div>
                     <span className="text-4xl font-extrabold text-foreground">${product.sale_price}</span>
                   </div>
@@ -176,16 +201,16 @@ const ProductDetail = () => {
 
               {/* Description */}
               {(product.description || product.short_description) && (
-                <p className="text-muted-foreground mt-5 leading-relaxed">
+                <p className="text-muted-foreground mt-5 leading-relaxed text-sm md:text-base">
                   {product.description || product.short_description}
                 </p>
               )}
 
-              {/* Action Buttons */}
+              {/* Primary CTA Buttons */}
               <div className="flex flex-col gap-3 mt-6">
                 <button
                   onClick={() => inStock && navigate("/checkout", { state: { items: [{ id: product.id, title: product.title, price: product.price, sale_price: product.sale_price, quantity: 1, image_url: product.image_url }] } })}
-                  className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-[hsl(25,95%,55%)] text-white text-lg font-bold hover:bg-[hsl(25,95%,48%)] transition-colors disabled:opacity-50"
+                  className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-primary text-primary-foreground text-lg font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 shadow-lg shadow-primary/20"
                   disabled={!inStock}
                 >
                   {inStock ? `Buy Now — $${finalPrice.toFixed(2)}` : "Sold Out"} {inStock && <ArrowRight className="w-5 h-5" />}
@@ -200,43 +225,45 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              {/* Trust Info List */}
+              {/* Trust Info Checklist */}
               <div className="mt-6 rounded-xl border border-border bg-card p-5 space-y-3">
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <Zap className="w-5 h-5 text-primary shrink-0" />
-                  <span>Instant delivery — usually within 1-4 hours</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <RefreshCw className="w-5 h-5 text-primary shrink-0" />
-                  <span>7-day replacement guarantee included</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <FileText className="w-5 h-5 text-primary shrink-0" />
-                  <span>Setup guide & compliance documentation</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <Lock className="w-5 h-5 text-primary shrink-0" />
-                  <span>SSL encrypted, secure credential handover</span>
-                </div>
+                {[
+                  { icon: Zap, text: "Instant delivery — usually within 1-4 hours" },
+                  { icon: RefreshCw, text: "7-day replacement guarantee included" },
+                  { icon: FileText, text: "Setup guide & compliance documentation" },
+                  { icon: Lock, text: "SSL encrypted, secure credential handover" },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <item.icon className="w-5 h-5 text-primary shrink-0" />
+                    <span>{item.text}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* What You Get - Features/Attributes Section */}
-      {product.attributes && Object.keys(product.attributes).length > 0 && (
-        <section className="py-16 bg-muted/30">
+      {/* ─── 2. DYNAMIC ATTRIBUTES GRID ─── */}
+      {hasAttributes && (
+        <section className="py-14 bg-muted/30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">What You Get</p>
             <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Product Features & Inclusions</h2>
-            <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">Everything included with your purchase — no hidden fees, no surprises.</p>
+            <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">
+              Everything included with your purchase — no hidden fees, no surprises.
+            </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-10">
-              {Object.entries(product.attributes).map(([key, value]: [string, any], i: number) => (
-                <div key={i} className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
-                  <CheckCircle className="w-5 h-5 text-[hsl(142,70%,45%)] shrink-0" />
-                  <span className="text-sm font-medium text-foreground">{value ? `${key}: ${value}` : key}</span>
+              {attrEntries.map(([key, value]: [string, any], i: number) => (
+                <div key={i} className="flex items-start gap-3.5 rounded-xl border border-border bg-card p-4 hover:shadow-md transition-shadow">
+                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <CheckCircle className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{key}</p>
+                    {value && <p className="text-xs text-muted-foreground mt-0.5">{value}</p>}
+                  </div>
                 </div>
               ))}
             </div>
@@ -244,24 +271,29 @@ const ProductDetail = () => {
         </section>
       )}
 
-      {/* Specifications */}
-      <section className="py-16">
+      {/* ─── 3A. PRODUCT DETAILS (Specifications) ─── */}
+      <section className="py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Specifications</p>
           <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Product Details</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
             {[
-              { title: "Account Type", items: ["Verified Business Manager", "Full Admin Access", "Meta Verified Status", "Ready-to-use immediately"] },
-              { title: "Security & Compliance", items: ["Anti-ban guide included", "Warm-up strategy provided", "SSL encrypted delivery", "Clean account history"] },
-              { title: "Delivery & Support", items: ["Same-day delivery (1–4 hrs)", "Setup assistance included", "7-day replacement guarantee", "Priority customer support"] },
+              { title: "Account Type", icon: ShieldCheck, items: ["Verified Business Manager", "Full Admin Access", "Meta Verified Status", "Ready-to-use immediately"] },
+              { title: "Security & Compliance", icon: Shield, items: ["Anti-ban guide included", "Warm-up strategy provided", "SSL encrypted delivery", "Clean account history"] },
+              { title: "Delivery & Support", icon: Headphones, items: ["Same-day delivery (1–4 hrs)", "Setup assistance included", "7-day replacement guarantee", "Priority customer support"] },
             ].map((spec, i) => (
               <div key={i} className="rounded-xl border border-border bg-card p-6">
-                <h3 className="font-bold text-foreground mb-4">{spec.title}</h3>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <spec.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <h3 className="font-bold text-foreground">{spec.title}</h3>
+                </div>
                 <ul className="space-y-2.5">
                   {spec.items.map((item, j) => (
                     <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <CheckCircle className="w-4 h-4 text-[hsl(142,70%,45%)] mt-0.5 shrink-0" />
                       {item}
                     </li>
                   ))}
@@ -272,68 +304,80 @@ const ProductDetail = () => {
         </div>
       </section>
 
-      {/* Payment Section */}
-      <section className="py-16 bg-muted/30">
+      {/* ─── 3B. HOW TO MAKE PAYMENT ─── */}
+      <section className="py-14 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Payment</p>
           <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">How to Make Payment</h2>
-          <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">We accept cryptocurrency payments for secure, fast, and worldwide transactions.</p>
+          <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">
+            We accept cryptocurrency payments for secure, fast, and worldwide transactions.
+          </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
             {[
-              { step: 1, title: "Choose Your Product", desc: "Select the product you want and click 'Buy Now' or contact us via WhatsApp / Telegram." },
-              { step: 2, title: "Send Crypto Payment", desc: "Pay using USDT (TRC20), Bitcoin, or Ethereum to the wallet address provided at checkout." },
-              { step: 3, title: "Confirm & Receive", desc: "Share your payment screenshot via WhatsApp or Telegram. We'll verify and deliver within 1-4 hours." },
+              { step: 1, icon: Package, title: "Choose Your Product", desc: "Select the product you want and click 'Buy Now' or contact us via WhatsApp / Telegram." },
+              { step: 2, icon: CreditCard, title: "Complete Payment", desc: "Pay using USDT (TRC20), Bitcoin, or Ethereum to the wallet address provided at checkout." },
+              { step: 3, icon: Mail, title: "Receive via Email", desc: "We'll verify your payment and deliver account credentials securely within 1-4 hours." },
             ].map((s) => (
-              <div key={s.step} className="rounded-xl border border-border bg-card p-6 text-center">
-                <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg mx-auto">{s.step}</div>
-                <h3 className="font-bold text-foreground mt-4">{s.title}</h3>
-                <p className="text-sm text-muted-foreground mt-2">{s.desc}</p>
+              <div key={s.step} className="rounded-xl border border-border bg-card p-6 text-center relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-primary/50" />
+                <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl mx-auto mt-2">
+                  {s.step}
+                </div>
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mt-3">
+                  <s.icon className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="font-bold text-foreground mt-3">{s.title}</h3>
+                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{s.desc}</p>
               </div>
             ))}
           </div>
 
           <div className="flex flex-wrap justify-center gap-3 mt-8">
             {["USDT (TRC20)", "Bitcoin (BTC)", "Ethereum (ETH)", "Other Crypto"].map((method) => (
-              <span key={method} className="px-4 py-2 rounded-full bg-card border border-border text-sm font-medium text-foreground">{method}</span>
+              <span key={method} className="px-4 py-2 rounded-full bg-card border border-border text-sm font-medium text-foreground hover:border-primary/50 transition-colors">{method}</span>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Delivery Process */}
-      <section className="py-16">
+      {/* ─── 3C. DELIVERY PROCESS ─── */}
+      <section className="py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Delivery</p>
           <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">How We Deliver Your Account</h2>
-          <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">A fully transparent, secure process from purchase to access.</p>
+          <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">
+            A fully transparent, secure process from purchase to access.
+          </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mt-10">
             {[
               { step: 1, title: "Payment Verified", desc: "Our team confirms your crypto payment within minutes.", icon: Wallet },
               { step: 2, title: "Account Prepared", desc: "We prepare your verified account with all necessary configurations.", icon: ShieldCheck },
               { step: 3, title: "Credentials Sent", desc: "Login credentials are sent via encrypted message on WhatsApp or Telegram.", icon: Send },
               { step: 4, title: "Setup Support", desc: "Our team guides you through login, setup, and best practices.", icon: Headphones },
             ].map((s) => (
-              <div key={s.step} className="rounded-xl border border-border bg-card p-6 text-center">
+              <div key={s.step} className="rounded-xl border border-border bg-card p-5 md:p-6 text-center">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
                   <s.icon className="w-6 h-6 text-primary" />
                 </div>
                 <div className="text-xs font-bold text-primary mt-3">Step {s.step}</div>
-                <h3 className="font-bold text-foreground mt-1">{s.title}</h3>
-                <p className="text-sm text-muted-foreground mt-2">{s.desc}</p>
+                <h3 className="font-bold text-foreground mt-1 text-sm md:text-base">{s.title}</h3>
+                <p className="text-xs md:text-sm text-muted-foreground mt-2 leading-relaxed">{s.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Why Choose Us */}
-      <section className="py-16 bg-muted/30">
+      {/* ─── WHY CUSTOMERS CHOOSE VERIFIED BM SERVICES ─── */}
+      <section className="py-14 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Why VBB Store</p>
+          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Why Verified BM Services</p>
           <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Why Customers Choose Us</h2>
-          <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">Trusted by 1,000+ advertisers worldwide for verified Meta accounts.</p>
+          <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">
+            Trusted by 1,000+ advertisers worldwide for verified Meta accounts.
+          </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
             {[
@@ -344,36 +388,40 @@ const ProductDetail = () => {
               { icon: Globe, title: "Global Service", desc: "We deliver worldwide with no geographic restrictions. Advertisers from any country can purchase with confidence." },
               { icon: Shield, title: "Replacement Policy", desc: "Accounts come with a full compliance and warm-up guide to minimize risk — plus a free replacement if needed." },
             ].map((item, i) => (
-              <div key={i} className="rounded-xl border border-border bg-card p-6">
-                <item.icon className="w-8 h-8 text-primary" />
-                <h3 className="font-bold text-foreground mt-3">{item.title}</h3>
-                <p className="text-sm text-muted-foreground mt-2">{item.desc}</p>
+              <div key={i} className="rounded-xl border border-border bg-card p-6 hover:shadow-md transition-shadow">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <item.icon className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="font-bold text-foreground mt-4">{item.title}</h3>
+                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* ─── TESTIMONIALS ─── */}
       {testimonials.length > 0 && (
-        <section className="py-16">
+        <section className="py-14">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Testimonials</p>
             <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">What Our Customers Say</h2>
-            <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">Real reviews from verified buyers who trust VBB Store.</p>
+            <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">
+              Real reviews from verified buyers who trust Verified BM services.
+            </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
               {testimonials.map((t) => (
-                <div key={t.id} className="rounded-xl border border-border bg-card p-6">
+                <div key={t.id} className="rounded-xl border border-border bg-card p-6 hover:shadow-md transition-shadow">
                   <div className="flex gap-0.5 mb-3">
                     {[...Array(t.rating || 5)].map((_, i) => (
                       <Star key={i} className="w-4 h-4 fill-[hsl(45,93%,47%)] text-[hsl(45,93%,47%)]" />
                     ))}
                   </div>
-                  <p className="text-sm text-muted-foreground italic">"{t.testimonial_text}"</p>
+                  <p className="text-sm text-muted-foreground italic leading-relaxed">"{t.testimonial_text}"</p>
                   <div className="mt-4 flex items-center gap-3">
                     {t.avatar_url ? (
-                      <img src={t.avatar_url} alt={t.client_name} className="w-10 h-10 rounded-full object-cover" />
+                      <img src={t.avatar_url} alt={t.client_name} className="w-10 h-10 rounded-full object-cover" loading="lazy" />
                     ) : (
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
                         {t.client_name?.charAt(0)}
@@ -391,9 +439,9 @@ const ProductDetail = () => {
         </section>
       )}
 
-      {/* FAQ */}
+      {/* ─── FAQ ─── */}
       {faqs.length > 0 && (
-        <section className="py-16 bg-muted/30">
+        <section className="py-14 bg-muted/30">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">FAQ</p>
             <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Frequently Asked Questions</h2>
@@ -404,10 +452,10 @@ const ProductDetail = () => {
                 <div key={faq.id} className="rounded-xl border border-border bg-card overflow-hidden">
                   <button
                     onClick={() => setOpenFaq(openFaq === faq.id ? null : faq.id)}
-                    className="w-full flex items-center justify-between p-4 text-left"
+                    className="w-full flex items-center justify-between p-4 text-left hover:bg-muted/30 transition-colors"
                   >
                     <span className="font-medium text-foreground pr-4">{faq.question}</span>
-                    <ChevronDown className={`w-5 h-5 text-muted-foreground shrink-0 transition-transform ${openFaq === faq.id ? "rotate-180" : ""}`} />
+                    <ChevronDown className={`w-5 h-5 text-muted-foreground shrink-0 transition-transform duration-200 ${openFaq === faq.id ? "rotate-180" : ""}`} />
                   </button>
                   {openFaq === faq.id && (
                     <div className="px-4 pb-4 text-sm text-muted-foreground leading-relaxed">
@@ -421,13 +469,15 @@ const ProductDetail = () => {
         </section>
       )}
 
-      {/* Related Products */}
+      {/* ─── RELATED PRODUCTS ─── */}
       {related.length > 0 && (
-        <section className="py-16">
+        <section className="py-14">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold text-foreground">Related Products</h2>
-              <Link to="/shop" className="text-primary font-medium text-sm hover:underline">View All</Link>
+              <Link to="/shop" className="text-primary font-medium text-sm hover:underline flex items-center gap-1">
+                View All <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {related.map((p) => <ProductCard key={p.id} product={p} />)}
@@ -436,8 +486,8 @@ const ProductDetail = () => {
         </section>
       )}
 
-      {/* Social Share */}
-      <section className="pb-16">
+      {/* ─── SOCIAL SHARE ─── */}
+      <section className="pb-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="border-t border-border pt-6">
             <SocialShareButtons
