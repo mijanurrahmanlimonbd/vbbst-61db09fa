@@ -94,12 +94,12 @@ const Navbar = () => {
               {logoElement}
             </Link>
 
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden md:flex items-center justify-center gap-8">
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`text-sm font-medium transition-colors hover:text-primary ${
+                  className={`nav-link-stable text-sm font-medium transition-colors hover:text-primary text-center ${
                     location.pathname === link.path ? "text-primary" : "text-foreground"
                   }`}
                 >
