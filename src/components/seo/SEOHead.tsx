@@ -1,5 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
+import { SITE_NAME, getSiteUrl, DEFAULT_DESCRIPTION } from "@/lib/config";
 
 interface SEOHeadProps {
   title?: string;
@@ -9,21 +10,18 @@ interface SEOHeadProps {
   noIndex?: boolean;
 }
 
-const SITE_NAME = "VBB STORE";
-const SITE_URL = "https://vbbstore.com";
-const DEFAULT_DESCRIPTION = "Buy Verified Business Manager, WhatsApp API, Facebook Ads accounts. Instant delivery, 7-day guarantee, 24/7 support.";
-const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.png`;
-
 const SEOHead = ({
   title,
   description = DEFAULT_DESCRIPTION,
-  ogImage = DEFAULT_OG_IMAGE,
+  ogImage,
   ogType = "website",
   noIndex = false,
 }: SEOHeadProps) => {
   const location = useLocation();
+  const siteUrl = getSiteUrl();
   const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
-  const canonicalUrl = `${SITE_URL}${location.pathname}`;
+  const canonicalUrl = `${siteUrl}${location.pathname}`;
+  const resolvedOgImage = ogImage || `${siteUrl}/og-default.png`;
 
   return (
     <Helmet>
@@ -37,14 +35,14 @@ const SEOHead = ({
       <meta property="og:description" content={description.slice(0, 160)} />
       <meta property="og:type" content={ogType} />
       <meta property="og:url" content={canonicalUrl} />
-      <meta property="og:image" content={ogImage} />
+      <meta property="og:image" content={resolvedOgImage} />
       <meta property="og:site_name" content={SITE_NAME} />
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description.slice(0, 160)} />
-      <meta name="twitter:image" content={ogImage} />
+      <meta name="twitter:image" content={resolvedOgImage} />
     </Helmet>
   );
 };
