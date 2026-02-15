@@ -19,7 +19,7 @@ const MaintenanceTab = () => {
         .from("site_settings")
         .select("value")
         .eq("key", "maintenance_mode")
-        .single();
+        .maybeSingle();
       if (data) setMaintenanceMode(data.value === "true");
       setLoading(false);
     };
