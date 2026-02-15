@@ -33,7 +33,10 @@ const ProductCard = ({ product }: { product: Product }) => {
   };
 
   return (
-    <div className="group bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 relative flex flex-col h-full">
+    <div
+      onClick={() => navigate(`/product/${product.slug}`)}
+      className="group bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 relative flex flex-col h-full cursor-pointer"
+    >
       {!inStock && (
         <div className="absolute inset-0 bg-background/60 z-20 flex items-center justify-center pointer-events-none">
           <Badge variant="destructive" className="text-sm px-4 py-1">Out of Stock</Badge>
@@ -120,6 +123,7 @@ const ProductCard = ({ product }: { product: Product }) => {
             href="https://wa.me/8801302669333"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
             className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-[hsl(142,70%,45%)] text-white text-sm font-semibold hover:bg-[hsl(142,70%,40%)] transition-colors"
           >
             <MessageCircle className="w-4 h-4" /> Buy on WhatsApp
@@ -128,12 +132,14 @@ const ProductCard = ({ product }: { product: Product }) => {
             href="https://t.me/Verifiedbmbuy"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
             className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-[hsl(200,100%,40%)] text-white text-sm font-semibold hover:bg-[hsl(200,100%,35%)] transition-colors"
           >
             <Send className="w-4 h-4" /> Buy on Telegram
           </a>
           <button
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               if (!inStock) { navigate(`/product/${product.slug}`); return; }
               const item = {
                 id: product.id,
