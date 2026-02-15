@@ -13,7 +13,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Eye, EyeOff, Plus, Edit, Trash2 } from "lucide-react";
+import { Loader2, Eye, EyeOff, Plus, Edit, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -59,6 +59,8 @@ const AdminSettings = () => {
   const [cryptomusApiKey, setCryptomusApiKey] = useState("");
   const [cryptomusMerchantId, setCryptomusMerchantId] = useState("");
   const [binancePayId, setBinancePayId] = useState("");
+  const [binanceQrUrl, setBinanceQrUrl] = useState("");
+  const [qrUploading, setQrUploading] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(true);
 
@@ -76,7 +78,7 @@ const AdminSettings = () => {
     const load = async () => {
       setPaymentLoading(true);
       const [settingsRes, methodsRes] = await Promise.all([
-        supabase.from("site_settings").select("key, value").in("key", ["cryptomus_api_key", "cryptomus_merchant_id", "binance_pay_id"]),
+        supabase.from("site_settings").select("key, value").in("key", ["cryptomus_api_key", "cryptomus_merchant_id", "binance_pay_id", "binance_qr_url"]),
         supabase.from("payment_methods").select("*").order("sort_order", { ascending: true }),
       ]);
 
@@ -85,6 +87,7 @@ const AdminSettings = () => {
           if (row.key === "cryptomus_api_key") setCryptomusApiKey(row.value);
           if (row.key === "cryptomus_merchant_id") setCryptomusMerchantId(row.value);
           if (row.key === "binance_pay_id") setBinancePayId(row.value);
+          if (row.key === "binance_qr_url") setBinanceQrUrl(row.value);
         }
       }
       if (methodsRes.data) setPaymentMethods(methodsRes.data as PaymentMethod[]);
@@ -141,6 +144,7 @@ const AdminSettings = () => {
         { key: "cryptomus_api_key", value: cryptomusApiKey.trim() },
         { key: "cryptomus_merchant_id", value: cryptomusMerchantId.trim() },
         { key: "binance_pay_id", value: binancePayId.trim() },
+        { key: "binance_qr_url", value: binanceQrUrl.trim() },
       ].filter((s) => s.value);
 
       for (const setting of settings) {
@@ -275,10 +279,66 @@ const AdminSettings = () => {
 
                 <div className="border-t border-border pt-6">
                   <h3 className="text-base font-semibold text-foreground mb-1">Binance Pay (Manual)</h3>
-                  <p className="text-xs text-muted-foreground mb-4">Your Binance Pay ID shown to customers for manual transfers.</p>
-                  <div>
-                    <label className="text-sm font-medium text-foreground mb-1.5 block">Binance Pay ID</label>
-                    <Input value={binancePayId} onChange={(e) => setBinancePayId(e.target.value)} placeholder="e.g. 895693102" />
+                  <p className="text-xs text-muted-foreground mb-4">Your Binance Pay ID and QR code shown to customers for manual transfers.</p>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-1.5 block">Binance Pay ID</label>
+                      <Input value={binancePayId} onChange={(e) => setBinancePayId(e.target.value)} placeholder="e.g. 895693102" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-1.5 block">Binance QR Code Image</label>
+                      <p className="text-xs text-muted-foreground mb-2">Upload your Binance Pay QR code screenshot. This will be shown on the checkout page.</p>
+                      {binanceQrUrl ? (
+                        <div className="flex items-start gap-4">
+                          <div className="border border-border rounded-lg p-2 bg-white">
+                            <img src={binanceQrUrl} alt="Binance QR Code" className="w-32 h-32 object-contain" />
+                          </div>
+                          <div className="space-y-2">
+                            <p className="text-xs text-muted-foreground break-all max-w-xs">{binanceQrUrl}</p>
+                            <Button variant="outline" size="sm" onClick={() => setBinanceQrUrl("")} className="gap-1">
+                              <X className="w-3.5 h-3.5" /> Remove
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-6 cursor-pointer hover:border-primary/50 transition-colors">
+                          {qrUploading ? (
+                            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                          ) : (
+                            <>
+                              <Upload className="w-6 h-6 text-muted-foreground mb-2" />
+                              <span className="text-sm text-muted-foreground">Click to upload QR code image</span>
+                              <span className="text-xs text-muted-foreground mt-1">JPG or PNG, max 5MB</span>
+                            </>
+                          )}
+                          <input
+                            type="file"
+                            accept=".jpg,.jpeg,.png"
+                            className="hidden"
+                            disabled={qrUploading}
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              if (file.size > 5 * 1024 * 1024) { toast.error("File must be under 5MB."); return; }
+                              setQrUploading(true);
+                              try {
+                                const ext = file.name.split(".").pop();
+                                const path = `binance-qr-${Date.now()}.${ext}`;
+                                const { error: upErr } = await supabase.storage.from("media").upload(path, file, { upsert: true });
+                                if (upErr) throw upErr;
+                                const { data: urlData } = supabase.storage.from("media").getPublicUrl(path);
+                                setBinanceQrUrl(urlData.publicUrl);
+                                toast.success("QR code uploaded! Click 'Save Payment Settings' to apply.");
+                              } catch {
+                                toast.error("Failed to upload QR code.");
+                              } finally {
+                                setQrUploading(false);
+                              }
+                            }}
+                          />
+                        </label>
+                      )}
+                    </div>
                   </div>
                 </div>
 
