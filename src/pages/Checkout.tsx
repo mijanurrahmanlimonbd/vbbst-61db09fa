@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, Upload, CheckCircle, Copy, AlertCircle } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
 
 interface CartItem {
   id: string;
@@ -52,6 +51,7 @@ const Checkout = () => {
   const [uploading, setUploading] = useState(false);
   const [cryptomusUrl, setCryptomusUrl] = useState<string | null>(null);
   const [binancePayId, setBinancePayId] = useState("895693102");
+  const [binanceQrUrl, setBinanceQrUrl] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const total = items.reduce((sum, i) => sum + (i.sale_price || i.price) * i.quantity, 0);
@@ -67,9 +67,13 @@ const Checkout = () => {
         .order("sort_order", { ascending: true });
       setPaymentMethods((data || []) as PaymentMethod[]);
 
-      // Load Binance Pay ID using get_setting function (bypasses RLS for public access)
-      const { data: setting } = await supabase.rpc("get_setting", { setting_key: "binance_pay_id" });
-      if (setting) setBinancePayId(setting);
+      // Load Binance settings using get_setting function (bypasses RLS for public access)
+      const [payIdRes, qrUrlRes] = await Promise.all([
+        supabase.rpc("get_setting", { setting_key: "binance_pay_id" }),
+        supabase.rpc("get_setting", { setting_key: "binance_qr_url" }),
+      ]);
+      if (payIdRes.data) setBinancePayId(payIdRes.data);
+      if (qrUrlRes.data) setBinanceQrUrl(qrUrlRes.data);
 
       setMethodsLoading(false);
     };
@@ -343,11 +347,16 @@ const Checkout = () => {
                     </Button>
                   </div>
                   <div className="text-center py-4">
-                    <div className="inline-block p-4 bg-white rounded-xl">
-                      <QRCodeSVG value={binancePayId} size={256} level="H" includeMargin={true} />
-                    </div>
+                    {binanceQrUrl ? (
+                      <div className="inline-block p-3 bg-white rounded-xl">
+                        <img src={binanceQrUrl} alt="Binance Pay QR Code" className="mx-auto" style={{ width: 250, height: 250, objectFit: "contain" }} />
+                      </div>
+                    ) : (
+                      <div className="inline-block p-4 bg-secondary/30 rounded-xl">
+                        <p className="text-sm text-muted-foreground">QR Code coming soon</p>
+                      </div>
+                    )}
                     <p className="text-xs text-muted-foreground mt-2">Scan with Binance app</p>
-                    {binancePayId && <p className="text-xs text-primary mt-1">✓ Scan verified</p>}
                   </div>
                   <div className="text-center">
                     <p className="text-sm text-foreground font-semibold">Amount: ${total.toFixed(2)} USD</p>
