@@ -6,6 +6,7 @@ import AIChatWidget from "@/components/chat/AIChatWidget";
 import MobileBottomNav from "./MobileBottomNav";
 import NewsletterPopup from "@/components/newsletter/NewsletterPopup";
 import TrackingScripts from "@/components/tracking/TrackingScripts";
+import InstallPrompt from "@/components/pwa/InstallPrompt";
 import FloatingEditBar from "@/components/editor/FloatingEditBar";
 import OrderThankYouPopup from "@/components/layout/OrderThankYouPopup";
 import { useEditMode } from "@/contexts/EditModeContext";
@@ -127,6 +128,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       <AIChatWidget />
       <NewsletterPopup />
       <TrackingScripts />
+      <InstallPrompt />
       <OrderThankYouPopup />
       {slug && <FloatingEditBar slug={slug} />}
     </div>
