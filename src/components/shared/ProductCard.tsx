@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Star, Shield, Zap, Headphones, MessageCircle, Send } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface Product {
   id: string;
@@ -12,12 +13,15 @@ interface Product {
   badge?: string | null;
   image_url?: string | null;
   rating?: number;
+  stock_status?: string;
 }
 
 const ProductCard = ({ product }: { product: Product }) => {
   const discount = product.sale_price && product.price > 0
     ? Math.round(((product.price - product.sale_price) / product.price) * 100)
     : null;
+  const inStock = product.stock_status !== "out_of_stock";
+  const showSaleBadge = product.sale_price && product.sale_price > 0;
 
   const badgeColors: Record<string, string> = {
     Sale: "bg-[hsl(15,90%,55%)] text-primary-foreground",
@@ -26,17 +30,24 @@ const ProductCard = ({ product }: { product: Product }) => {
     Premium: "bg-[hsl(280,60%,50%)] text-primary-foreground",
   };
 
+  const displayBadge = showSaleBadge ? "Sale" : product.badge;
+
   return (
-    <div className="group bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300">
+    <div className="group bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 relative">
+      {!inStock && (
+        <div className="absolute inset-0 bg-background/60 z-20 flex items-center justify-center pointer-events-none">
+          <Badge variant="destructive" className="text-sm px-4 py-1">Out of Stock</Badge>
+        </div>
+      )}
       <Link to={`/product/${product.slug}`} className="block relative">
         {discount && (
           <span className="absolute top-3 left-3 z-10 bg-[hsl(0,84%,60%)] text-primary-foreground text-xs font-bold px-2 py-1 rounded">
             {discount}% SAVE
           </span>
         )}
-        {product.badge && (
-          <span className={`absolute top-3 right-3 z-10 text-xs font-bold px-3 py-1 rounded ${badgeColors[product.badge] || "bg-primary text-primary-foreground"}`}>
-            {product.badge}
+        {displayBadge && (
+          <span className={`absolute top-3 right-3 z-10 text-xs font-bold px-3 py-1 rounded ${badgeColors[displayBadge] || "bg-primary text-primary-foreground"}`}>
+            {displayBadge}
           </span>
         )}
         <div className="aspect-[4/3] bg-secondary overflow-hidden">
@@ -94,7 +105,7 @@ const ProductCard = ({ product }: { product: Product }) => {
             <Send className="w-3 h-3" /> Telegram
           </a>
           <Link to={`/product/${product.slug}`} className="flex items-center justify-center py-2 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 transition-opacity">
-            Buy Now
+            {inStock ? "Buy Now" : "View"}
           </Link>
         </div>
 
