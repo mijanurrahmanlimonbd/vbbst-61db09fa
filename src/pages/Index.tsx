@@ -1,22 +1,24 @@
+import { lazy, Suspense } from "react";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
 import JsonLdSchema from "@/components/seo/JsonLdSchema";
 import HeroSection from "@/components/home/HeroSection";
-
 import FeaturesSection from "@/components/home/FeaturesSection";
 import ProductsSection from "@/components/home/ProductsSection";
-import BenefitsGrid from "@/components/home/BenefitsGrid";
-import ServicesSection from "@/components/home/ServicesSection";
-import WhyVBBStore from "@/components/home/WhyVBBStore";
-import ScaleUpCTA from "@/components/home/ScaleUpCTA";
-import TopAdvertisers from "@/components/home/TopAdvertisers";
-import KeyAdvantages from "@/components/home/KeyAdvantages";
-import PortfolioSection from "@/components/home/PortfolioSection";
-import TestimonialsSection from "@/components/home/TestimonialsSection";
-import FAQSection from "@/components/home/FAQSection";
-import AboutSection from "@/components/home/AboutSection";
-import ContactMapSection from "@/components/home/ContactMapSection";
-import BuyVerifiedBMGuide from "@/components/home/BuyVerifiedBMGuide";
+
+// Lazy-load below-the-fold sections
+const BenefitsGrid = lazy(() => import("@/components/home/BenefitsGrid"));
+const ServicesSection = lazy(() => import("@/components/home/ServicesSection"));
+const WhyVBBStore = lazy(() => import("@/components/home/WhyVBBStore"));
+const ScaleUpCTA = lazy(() => import("@/components/home/ScaleUpCTA"));
+const TopAdvertisers = lazy(() => import("@/components/home/TopAdvertisers"));
+const KeyAdvantages = lazy(() => import("@/components/home/KeyAdvantages"));
+const PortfolioSection = lazy(() => import("@/components/home/PortfolioSection"));
+const TestimonialsSection = lazy(() => import("@/components/home/TestimonialsSection"));
+const FAQSection = lazy(() => import("@/components/home/FAQSection"));
+const AboutSection = lazy(() => import("@/components/home/AboutSection"));
+const ContactMapSection = lazy(() => import("@/components/home/ContactMapSection"));
+const BuyVerifiedBMGuide = lazy(() => import("@/components/home/BuyVerifiedBMGuide"));
 
 const homeFaqs = [
   { question: "What exactly is a Verified Business Manager?", answer: "A Verified Business Manager is a Meta-approved account that has passed identity and business verification using legitimate company documents." },
@@ -41,19 +43,21 @@ const Index = () => {
       <HeroSection />
       <FeaturesSection />
       <ProductsSection />
-      <BenefitsGrid type="bm" />
-      <BenefitsGrid type="whatsapp" />
-      <ServicesSection />
-      <WhyVBBStore />
-      <ScaleUpCTA />
-      <TopAdvertisers />
-      <KeyAdvantages />
-      <PortfolioSection />
-      <TestimonialsSection />
-      <FAQSection />
-      <AboutSection />
-      <ContactMapSection />
-      <BuyVerifiedBMGuide />
+      <Suspense fallback={null}>
+        <BenefitsGrid type="bm" />
+        <BenefitsGrid type="whatsapp" />
+        <ServicesSection />
+        <WhyVBBStore />
+        <ScaleUpCTA />
+        <TopAdvertisers />
+        <KeyAdvantages />
+        <PortfolioSection />
+        <TestimonialsSection />
+        <FAQSection />
+        <AboutSection />
+        <ContactMapSection />
+        <BuyVerifiedBMGuide />
+      </Suspense>
     </Layout>
   );
 };

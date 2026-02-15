@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,42 +11,53 @@ import { EditModeProvider } from "@/contexts/EditModeContext";
 import MaintenanceGuard from "@/components/MaintenanceGuard";
 import CartDrawer from "@/components/cart/CartDrawer";
 import Index from "./pages/Index";
-import Shop from "./pages/Shop";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
-import Contact from "./pages/Contact";
-import About from "./pages/About";
-import ProductDetail from "./pages/ProductDetail";
-import Search from "./pages/Search";
-import NotFound from "./pages/NotFound";
-import DynamicPage from "./pages/DynamicPage";
-import AdminLayout from "./components/admin/AdminLayout";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminPosts from "./pages/admin/AdminPosts";
-import AdminPostEditor from "./pages/admin/AdminPostEditor";
-import AdminPages from "./pages/admin/AdminPages";
-import AdminPageEditor from "./pages/admin/AdminPageEditor";
-import AdminMedia from "./pages/admin/AdminMedia";
-import AdminProducts from "./pages/admin/AdminProducts";
-import AdminComments from "./pages/admin/AdminComments";
-import AdminSubscribers from "./pages/admin/AdminSubscribers";
-import AdminSettings from "./pages/admin/AdminSettings";
-import AdminUsers from "./pages/admin/AdminUsers";
-import AdminLogin from "./pages/admin/AdminLogin";
-import AdminOrders from "./pages/admin/AdminOrders";
-import AdminSEO from "./pages/admin/AdminSEO";
-import AdminWorkSamples from "./pages/admin/AdminWorkSamples";
-import AdminTestimonials from "./pages/admin/AdminTestimonials";
-import AdminFAQs from "./pages/admin/AdminFAQs";
-import AdminMessages from "./pages/admin/AdminMessages";
-import Checkout from "./pages/Checkout";
-import TermsOfService from "./pages/TermsOfService";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import RefundPolicy from "./pages/RefundPolicy";
-import ReplacementGuarantee from "./pages/ReplacementGuarantee";
-import FAQ from "./pages/FAQ";
-import Dashboard from "./pages/Dashboard";
+
+// Lazy-loaded routes — not needed for initial paint
+const Shop = lazy(() => import("./pages/Shop"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
+const Contact = lazy(() => import("./pages/Contact"));
+const About = lazy(() => import("./pages/About"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
+const Search = lazy(() => import("./pages/Search"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const DynamicPage = lazy(() => import("./pages/DynamicPage"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
+const ReplacementGuarantee = lazy(() => import("./pages/ReplacementGuarantee"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+
+// Admin routes — heavy, rarely visited
+const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminPosts = lazy(() => import("./pages/admin/AdminPosts"));
+const AdminPostEditor = lazy(() => import("./pages/admin/AdminPostEditor"));
+const AdminPages = lazy(() => import("./pages/admin/AdminPages"));
+const AdminPageEditor = lazy(() => import("./pages/admin/AdminPageEditor"));
+const AdminMedia = lazy(() => import("./pages/admin/AdminMedia"));
+const AdminProducts = lazy(() => import("./pages/admin/AdminProducts"));
+const AdminComments = lazy(() => import("./pages/admin/AdminComments"));
+const AdminSubscribers = lazy(() => import("./pages/admin/AdminSubscribers"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
+const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
+const AdminSEO = lazy(() => import("./pages/admin/AdminSEO"));
+const AdminWorkSamples = lazy(() => import("./pages/admin/AdminWorkSamples"));
+const AdminTestimonials = lazy(() => import("./pages/admin/AdminTestimonials"));
+const AdminFAQs = lazy(() => import("./pages/admin/AdminFAQs"));
+const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
+
 const queryClient = new QueryClient();
+
+const PageFallback = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 const App = () => (
   <HelmetProvider>
@@ -59,6 +71,7 @@ const App = () => (
           <EditModeProvider>
           <CartDrawer />
           <MaintenanceGuard>
+          <Suspense fallback={<PageFallback />}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/shop" element={<Shop />} />
@@ -100,6 +113,7 @@ const App = () => (
             <Route path="/page/:slug" element={<DynamicPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
           </MaintenanceGuard>
           </EditModeProvider>
           </CartProvider>
