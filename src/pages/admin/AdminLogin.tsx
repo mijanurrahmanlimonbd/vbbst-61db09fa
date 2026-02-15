@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Lock } from "lucide-react";
+import { Loader2, Lock, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
@@ -20,13 +22,31 @@ const AdminLogin = () => {
       return;
     }
     setLoading(true);
-    const { error } = await signIn(email, password);
-    setLoading(false);
-    if (error) {
-      toast.error(error);
+
+    if (isSignUp) {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { emailRedirectTo: window.location.origin },
+      });
+      setLoading(false);
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success("Account created! Signing you in...");
+        // Auto-confirm is enabled, so sign in immediately
+        const { error: signInError } = await signIn(email, password);
+        if (!signInError) navigate("/admin");
+      }
     } else {
-      toast.success("Welcome back!");
-      navigate("/admin");
+      const { error } = await signIn(email, password);
+      setLoading(false);
+      if (error) {
+        toast.error(error);
+      } else {
+        toast.success("Welcome back!");
+        navigate("/admin");
+      }
     }
   };
 
@@ -38,8 +58,12 @@ const AdminLogin = () => {
             <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-primary-foreground font-bold text-lg mx-auto mb-4">
               VS
             </div>
-            <h1 className="text-xl font-bold text-foreground">Admin Login</h1>
-            <p className="text-sm text-muted-foreground mt-1">Sign in to your VBB Store admin panel</p>
+            <h1 className="text-xl font-bold text-foreground">
+              {isSignUp ? "Create Account" : "Admin Login"}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {isSignUp ? "Create a new admin account" : "Sign in to your VBB Store admin panel"}
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -60,14 +84,30 @@ const AdminLogin = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                autoComplete="current-password"
+                autoComplete={isSignUp ? "new-password" : "current-password"}
               />
             </div>
             <Button type="submit" className="w-full gap-2" disabled={loading}>
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
-              Sign In
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : isSignUp ? (
+                <UserPlus className="w-4 h-4" />
+              ) : (
+                <Lock className="w-4 h-4" />
+              )}
+              {isSignUp ? "Sign Up" : "Sign In"}
             </Button>
           </form>
+
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="text-sm text-primary hover:underline"
+            >
+              {isSignUp ? "Already have an account? Sign In" : "Need an account? Sign Up"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
