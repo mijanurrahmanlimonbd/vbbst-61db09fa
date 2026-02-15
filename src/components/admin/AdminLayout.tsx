@@ -37,6 +37,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import NotificationBell from "@/components/admin/NotificationBell";
 
 const navItems = [
   { title: "Dashboard", path: "/admin", icon: LayoutDashboard, section: "dashboard" },
@@ -317,10 +318,7 @@ const AdminLayout = () => {
               <TooltipContent>{syncing ? "Syncing..." : "Clear Cache & Sync Site"}</TooltipContent>
             </Tooltip>
 
-            <button className="p-2 rounded-lg text-muted-foreground hover:bg-accent transition-colors relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
-            </button>
+            <NotificationBell />
 
             <div className="relative">
               <button
