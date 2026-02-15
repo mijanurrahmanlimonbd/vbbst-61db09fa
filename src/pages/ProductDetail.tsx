@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
+import SEOHead from "@/components/seo/SEOHead";
 import ProductCard from "@/components/shared/ProductCard";
 import { Star, Shield, Zap, Headphones, MessageCircle, Send, ArrowLeft } from "lucide-react";
 
@@ -33,6 +34,12 @@ const ProductDetail = () => {
 
   return (
     <Layout>
+      <SEOHead
+        title={product.title}
+        description={product.description || product.short_description || `Buy ${product.title} from VBB STORE. Instant delivery and 7-day guarantee.`}
+        ogImage={product.image_url || undefined}
+        ogType="product"
+      />
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link to="/shop" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary mb-8">

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
+import SEOHead from "@/components/seo/SEOHead";
 import PageHeader from "@/components/layout/PageHeader";
 import { Clock, ArrowRight } from "lucide-react";
 
@@ -25,6 +26,7 @@ const Blog = () => {
 
   return (
     <Layout>
+      <SEOHead title="Blog - Insights & Guides" description="Expert tips, industry insights, and guides on Meta advertising, verified Business Managers, WhatsApp API, and digital marketing strategies." />
       <PageHeader
         breadcrumb="Blog"
         subtitle="Our Blog"

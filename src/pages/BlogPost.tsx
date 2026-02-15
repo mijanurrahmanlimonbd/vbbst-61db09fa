@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
+import SEOHead from "@/components/seo/SEOHead";
 import { ArrowLeft, Clock } from "lucide-react";
 
 const BlogPost = () => {
@@ -23,6 +24,12 @@ const BlogPost = () => {
 
   return (
     <Layout>
+      <SEOHead
+        title={(post as any).meta_title || post.title}
+        description={(post as any).meta_description || post.excerpt || `Read ${post.title} on VBB STORE blog.`}
+        ogImage={post.featured_image || undefined}
+        ogType="article"
+      />
       <section className="bg-primary text-primary-foreground py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link to="/blog" className="inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground mb-6">
