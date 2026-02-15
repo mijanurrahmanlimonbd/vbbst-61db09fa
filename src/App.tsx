@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminPosts from "./pages/admin/AdminPosts";
+import AdminPostEditor from "./pages/admin/AdminPostEditor";
 import AdminPages from "./pages/admin/AdminPages";
 import AdminMedia from "./pages/admin/AdminMedia";
 import AdminSettings from "./pages/admin/AdminSettings";
@@ -37,6 +38,8 @@ const App = () => (
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="posts" element={<AdminPosts />} />
+            <Route path="posts/new" element={<AdminPostEditor />} />
+            <Route path="posts/:id/edit" element={<AdminPostEditor />} />
             <Route path="pages" element={<AdminPages />} />
             <Route path="media" element={<AdminMedia />} />
             <Route path="settings" element={<AdminSettings />} />
