@@ -34,7 +34,9 @@ const HeroSection = () => {
                   src={vbbLogo}
                   alt="Buy Verified BM - Verified BM services"
                   className="relative h-52 w-52 rounded-[21px] object-cover sm:h-72 sm:w-72 md:h-80 md:w-80 lg:h-80 lg:w-80 bg-secondary"
+                  loading="eager"
                   fetchPriority="high"
+                  decoding="sync"
                   width={320}
                   height={320}
                 />
