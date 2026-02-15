@@ -107,6 +107,7 @@ export default defineConfig(({ mode }) => ({
           vendor: ["react", "react-dom", "react-router-dom"],
           ui: ["@radix-ui/react-dialog", "@radix-ui/react-tabs", "@radix-ui/react-tooltip"],
           query: ["@tanstack/react-query"],
+          motion: ["framer-motion"],
         },
       },
     },

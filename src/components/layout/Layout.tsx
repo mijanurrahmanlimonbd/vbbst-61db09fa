@@ -1,15 +1,17 @@
-import { ReactNode, useEffect, useRef, useCallback } from "react";
+import { ReactNode, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import AIChatWidget from "@/components/chat/AIChatWidget";
 import MobileBottomNav from "./MobileBottomNav";
-import NewsletterPopup from "@/components/newsletter/NewsletterPopup";
 import TrackingScripts from "@/components/tracking/TrackingScripts";
-import InstallPrompt from "@/components/pwa/InstallPrompt";
-import FloatingEditBar from "@/components/editor/FloatingEditBar";
-import OrderThankYouPopup from "@/components/layout/OrderThankYouPopup";
 import { useEditMode } from "@/contexts/EditModeContext";
+
+// Defer heavy widgets — not needed for initial paint / LCP
+const AIChatWidget = lazy(() => import("@/components/chat/AIChatWidget"));
+const NewsletterPopup = lazy(() => import("@/components/newsletter/NewsletterPopup"));
+const InstallPrompt = lazy(() => import("@/components/pwa/InstallPrompt"));
+const FloatingEditBar = lazy(() => import("@/components/editor/FloatingEditBar"));
+const OrderThankYouPopup = lazy(() => import("@/components/layout/OrderThankYouPopup"));
 
 const EDITABLE_SELECTORS = "h1, h2, h3, h4, p, span, li";
 
@@ -125,12 +127,14 @@ const Layout = ({ children }: { children: ReactNode }) => {
       <main ref={mainRef} className="flex-1">{children}</main>
       <Footer />
       <MobileBottomNav />
-      <AIChatWidget />
-      <NewsletterPopup />
+      <Suspense fallback={null}>
+        <AIChatWidget />
+        <NewsletterPopup />
+        <InstallPrompt />
+        <OrderThankYouPopup />
+        {slug && <FloatingEditBar slug={slug} />}
+      </Suspense>
       <TrackingScripts />
-      <InstallPrompt />
-      <OrderThankYouPopup />
-      {slug && <FloatingEditBar slug={slug} />}
     </div>
   );
 };
