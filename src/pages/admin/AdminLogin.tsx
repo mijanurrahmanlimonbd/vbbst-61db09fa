@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBranding } from "@/hooks/useBranding";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +15,7 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const { signIn } = useAuth();
+  const { branding } = useBranding();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,17 +55,30 @@ const AdminLogin = () => {
 
   return (
     <div className="min-h-screen bg-[hsl(210,20%,96%)] flex items-center justify-center p-4">
+      {branding.favicon && (
+        <Helmet>
+          <link rel="icon" href={branding.favicon} type="image/png" />
+        </Helmet>
+      )}
       <div className="w-full max-w-sm">
         <div className="bg-background rounded-2xl border border-border shadow-lg p-8 space-y-6">
           <div className="text-center">
-            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-primary-foreground font-bold text-lg mx-auto mb-4">
-              VS
-            </div>
+            {branding.header_logo ? (
+              <img
+                src={branding.header_logo}
+                alt={branding.site_title || "Admin"}
+                className="h-12 max-w-[200px] object-contain mx-auto mb-4"
+              />
+            ) : (
+              <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-primary-foreground font-bold text-lg mx-auto mb-4">
+                {(branding.site_title || "VS").substring(0, 2).toUpperCase()}
+              </div>
+            )}
             <h1 className="text-xl font-bold text-foreground">
               {isSignUp ? "Create Account" : "Admin Login"}
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {isSignUp ? "Create a new admin account" : "Sign in to your VBB Store admin panel"}
+              {isSignUp ? "Create a new admin account" : `Sign in to your ${branding.site_title || "VBB Store"} admin panel`}
             </p>
           </div>
 
