@@ -1,151 +1,50 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Edit, Trash2, Loader2, FileText } from "lucide-react";
+import { Plus, Edit, Trash2, FileText } from "lucide-react";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 interface Page {
   id: string;
   title: string;
   slug: string;
-  content: string | null;
   status: string;
-  meta_title: string | null;
-  meta_description: string | null;
-  components: { work_samples?: boolean; testimonials?: boolean; faqs?: boolean } | null;
-  created_at: string;
   updated_at: string;
 }
-
-const emptyPage = (): Partial<Page> => ({
-  title: "", slug: "", content: "", status: "draft", meta_title: "", meta_description: "", components: {},
-});
 
 const AdminPages = () => {
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editorOpen, setEditorOpen] = useState(false);
-  const [editPage, setEditPage] = useState<Partial<Page>>(emptyPage());
-  const [saving, setSaving] = useState(false);
+  const navigate = useNavigate();
 
   const fetchPages = async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("pages")
-      .select("*")
+      .select("id, title, slug, status, updated_at")
       .order("created_at", { ascending: true });
-    if (error) {
-      toast.error(`Failed to load pages: ${error.message}`);
-    } else {
-      setPages((data || []) as Page[]);
-    }
+    if (error) toast.error(`Failed to load pages: ${error.message}`);
+    else setPages((data || []) as Page[]);
     setLoading(false);
   };
 
   useEffect(() => { fetchPages(); }, []);
 
-  const openEditor = (page?: Page) => {
-    if (page) {
-      // Hydrate all fields from DB row
-      setEditPage({
-        id: page.id,
-        title: page.title ?? "",
-        slug: page.slug ?? "",
-        content: page.content ?? "",
-        status: page.status ?? "draft",
-        meta_title: page.meta_title ?? "",
-        meta_description: page.meta_description ?? "",
-        components: (page.components as any) ?? {},
-      });
-    } else {
-      setEditPage(emptyPage());
-    }
-    setEditorOpen(true);
-  };
-
-  const handleSave = async () => {
-    if (!editPage.title?.trim()) {
-      toast.error("Title is required.");
-      return;
-    }
-    if (!editPage.slug?.trim()) {
-      toast.error("Slug is required.");
-      return;
-    }
-
-    setSaving(true);
-    try {
-      const payload = {
-        title: editPage.title!.trim(),
-        slug: editPage.slug!.trim(),
-        content: editPage.content || null,
-        status: editPage.status || "draft",
-        meta_title: editPage.meta_title || null,
-        meta_description: editPage.meta_description || null,
-        components: editPage.components || {},
-      };
-
-      if (editPage.id) {
-        // UPDATE existing page
-        const { error } = await supabase
-          .from("pages")
-          .update(payload)
-          .eq("id", editPage.id);
-        if (error) throw error;
-        toast.success("Page updated successfully!");
-      } else {
-        // INSERT new page
-        const { error } = await supabase
-          .from("pages")
-          .insert(payload);
-        if (error) {
-          if (error.message?.includes("duplicate")) {
-            toast.error("A page with this slug already exists.");
-          } else {
-            throw error;
-          }
-          setSaving(false);
-          return;
-        }
-        toast.success("Page created successfully!");
-      }
-      setEditorOpen(false);
-      fetchPages();
-    } catch (error: any) {
-      toast.error(`Failed to save page: ${error.message}`);
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const deletePage = async (id: string, title: string) => {
     if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
     const { error } = await supabase.from("pages").delete().eq("id", id);
-    if (error) {
-      toast.error(`Failed to delete: ${error.message}`);
-    } else {
-      toast.success("Page deleted.");
-      fetchPages();
-    }
+    if (error) toast.error(`Failed to delete: ${error.message}`);
+    else { toast.success("Page deleted."); fetchPages(); }
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-foreground">Pages</h2>
-        <Button onClick={() => openEditor()} className="gap-2">
+        <Button onClick={() => navigate("/admin/pages/new")} className="gap-2">
           <Plus className="w-4 h-4" /> New Page
         </Button>
       </div>
@@ -174,7 +73,7 @@ const AdminPages = () => {
                 </div>
                 <div className="flex items-center gap-1 ml-4">
                   <button
-                    onClick={() => openEditor(page)}
+                    onClick={() => navigate(`/admin/pages/${page.id}/edit`)}
                     className="p-2 rounded text-primary text-xs font-medium hover:bg-primary/10 transition-colors"
                   >
                     <Edit className="w-4 h-4" />
@@ -191,100 +90,6 @@ const AdminPages = () => {
           </div>
         )}
       </div>
-
-      {/* Page Editor Modal */}
-      <Dialog open={editorOpen} onOpenChange={setEditorOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editPage.id ? "Edit Page" : "New Page"}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 pt-2">
-            <div>
-              <Label>Title *</Label>
-              <Input
-                value={editPage.title ?? ""}
-                onChange={(e) => setEditPage({ ...editPage, title: e.target.value })}
-                placeholder="Page title"
-                className="mt-1.5"
-              />
-            </div>
-            <div>
-              <Label>Slug *</Label>
-              <Input
-                value={editPage.slug ?? ""}
-                onChange={(e) => setEditPage({ ...editPage, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "") })}
-                placeholder="page-slug"
-                className="mt-1.5 font-mono"
-              />
-            </div>
-            <div>
-              <Label>Content</Label>
-              <Textarea
-                value={editPage.content ?? ""}
-                onChange={(e) => setEditPage({ ...editPage, content: e.target.value })}
-                placeholder="Page content…"
-                rows={8}
-                className="mt-1.5"
-              />
-            </div>
-            <div>
-              <Label>Status</Label>
-              <Select value={editPage.status || "draft"} onValueChange={(v) => setEditPage({ ...editPage, status: v })}>
-                <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="published">Published</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Meta Title</Label>
-              <Input
-                value={editPage.meta_title ?? ""}
-                onChange={(e) => setEditPage({ ...editPage, meta_title: e.target.value })}
-                placeholder="SEO title"
-                className="mt-1.5"
-              />
-            </div>
-            <div>
-              <Label>Meta Description</Label>
-              <Textarea
-                value={editPage.meta_description ?? ""}
-                onChange={(e) => setEditPage({ ...editPage, meta_description: e.target.value })}
-                placeholder="SEO description"
-                rows={3}
-                className="mt-1.5"
-              />
-            </div>
-            <div>
-              <Label className="text-sm font-semibold">Page Components</Label>
-              <p className="text-xs text-muted-foreground mb-3">Select sections to display at the bottom of this page.</p>
-              <div className="space-y-3">
-                {([
-                  { key: "work_samples", label: "Display Work Samples" },
-                  { key: "testimonials", label: "Display Testimonials" },
-                  { key: "faqs", label: "Display FAQs" },
-                ] as const).map(({ key, label }) => (
-                  <div key={key} className="flex items-center gap-2">
-                    <Checkbox
-                      checked={!!(editPage.components as any)?.[key]}
-                      onCheckedChange={(v) => setEditPage({
-                        ...editPage,
-                        components: { ...(editPage.components || {}), [key]: !!v },
-                      })}
-                    />
-                    <Label className="text-sm font-normal cursor-pointer">{label}</Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <Button onClick={handleSave} disabled={saving} className="w-full gap-2">
-              {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-              {editPage.id ? "Update Page" : "Create Page"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
