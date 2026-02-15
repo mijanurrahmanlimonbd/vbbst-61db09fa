@@ -4,19 +4,21 @@ import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
 import ProductCard from "@/components/shared/ProductCard";
-import { Star, Shield, Zap, Headphones, MessageCircle, Send, ArrowLeft } from "lucide-react";
+import { Star, Shield, Zap, Headphones, MessageCircle, Send, ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 
 const ProductDetail = () => {
   const { slug } = useParams();
   const [product, setProduct] = useState<any>(null);
   const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeImage, setActiveImage] = useState("");
 
   useEffect(() => {
     const fetch = async () => {
       const { data } = await supabase.from("products").select("*").eq("slug", slug).single();
       setProduct(data);
       if (data) {
+        setActiveImage(data.image_url || "");
         const { data: rel } = await supabase.from("products").select("*").eq("category", data.category).neq("id", data.id).limit(3);
         setRelated(rel || []);
       }
@@ -32,14 +34,44 @@ const ProductDetail = () => {
     ? Math.round(((product.price - product.sale_price) / product.price) * 100)
     : null;
 
+  const allImages = [product.image_url, ...(product.gallery_images || [])].filter(Boolean);
+  const inStock = product.stock_status === "in_stock";
+
+  // JSON-LD Product Schema
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.title,
+    description: product.meta_description || product.description || product.short_description || "",
+    image: allImages,
+    sku: product.sku || undefined,
+    brand: { "@type": "Brand", name: "VBB STORE" },
+    offers: {
+      "@type": "Offer",
+      price: product.sale_price || product.price,
+      priceCurrency: "USD",
+      availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      url: `https://verifiedbmbuy.com/product/${product.slug}`,
+    },
+    aggregateRating: product.rating ? {
+      "@type": "AggregateRating",
+      ratingValue: product.rating,
+      bestRating: 5,
+      ratingCount: 1,
+    } : undefined,
+  };
+
   return (
     <Layout>
       <SEOHead
-        title={product.title}
-        description={product.description || product.short_description || `Buy ${product.title} from VBB STORE. Instant delivery and 7-day guarantee.`}
+        title={product.meta_title || `${product.title} - Buy Online`}
+        description={product.meta_description || product.description || product.short_description || `Buy ${product.title} from VBB STORE. Instant delivery and 7-day guarantee.`}
         ogImage={product.image_url || undefined}
         ogType="product"
       />
+      {/* JSON-LD */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link to="/shop" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary mb-8">
@@ -47,20 +79,42 @@ const ProductDetail = () => {
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div className="aspect-square bg-secondary rounded-xl overflow-hidden border border-border">
-              {product.image_url ? (
-                <img src={product.image_url} alt={product.title} className="w-full h-full object-cover" loading="lazy" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground">{product.category}</div>
+            {/* Image Gallery */}
+            <div>
+              <div className="aspect-square bg-secondary rounded-xl overflow-hidden border border-border">
+                {activeImage ? (
+                  <img src={activeImage} alt={product.title} className="w-full h-full object-cover" loading="lazy" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">{product.category}</div>
+                )}
+              </div>
+              {allImages.length > 1 && (
+                <div className="flex gap-2 mt-3 overflow-x-auto">
+                  {allImages.map((img: string, i: number) => (
+                    <button
+                      key={i}
+                      onClick={() => setActiveImage(img)}
+                      className={`w-16 h-16 rounded-lg overflow-hidden border-2 shrink-0 transition-colors ${activeImage === img ? "border-primary" : "border-border hover:border-primary/50"}`}
+                    >
+                      <img src={img} alt={`${product.title} ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
 
+            {/* Product Details */}
             <div>
               <span className="text-sm font-medium text-primary">{product.category}</span>
-              {product.badge && (
-                <span className="ml-3 text-xs font-bold px-3 py-1 rounded bg-primary text-primary-foreground">{product.badge}</span>
+              {(product.badge || (product.sale_price && "Sale")) && (
+                <span className="ml-3 text-xs font-bold px-3 py-1 rounded bg-primary text-primary-foreground">
+                  {product.badge || "Sale"}
+                </span>
               )}
               <h1 className="text-3xl font-bold text-foreground mt-2">{product.title}</h1>
+              {product.sku && (
+                <p className="text-xs text-muted-foreground mt-1 font-mono">SKU: {product.sku}</p>
+              )}
 
               <div className="flex items-center gap-2 mt-4">
                 <Star className="w-5 h-5 fill-[hsl(45,93%,47%)] text-[hsl(45,93%,47%)]" />
@@ -76,6 +130,20 @@ const ProductDetail = () => {
                   </div>
                 ) : (
                   <span className="text-3xl font-bold text-foreground">${product.price} USD</span>
+                )}
+              </div>
+
+              {/* Stock Status */}
+              <div className="mt-4">
+                {inStock ? (
+                  <span className="inline-flex items-center gap-1.5 text-sm text-[hsl(142,70%,45%)] font-medium">
+                    <CheckCircle className="w-4 h-4" /> In Stock
+                    {product.stock_quantity > 0 && <span className="text-muted-foreground">({product.stock_quantity} available)</span>}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-sm text-destructive font-medium">
+                    <XCircle className="w-4 h-4" /> Out of Stock
+                  </span>
                 )}
               </div>
 
@@ -99,8 +167,8 @@ const ProductDetail = () => {
                 <a href="https://t.me/Verifiedbmbuy" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 rounded-lg bg-[hsl(200,100%,40%)] text-primary-foreground font-medium hover:opacity-90 transition-opacity">
                   <Send className="w-5 h-5" /> Telegram
                 </a>
-                <button className="flex items-center justify-center py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity">
-                  Buy Now
+                <button className="flex items-center justify-center py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity" disabled={!inStock}>
+                  {inStock ? "Contact to Buy" : "Sold Out"}
                 </button>
               </div>
 

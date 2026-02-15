@@ -215,15 +215,21 @@ export type Database = {
           category: string
           created_at: string
           description: string | null
+          gallery_images: string[] | null
           id: string
           image_url: string | null
           is_featured: boolean | null
+          meta_description: string | null
+          meta_title: string | null
           price: number
           rating: number | null
           sale_price: number | null
           short_description: string | null
+          sku: string | null
           slug: string
           sort_order: number | null
+          stock_quantity: number
+          stock_status: string
           title: string
         }
         Insert: {
@@ -231,15 +237,21 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string | null
+          gallery_images?: string[] | null
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
           price: number
           rating?: number | null
           sale_price?: number | null
           short_description?: string | null
+          sku?: string | null
           slug: string
           sort_order?: number | null
+          stock_quantity?: number
+          stock_status?: string
           title: string
         }
         Update: {
@@ -247,15 +259,21 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string | null
+          gallery_images?: string[] | null
           id?: string
           image_url?: string | null
           is_featured?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
           price?: number
           rating?: number | null
           sale_price?: number | null
           short_description?: string | null
+          sku?: string | null
           slug?: string
           sort_order?: number | null
+          stock_quantity?: number
+          stock_status?: string
           title?: string
         }
         Relationships: []
