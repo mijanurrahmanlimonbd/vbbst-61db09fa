@@ -2,7 +2,7 @@ import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
 import JsonLdSchema from "@/components/seo/JsonLdSchema";
 import HeroSection from "@/components/home/HeroSection";
-import StatsBar from "@/components/home/StatsBar";
+
 import FeaturesSection from "@/components/home/FeaturesSection";
 import ProductsSection from "@/components/home/ProductsSection";
 import BenefitsGrid from "@/components/home/BenefitsGrid";

@@ -206,15 +206,15 @@ const Navbar = () => {
         {/* Mobile menu overlay + slide-out */}
         {mobileOpen && (
           <>
-            {/* Backdrop blur overlay — clicking closes menu */}
             <div
               className="fixed inset-0 z-[9998] bg-black/40 backdrop-blur-sm md:hidden"
               onClick={() => setMobileOpen(false)}
+              aria-hidden="true"
             />
-            {/* Menu panel */}
             <div
               data-mobile-menu
-              className="fixed top-16 left-0 right-0 z-[9999] bg-background border-b border-border md:hidden animate-fade-in"
+              className="fixed top-16 left-0 right-0 z-[9999] bg-background border-b border-border md:hidden"
+              style={{ animation: "hero-fade-up 0.2s ease-out" }}
             >
               <div className="px-4 py-4 space-y-3 max-h-[calc(100vh-120px)] overflow-y-auto">
                 {navLinks.map((link) => (
