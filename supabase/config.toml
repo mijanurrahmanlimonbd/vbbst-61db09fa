@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.robots-txt]
 verify_jwt = false
+
+[functions.vbb-chat]
+verify_jwt = false
