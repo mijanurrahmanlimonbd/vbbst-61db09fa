@@ -26,6 +26,7 @@ import {
   Briefcase,
   MessageCircle,
   HelpCircle,
+  ExternalLink,
 } from "lucide-react";
 import {
   Tooltip,
@@ -98,31 +99,42 @@ const AdminLayout = () => {
   };
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full">
-      <div className="h-16 flex items-center px-6 border-b border-border">
+    <div className="flex flex-col h-full bg-[hsl(220,20%,14%)] text-white">
+      <div className="h-16 flex items-center justify-center px-4 border-b border-white/10">
         <Link to="/admin" className="flex items-center gap-2 min-w-0">
           {branding.header_logo ? (
             <img
               src={branding.header_logo}
               alt={branding.site_title || "Admin"}
-              className={sidebarOpen ? "h-9 max-w-[180px] object-contain" : "h-8 w-8 object-contain"}
+              className="max-h-[50px] w-auto object-contain"
             />
           ) : (
-            <>
+            sidebarOpen ? (
+              <span className="text-lg font-bold text-white whitespace-nowrap truncate">
+                {branding.site_title || "VBB Admin"}
+              </span>
+            ) : (
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0">
                 {(branding.site_title || "VS").substring(0, 2).toUpperCase()}
               </div>
-              {sidebarOpen && (
-                <span className="text-base font-bold text-foreground whitespace-nowrap truncate">
-                  {branding.site_title || "VBB Admin"}
-                </span>
-              )}
-            </>
+            )
           )}
         </Link>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      {sidebarOpen && (
+        <a
+          href={window.location.origin}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 mx-3 mt-3 mb-1 px-3 py-2 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+        >
+          <ExternalLink className="w-4 h-4 flex-shrink-0" />
+          <span>View Site</span>
+        </a>
+      )}
+
+      <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
         {navItems.map((item) => {
           const accessible = canAccess(item.section);
           const active = isActive(item.path);
@@ -131,9 +143,7 @@ const AdminLayout = () => {
             return (
               <Tooltip key={item.path}>
                 <TooltipTrigger asChild>
-                  <div
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground/50 cursor-not-allowed"
-                  >
+                  <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/20 cursor-not-allowed">
                     <item.icon className="w-5 h-5 flex-shrink-0" />
                     {sidebarOpen && (
                       <>
@@ -159,7 +169,7 @@ const AdminLayout = () => {
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                 active
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                  : "text-white/70 hover:bg-white/10 hover:text-white"
               )}
             >
               <item.icon className="w-5 h-5 flex-shrink-0" />
@@ -179,20 +189,18 @@ const AdminLayout = () => {
         })}
       </nav>
 
-      <div className="px-3 pb-4 space-y-1">
-        {role && (
-          <div className="px-3 py-2 text-xs text-muted-foreground">
-            {sidebarOpen && (
-              <span className="capitalize">Role: <span className="font-medium text-foreground">{role}</span></span>
-            )}
+      <div className="px-3 pb-4 space-y-1 border-t border-white/10 pt-3">
+        {role && sidebarOpen && (
+          <div className="px-3 py-1.5 text-xs text-white/40">
+            <span className="capitalize">Role: <span className="font-medium text-white/70">{role}</span></span>
           </div>
         )}
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors w-full"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors w-full"
         >
           <LogOut className="w-5 h-5 flex-shrink-0" />
-          {sidebarOpen && <span>Sign Out</span>}
+          {sidebarOpen && <span>Logout</span>}
         </button>
       </div>
     </div>
@@ -207,7 +215,7 @@ const AdminLayout = () => {
       )}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-40 h-screen bg-background border-r border-border transition-all duration-300 hidden md:block",
+          "fixed top-0 left-0 z-40 h-screen bg-[hsl(220,20%,14%)] border-r border-white/10 transition-all duration-300 hidden md:block",
           sidebarOpen ? "w-60" : "w-[68px]"
         )}
       >
@@ -220,7 +228,7 @@ const AdminLayout = () => {
 
       <aside
         className={cn(
-          "fixed top-0 left-0 z-50 h-screen w-60 bg-background border-r border-border transition-transform duration-300 md:hidden",
+          "fixed top-0 left-0 z-50 h-screen w-60 bg-[hsl(220,20%,14%)] border-r border-white/10 transition-transform duration-300 md:hidden",
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
