@@ -5,19 +5,35 @@ import ProductCard from "@/components/shared/ProductCard";
 const categories = ["All", "Verified BM", "WhatsApp API", "Facebook Accounts", "TikTok Ads", "Google Ads", "Reinstated Profiles", "Snapchat Ads"];
 
 const CACHE_KEY = "vbb_products_cache";
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = 5 * 60 * 1000;
 
 const ProductsSection = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [displayCount, setDisplayCount] = useState(6);
   const fetchedRef = useRef(false);
+
+  // Fetch display count setting
+  useEffect(() => {
+    const fetchCount = async () => {
+      const { data } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "homepage_product_count")
+        .single();
+      if (data?.value) {
+        const num = parseInt(data.value, 10);
+        if ([3, 6, 9, 12].includes(num)) setDisplayCount(num);
+      }
+    };
+    fetchCount();
+  }, []);
 
   useEffect(() => {
     if (fetchedRef.current) return;
     fetchedRef.current = true;
 
-    // Stale-while-revalidate: show cached data immediately, revalidate in background
     const cached = localStorage.getItem(CACHE_KEY);
     if (cached) {
       try {
@@ -25,14 +41,11 @@ const ProductsSection = () => {
         if (Date.now() - timestamp < CACHE_TTL) {
           setProducts(data);
           setLoading(false);
-          // Still revalidate in background
         } else {
-          setProducts(data); // show stale
+          setProducts(data);
           setLoading(false);
         }
-      } catch {
-        // corrupt cache, ignore
-      }
+      } catch { /* corrupt cache */ }
     }
 
     const fetchProducts = async () => {
@@ -50,6 +63,7 @@ const ProductsSection = () => {
   }, []);
 
   const filtered = activeCategory === "All" ? products : products.filter((p) => p.category === activeCategory);
+  const displayed = filtered.slice(0, displayCount);
 
   return (
     <section className="py-16 bg-secondary/30">
@@ -79,9 +93,17 @@ const ProductsSection = () => {
         {loading ? (
           <div className="text-center py-12 text-muted-foreground">Loading products...</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10 items-stretch">
-            {filtered.map((product) => (
-              <ProductCard key={product.id} product={product} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+            {displayed.map((product, idx) => (
+              <div key={product.id} className="flex">
+                {idx >= 3 ? (
+                  <div className="w-full" style={{ contentVisibility: "auto" }}>
+                    <ProductCard product={product} />
+                  </div>
+                ) : (
+                  <ProductCard product={product} />
+                )}
+              </div>
             ))}
           </div>
         )}
