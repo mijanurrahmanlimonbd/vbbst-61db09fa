@@ -74,9 +74,17 @@ const Navbar = () => {
   }, [user, navigate]);
 
   const logoElement = branding.header_logo ? (
-    <img src={branding.header_logo} alt={branding.site_title} className="h-8 max-w-[160px] object-contain" />
+    <img
+      src={branding.header_logo}
+      alt={branding.site_title}
+      width={160}
+      height={32}
+      fetchPriority="high"
+      decoding="sync"
+      className="h-8 w-auto max-w-[160px] object-contain"
+    />
   ) : (
-    <div className="flex items-center" style={{ minWidth: 160 }}>
+    <div className="flex items-center" style={{ minWidth: 160, minHeight: 32 }}>
       <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-bold text-sm">VS</div>
       <span className="ml-2 text-lg font-bold text-foreground tracking-tight">VBB <span className="text-primary">STORE</span></span>
     </div>
