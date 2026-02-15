@@ -13,7 +13,7 @@ const stats = [
 const HeroSection = () => {
 
   return (
-    <section className="relative overflow-hidden bg-background py-10 md:py-12">
+    <section className="relative overflow-hidden bg-background pt-10 pb-3 md:pt-12 md:pb-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Main two-column layout */}
         <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:gap-12">
