@@ -41,11 +41,12 @@ import NotificationBell from "@/components/admin/NotificationBell";
 
 const navItems = [
   { title: "Dashboard", path: "/admin", icon: LayoutDashboard, section: "dashboard" },
+  { title: "Messages", path: "/admin/messages", icon: MessageSquare, section: "dashboard" },
   { title: "Posts", path: "/admin/posts", icon: FileText, section: "posts" },
   { title: "Pages", path: "/admin/pages", icon: File, section: "pages" },
   { title: "Products", path: "/admin/products", icon: Package, section: "dashboard" },
   { title: "Orders", path: "/admin/orders", icon: ShoppingCart, section: "dashboard" },
-  { title: "Comments", path: "/admin/comments", icon: MessageSquare, section: "posts", badge: true },
+  { title: "Comments", path: "/admin/comments", icon: MessageCircle, section: "posts", badge: true },
   { title: "Subscribers", path: "/admin/subscribers", icon: Mail, section: "dashboard" },
   { title: "Media", path: "/admin/media", icon: Image, section: "media" },
   { title: "Users", path: "/admin/users", icon: Users, section: "users" },

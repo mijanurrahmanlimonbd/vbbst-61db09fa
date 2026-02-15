@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Bot, X, Send, Loader2, MessageCircle } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Bot, X, Send, Loader2, MessageCircle, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = { role: "user" | "assistant" | "admin"; content: string };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/vbb-chat`;
+const TELEGRAM_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/telegram-notify`;
 
 async function streamChat({
   messages,
@@ -23,7 +25,7 @@ async function streamChat({
       "Content-Type": "application/json",
       Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
     },
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ messages: messages.filter(m => m.role !== 'admin').map(m => ({ role: m.role === 'admin' ? 'assistant' : m.role, content: m.content })) }),
   });
 
   if (!resp.ok) {
@@ -68,6 +70,11 @@ const AIChatWidget = () => {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [visitorName, setVisitorName] = useState("");
+  const [visitorEmail, setVisitorEmail] = useState("");
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [adminTyping, setAdminTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -80,7 +87,7 @@ const AIChatWidget = () => {
   }, []);
 
   useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
-  useEffect(() => { if (open) inputRef.current?.focus(); }, [open]);
+  useEffect(() => { if (open && formSubmitted) inputRef.current?.focus(); }, [open, formSubmitted]);
 
   // Listen for mobile nav trigger
   useEffect(() => {
@@ -89,12 +96,94 @@ const AIChatWidget = () => {
     return () => window.removeEventListener("open-ai-chat", handler);
   }, []);
 
+  // Realtime: listen for admin messages & typing indicator
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const msgChannel = supabase
+      .channel(`chat-messages-${sessionId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "chat_messages", filter: `session_id=eq.${sessionId}` },
+        (payload) => {
+          const newMsg = payload.new as any;
+          if (newMsg.role === "admin") {
+            setMessages((prev) => [...prev, { role: "admin", content: newMsg.content }]);
+          }
+        }
+      )
+      .subscribe();
+
+    const sessionChannel = supabase
+      .channel(`chat-session-typing-${sessionId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "chat_sessions", filter: `id=eq.${sessionId}` },
+        (payload) => {
+          setAdminTyping((payload.new as any).admin_typing || false);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(msgChannel);
+      supabase.removeChannel(sessionChannel);
+    };
+  }, [sessionId]);
+
+  const startSession = async () => {
+    if (!visitorName.trim()) return;
+    const { data, error } = await supabase
+      .from("chat_sessions")
+      .insert({ visitor_name: visitorName.trim(), visitor_email: visitorEmail.trim() || null })
+      .select()
+      .single();
+    if (error || !data) {
+      toast({ variant: "destructive", title: "Error", description: "Could not start session" });
+      return;
+    }
+    setSessionId(data.id);
+    setFormSubmitted(true);
+  };
+
+  const sendTelegramNotification = async (message: string) => {
+    try {
+      await fetch(TELEGRAM_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          visitor_name: visitorName,
+          message,
+          session_id: sessionId,
+        }),
+      });
+    } catch {
+      // Silent fail for telegram
+    }
+  };
+
   const sendMessage = async (text: string) => {
-    if (!text.trim() || loading) return;
+    if (!text.trim() || loading || !sessionId) return;
     setInput("");
     const userMsg: Msg = { role: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
+
+    // Save user message to DB
+    await supabase.from("chat_messages").insert({
+      session_id: sessionId,
+      role: "user",
+      content: text,
+    });
+
+    // Update session timestamp
+    await supabase.from("chat_sessions").update({ updated_at: new Date().toISOString() }).eq("id", sessionId);
+
+    // Send Telegram notification
+    sendTelegramNotification(text);
 
     let assistantSoFar = "";
     const upsert = (chunk: string) => {
@@ -112,7 +201,17 @@ const AIChatWidget = () => {
       await streamChat({
         messages: [...messages, userMsg],
         onDelta: upsert,
-        onDone: () => setLoading(false),
+        onDone: async () => {
+          setLoading(false);
+          // Save assistant response to DB
+          if (assistantSoFar) {
+            await supabase.from("chat_messages").insert({
+              session_id: sessionId,
+              role: "assistant",
+              content: assistantSoFar,
+            });
+          }
+        },
       });
     } catch (e: any) {
       setLoading(false);
@@ -178,70 +277,117 @@ const AIChatWidget = () => {
             </div>
           </div>
 
-          {/* Messages */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
-            {messages.length === 0 && (
-              <div className="text-center py-8 space-y-3">
-                <Bot className="w-10 h-10 mx-auto text-primary/50" />
-               <p className="text-sm text-muted-foreground">Hi! 👋 I'm the VBB Store AI Assistant. Ask me anything about our products, pricing, or how to get started!</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { icon: "🛒", q: "What products do you sell?" },
-                    { icon: "📱", q: "Tell me about WhatsApp API" },
-                    { icon: "📦", q: "How do I order?" },
-                    { icon: "💰", q: "What are the prices?" },
-                  ].map(({ icon, q }) => (
-                    <button
-                      key={q}
-                      onClick={() => sendMessage(q)}
-                      className="flex items-start gap-2 text-left p-2.5 rounded-xl border border-border bg-card hover:bg-accent hover:border-primary/30 transition-all text-xs leading-snug"
-                    >
-                      <span className="text-base shrink-0">{icon}</span>
-                      <span className="text-foreground">{q}</span>
-                    </button>
-                  ))}
-                </div>
+          {/* Pre-chat form or Messages */}
+          {!formSubmitted ? (
+            <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-4">
+              <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                <User className="w-7 h-7 text-primary" />
               </div>
-            )}
-            {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm whitespace-pre-wrap ${
-                    m.role === "user"
-                      ? "bg-primary text-primary-foreground rounded-br-md"
-                      : "bg-muted text-foreground rounded-bl-md"
-                  }`}
-                >
-                  {m.content}
-                </div>
+              <div className="text-center space-y-1">
+                <h3 className="text-sm font-semibold text-foreground">Welcome! 👋</h3>
+                <p className="text-xs text-muted-foreground">Please enter your name to start chatting</p>
               </div>
-            ))}
-            {loading && messages[messages.length - 1]?.role !== "assistant" && (
-              <div className="flex justify-start">
-                <div className="bg-muted px-3 py-2 rounded-2xl rounded-bl-md">
-                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-                </div>
+              <div className="w-full space-y-3">
+                <Input
+                  placeholder="Your Name *"
+                  value={visitorName}
+                  onChange={(e) => setVisitorName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && startSession()}
+                  className="text-sm"
+                />
+                <Input
+                  placeholder="Email (optional)"
+                  type="email"
+                  value={visitorEmail}
+                  onChange={(e) => setVisitorEmail(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && startSession()}
+                  className="text-sm"
+                />
+                <Button onClick={startSession} disabled={!visitorName.trim()} className="w-full">
+                  Start Chat
+                </Button>
               </div>
-            )}
-          </div>
-
-          {/* Input */}
-          <div className="p-3 border-t border-border">
-            <div className="flex gap-2">
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Ask anything..."
-                rows={1}
-                className="flex-1 resize-none rounded-xl border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              />
-              <Button size="icon" onClick={() => sendMessage(input)} disabled={!input.trim() || loading} className="rounded-xl shrink-0">
-                <Send className="w-4 h-4" />
-              </Button>
             </div>
-          </div>
+          ) : (
+            <>
+              {/* Messages */}
+              <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
+                {messages.length === 0 && (
+                  <div className="text-center py-8 space-y-3">
+                    <Bot className="w-10 h-10 mx-auto text-primary/50" />
+                    <p className="text-sm text-muted-foreground">Hi {visitorName}! 👋 I'm the VBB Store AI Assistant. Ask me anything about our products, pricing, or how to get started!</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { icon: "🛒", q: "What products do you sell?" },
+                        { icon: "📱", q: "Tell me about WhatsApp API" },
+                        { icon: "📦", q: "How do I order?" },
+                        { icon: "💰", q: "What are the prices?" },
+                      ].map(({ icon, q }) => (
+                        <button
+                          key={q}
+                          onClick={() => sendMessage(q)}
+                          className="flex items-start gap-2 text-left p-2.5 rounded-xl border border-border bg-card hover:bg-accent hover:border-primary/30 transition-all text-xs leading-snug"
+                        >
+                          <span className="text-base shrink-0">{icon}</span>
+                          <span className="text-foreground">{q}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {messages.map((m, i) => (
+                  <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                    <div
+                      className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm whitespace-pre-wrap ${
+                        m.role === "user"
+                          ? "bg-primary text-primary-foreground rounded-br-md"
+                          : m.role === "admin"
+                          ? "bg-[hsl(210,100%,95%)] text-[hsl(210,50%,20%)] rounded-bl-md border border-[hsl(210,100%,85%)]"
+                          : "bg-muted text-foreground rounded-bl-md"
+                      }`}
+                    >
+                      {m.role === "admin" && (
+                        <span className="text-[10px] font-semibold text-[hsl(210,100%,50%)] block mb-0.5">Admin</span>
+                      )}
+                      {m.content}
+                    </div>
+                  </div>
+                ))}
+                {adminTyping && (
+                  <div className="flex justify-start">
+                    <div className="bg-[hsl(210,100%,95%)] border border-[hsl(210,100%,85%)] px-3 py-2 rounded-2xl rounded-bl-md text-xs text-[hsl(210,50%,40%)] italic">
+                      Admin is typing...
+                    </div>
+                  </div>
+                )}
+                {loading && messages[messages.length - 1]?.role !== "assistant" && (
+                  <div className="flex justify-start">
+                    <div className="bg-muted px-3 py-2 rounded-2xl rounded-bl-md">
+                      <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Input */}
+              <div className="p-3 border-t border-border">
+                <div className="flex gap-2">
+                  <textarea
+                    ref={inputRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Ask anything..."
+                    rows={1}
+                    className="flex-1 resize-none rounded-xl border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  />
+                  <Button size="icon" onClick={() => sendMessage(input)} disabled={!input.trim() || loading} className="rounded-xl shrink-0">
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
     </>
