@@ -37,6 +37,7 @@ import AdminSEO from "./pages/admin/AdminSEO";
 import AdminWorkSamples from "./pages/admin/AdminWorkSamples";
 import AdminTestimonials from "./pages/admin/AdminTestimonials";
 import AdminFAQs from "./pages/admin/AdminFAQs";
+import AdminMessages from "./pages/admin/AdminMessages";
 import Checkout from "./pages/Checkout";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -94,6 +95,7 @@ const App = () => (
               <Route path="work-samples" element={<AdminWorkSamples />} />
               <Route path="testimonials" element={<AdminTestimonials />} />
               <Route path="faqs" element={<AdminFAQs />} />
+              <Route path="messages" element={<AdminMessages />} />
             </Route>
             <Route path="/page/:slug" element={<DynamicPage />} />
             <Route path="*" element={<NotFound />} />
