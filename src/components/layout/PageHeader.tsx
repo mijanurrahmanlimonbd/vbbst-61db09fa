@@ -29,14 +29,13 @@ const PageHeader = ({
 }: PageHeaderProps) => {
   const { settings: globalSettings } = usePageHero();
 
-  // Per-page overrides take priority over global settings
   const image = heroImage ?? globalSettings.image;
   const overlay = heroOverlay ?? globalSettings.overlay;
   const hasImage = !!image;
 
   return (
     <section
-      className="relative min-h-[350px] md:min-h-[450px] flex items-center justify-center text-center"
+      className="relative h-[200px] md:h-[280px] flex items-center justify-center text-center overflow-hidden"
       style={
         hasImage
           ? {
@@ -59,37 +58,37 @@ const PageHeader = ({
         {!hasImage && <div className="absolute inset-0 bg-primary" />}
       </div>
 
-      <div className="relative z-10 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="relative z-10 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
         {/* Breadcrumbs */}
-        <div className="flex items-center justify-center gap-2 text-sm text-primary-foreground/80 mb-6">
+        <div className="flex items-center justify-center gap-1.5 text-xs text-primary-foreground/80 mb-2">
           <Link to="/" className="flex items-center gap-1 hover:text-primary-foreground">
-            <Home className="w-4 h-4" /> Home
+            <Home className="w-3.5 h-3.5" /> Home
           </Link>
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="w-3.5 h-3.5" />
           <span className="font-medium text-primary-foreground">{breadcrumb}</span>
         </div>
 
         {subtitle && (
-          <p className="text-sm font-semibold tracking-widest uppercase text-primary-foreground/80 mb-4">
+          <p className="text-xs font-semibold tracking-widest uppercase text-primary-foreground/80 mb-1.5">
             {subtitle}
           </p>
         )}
 
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground leading-tight">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary-foreground leading-tight">
           {title}
         </h1>
 
         {description && (
-          <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto mt-4">
+          <p className="text-sm text-primary-foreground/80 max-w-xl mx-auto mt-1.5 leading-snug">
             {description}
           </p>
         )}
 
         {showSearch && (
-          <div className="mt-8 max-w-lg mx-auto">
+          <div className="mt-3 max-w-lg mx-auto">
             <div className="relative">
               <svg
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground"
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -101,7 +100,7 @@ const PageHeader = ({
                 placeholder="Search products..."
                 value={searchValue || ""}
                 onChange={(e) => onSearchChange?.(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-lg bg-primary-foreground text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-primary-foreground text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm"
               />
             </div>
           </div>
