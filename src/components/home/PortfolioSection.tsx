@@ -1,0 +1,30 @@
+const projects = [
+  { client: "Digital Marketing Agency, USA", title: "Agency BM Setup – 10 Ad Accounts", desc: "Scaled to $50K/month ad spend with zero bans using our verified BMs." },
+  { client: "Online Retail Store, UK", title: "WhatsApp API Integration – E-commerce", desc: "Automated 10,000+ customer messages daily with our WABA account." },
+  { client: "Social Media Manager, Germany", title: "Reinstated Profile Recovery", desc: "Recovered banned profile within 24 hours, fully operational and verified." },
+  { client: "Performance Marketing Team, UAE", title: "TikTok Ads – Performance Team", desc: "Launched TikTok campaigns across 5 markets with our ready-to-use ad accounts." },
+  { client: "Account Reseller, India", title: "Bulk BM Order – Reseller", desc: "Supplied 50+ verified BMs with 100% delivery rate and zero issues." },
+  { client: "Dropshipping Business, Canada", title: "Facebook Ads Account – Unlimited", desc: "Launched campaigns immediately with unlimited spending ads account." },
+];
+
+const PortfolioSection = () => (
+  <section className="py-16 bg-background">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <p className="text-sm font-semibold tracking-widest uppercase text-primary text-center">Portfolio</p>
+      <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mt-2">VBB STORE'S Work Sample</h2>
+      <p className="text-muted-foreground text-center mt-4">Real results from real clients. Here's a glimpse of the work we've done for advertisers worldwide.</p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+        {projects.map((p, i) => (
+          <div key={i} className="bg-card border border-border rounded-xl p-6 hover:shadow-md transition-shadow">
+            <p className="text-xs text-primary font-medium">{p.client}</p>
+            <h3 className="font-bold text-foreground mt-2">{p.title}</h3>
+            <p className="text-sm text-muted-foreground mt-2">{p.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+export default PortfolioSection;
