@@ -29,10 +29,11 @@ interface StoreSettings {
   address: string;
   tax_id: string;
   site_url: string;
+  invoice_logo: string;
 }
 
 const fetchStoreSettings = async (): Promise<StoreSettings> => {
-  const keys = ["site_title", "contact_email", "whatsapp", "store_address", "tax_id", "site_url"];
+  const keys = ["site_title", "contact_email", "whatsapp", "store_address", "tax_id", "site_url", "invoice_logo"];
   const { data } = await supabase
     .from("site_settings")
     .select("key, value")
@@ -48,6 +49,7 @@ const fetchStoreSettings = async (): Promise<StoreSettings> => {
     address: map.store_address || "Madergonj, Pirgonj, Rangpur, Bangladesh - 5470",
     tax_id: map.tax_id || "",
     site_url: map.site_url || getSiteUrl(),
+    invoice_logo: map.invoice_logo || "",
   };
 };
 

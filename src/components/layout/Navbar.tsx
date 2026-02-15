@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ShoppingCart, User, Menu, X, Search } from "lucide-react";
+import { useBranding } from "@/hooks/useBranding";
 
 const navLinks = [
   { label: "HOME", path: "/" },
@@ -16,6 +17,7 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
+  const { branding } = useBranding();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,15 +28,21 @@ const Navbar = () => {
     }
   };
 
+  const logoElement = branding.header_logo ? (
+    <img src={branding.header_logo} alt={branding.site_title} className="h-8 max-w-[160px] object-contain" />
+  ) : (
+    <div className="flex items-center">
+      <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-bold text-sm">VS</div>
+      <span className="ml-2 text-lg font-bold text-foreground tracking-tight">VBB <span className="text-primary">STORE</span></span>
+    </div>
+  );
+
   return (
     <nav className="sticky top-0 z-50 bg-background border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-bold text-sm">VS</div>
-              <span className="ml-2 text-lg font-bold text-foreground tracking-tight">VBB <span className="text-primary">STORE</span></span>
-            </div>
+            {logoElement}
           </Link>
 
           <div className="hidden md:flex items-center gap-8">

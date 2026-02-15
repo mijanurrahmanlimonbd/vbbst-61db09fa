@@ -17,6 +17,7 @@ import { Loader2, Eye, EyeOff, Plus, Edit, Trash2, Upload, X } from "lucide-reac
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import TrackingPixelsTab from "@/components/admin/TrackingPixelsTab";
+import BrandingSection from "@/components/admin/BrandingSection";
 
 interface FieldErrors { [key: string]: boolean; }
 
@@ -218,6 +219,7 @@ const AdminSettings = () => {
       <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setErrors({}); }}>
         <TabsList className="bg-secondary/50 flex-wrap">
           <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="branding">Branding</TabsTrigger>
           <TabsTrigger value="payment">Payment</TabsTrigger>
           <TabsTrigger value="methods">Payment Methods</TabsTrigger>
           <TabsTrigger value="tracking">Tracking & Pixels</TabsTrigger>
@@ -249,6 +251,13 @@ const AdminSettings = () => {
             <Button onClick={() => handleSave("general")} disabled={saving} className="gap-2">
               {saving && <Loader2 className="w-4 h-4 animate-spin" />} Save Changes
             </Button>
+          </div>
+        </TabsContent>
+
+        {/* Branding */}
+        <TabsContent value="branding">
+          <div className="bg-background rounded-xl border border-border p-6 mt-4">
+            <BrandingSection />
           </div>
         </TabsContent>
 
