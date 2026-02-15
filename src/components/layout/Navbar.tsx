@@ -76,7 +76,7 @@ const Navbar = () => {
   const logoElement = branding.header_logo ? (
     <img src={branding.header_logo} alt={branding.site_title} className="h-8 max-w-[160px] object-contain" />
   ) : (
-    <div className="flex items-center">
+    <div className="flex items-center" style={{ minWidth: 160 }}>
       <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-bold text-sm">VS</div>
       <span className="ml-2 text-lg font-bold text-foreground tracking-tight">VBB <span className="text-primary">STORE</span></span>
     </div>
@@ -90,7 +90,7 @@ const Navbar = () => {
       <nav className="sticky top-0 z-50 bg-background border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2 min-w-[160px]">
               {logoElement}
             </Link>
 
@@ -108,7 +108,7 @@ const Navbar = () => {
               ))}
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 min-w-[120px] justify-end">
               <button
                 onClick={(e) => { e.stopPropagation(); setSearchOpen(!searchOpen); }}
                 className="text-foreground hover:text-primary transition-colors"
