@@ -82,12 +82,12 @@ const HeroSection = () => {
               style={{ animationDelay: "0.45s" }}
             >
               <a href="https://wa.me/8801302669333" target="_blank" rel="noopener noreferrer" className="flex-1 min-w-[120px]">
-                <Button size="lg" className="w-full h-12 rounded-[9px] px-6 font-bold bg-[hsl(142,50%,30%)] hover:bg-[hsl(142,50%,25%)] text-white transition-all">
+                <Button size="lg" className="w-full h-12 rounded-[9px] px-6 font-bold bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-white transition-all">
                   <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
                 </Button>
               </a>
               <a href="https://t.me/Verifiedbmbuy" target="_blank" rel="noopener noreferrer" className="flex-1 min-w-[120px]">
-                <Button size="lg" className="w-full h-12 rounded-[9px] px-6 font-bold bg-[hsl(200,70%,30%)] hover:bg-[hsl(200,70%,25%)] text-white transition-all">
+                <Button size="lg" className="w-full h-12 rounded-[9px] px-6 font-bold bg-[hsl(200,100%,40%)] hover:bg-[hsl(200,100%,35%)] text-white transition-all">
                   <Send className="mr-2 h-4 w-4" /> Telegram
                 </Button>
               </a>

@@ -229,7 +229,7 @@ const ProductDetail = () => {
               <div className="flex flex-col gap-3 mt-6">
                 <button
                   onClick={() => inStock && navigate("/checkout", { state: { items: [{ id: product.id, title: product.title, price: product.price, sale_price: product.sale_price, quantity: 1, image_url: product.image_url }] } })}
-                  className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-primary text-primary-foreground text-lg font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 shadow-lg shadow-primary/20"
+                  className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-[hsl(25,95%,55%)] text-white text-lg font-bold hover:bg-[hsl(25,95%,48%)] transition-colors disabled:opacity-50 shadow-lg shadow-[hsl(25,95%,55%)]/20"
                   disabled={!inStock}
                 >
                   {inStock ? `Buy Now — $${finalPrice.toFixed(2)}` : "Sold Out"} {inStock && <ArrowRight className="w-5 h-5" />}
