@@ -162,25 +162,7 @@ All colors MUST be HSL.
   will-change: transform;
 }
 
-/* Stable nav links — grid layout + pseudo-element reserves bold-width space */
-.nav-link-stable {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-.nav-link-stable::after {
-  content: attr(data-text);
-  height: 0;
-  display: block;
-  visibility: hidden;
-  overflow: hidden;
-  user-select: none;
-  pointer-events: none;
-  font-weight: 700;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-}
+/* Neon button wrapper */
 
 /* Neon button wrapper */
 .neon-btn-wrap {
