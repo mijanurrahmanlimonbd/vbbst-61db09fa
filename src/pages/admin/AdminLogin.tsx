@@ -1,0 +1,77 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Loader2, Lock } from "lucide-react";
+import { toast } from "sonner";
+
+const AdminLogin = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !password.trim()) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
+    setLoading(true);
+    const { error } = await signIn(email, password);
+    setLoading(false);
+    if (error) {
+      toast.error(error);
+    } else {
+      toast.success("Welcome back!");
+      navigate("/admin");
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[hsl(210,20%,96%)] flex items-center justify-center p-4">
+      <div className="w-full max-w-sm">
+        <div className="bg-background rounded-2xl border border-border shadow-lg p-8 space-y-6">
+          <div className="text-center">
+            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-primary-foreground font-bold text-lg mx-auto mb-4">
+              VS
+            </div>
+            <h1 className="text-xl font-bold text-foreground">Admin Login</h1>
+            <p className="text-sm text-muted-foreground mt-1">Sign in to your VBB Store admin panel</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Email</label>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@vbbstore.com"
+                autoComplete="email"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Password</label>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                autoComplete="current-password"
+              />
+            </div>
+            <Button type="submit" className="w-full gap-2" disabled={loading}>
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+              Sign In
+            </Button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AdminLogin;
