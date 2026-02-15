@@ -3,8 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
 import JsonLdSchema from "@/components/seo/JsonLdSchema";
+import PageHeader from "@/components/layout/PageHeader";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Home, ChevronRight, Search, Calendar, Printer, HelpCircle, MessageCircle, Send, ShoppingCart, Shield, CreditCard, Headphones } from "lucide-react";
+import { Search, Calendar, Printer, HelpCircle, MessageCircle, Send, ShoppingCart, Shield, CreditCard, Headphones } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -60,40 +61,37 @@ const FAQ = () => {
         breadcrumbs={[{ name: "Home", url: "/" }, { name: "FAQ", url: "/faq" }]}
       />
 
-      {/* Header */}
-      <section className="bg-primary text-primary-foreground py-12 md:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 text-sm text-primary-foreground/80 mb-4">
-            <Link to="/" className="flex items-center gap-1 hover:text-primary-foreground"><Home className="w-4 h-4" /> Home</Link>
-            <ChevronRight className="w-4 h-4" />
-            <span className="font-medium">FAQ</span>
-          </div>
-          <p className="text-xs font-semibold tracking-widest uppercase text-primary-foreground/70 mb-2">HELP CENTER</p>
-          <h1 className="text-3xl md:text-5xl font-bold">Frequently Asked Questions</h1>
-          <p className="text-primary-foreground/80 mt-3 max-w-2xl">Find quick answers to common questions about our products, payments, and support.</p>
-          <div className="flex items-center gap-4 mt-6">
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-primary-foreground/15 backdrop-blur-sm px-3 py-1.5 rounded-full">
-              <Calendar className="w-3.5 h-3.5" /> Last Updated: February 15, 2026
-            </span>
-            <button
-              onClick={() => window.print()}
-              className="inline-flex items-center gap-1.5 text-xs font-medium bg-primary-foreground/15 backdrop-blur-sm px-3 py-1.5 rounded-full hover:bg-primary-foreground/25 transition-colors print:hidden"
-            >
-              <Printer className="w-3.5 h-3.5" /> Print / Save PDF
-            </button>
-          </div>
+      <PageHeader
+        breadcrumb="FAQ"
+        title="Frequently Asked Questions"
+        subtitle="HELP CENTER"
+        description="Find quick answers to common questions about our products, payments, and support."
+      />
 
-          {/* Search */}
-          <div className="mt-8 max-w-lg">
-            <div className="relative">
+      {/* Search & Meta bar */}
+      <section className="border-b border-border py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="relative flex-1 max-w-lg">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search questions..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-lg bg-primary-foreground text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full pl-12 pr-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               />
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-secondary px-3 py-1.5 rounded-full">
+                <Calendar className="w-3.5 h-3.5" /> Last Updated: February 15, 2026
+              </span>
+              <button
+                onClick={() => window.print()}
+                className="inline-flex items-center gap-1.5 text-xs font-medium bg-secondary px-3 py-1.5 rounded-full hover:bg-accent transition-colors print:hidden"
+              >
+                <Printer className="w-3.5 h-3.5" /> Print / Save PDF
+              </button>
             </div>
           </div>
         </div>
