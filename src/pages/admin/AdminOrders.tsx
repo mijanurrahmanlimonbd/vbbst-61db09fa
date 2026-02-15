@@ -14,8 +14,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Search, Eye, CheckCircle, XCircle, Package, Image as ImageIcon } from "lucide-react";
+import { Search, Eye, CheckCircle, XCircle, Package, Image as ImageIcon, Download } from "lucide-react";
 import { format } from "date-fns";
+import { generateInvoicePDF } from "@/lib/invoiceGenerator";
 
 interface Order {
   id: string;
@@ -61,6 +62,7 @@ const AdminOrders = () => {
   const [proofUrl, setProofUrl] = useState("");
   const [adminNotes, setAdminNotes] = useState("");
   const [saving, setSaving] = useState(false);
+  const [downloading, setDownloading] = useState<string | null>(null);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -172,6 +174,18 @@ const AdminOrders = () => {
     setSaving(false);
   };
 
+  const handleDownloadInvoice = async (order: Order) => {
+    setDownloading(order.id);
+    try {
+      const { data: items } = await supabase.from("order_items").select("product_title, unit_price, quantity").eq("order_id", order.id);
+      await generateInvoicePDF(order, items || []);
+    } catch (e: any) {
+      toast.error("Failed to generate invoice: " + e.message);
+    } finally {
+      setDownloading(null);
+    }
+  };
+
   const saveNotes = async () => {
     if (!selectedOrder) return;
     const { error } = await supabase
@@ -256,9 +270,22 @@ const AdminOrders = () => {
                   <TableCell>{getStatusBadge(order.status)}</TableCell>
                   <TableCell className="hidden md:table-cell text-sm text-muted-foreground capitalize">{order.payment_method}</TableCell>
                   <TableCell>
-                    <Button variant="ghost" size="sm" onClick={() => openOrder(order)}>
-                      <Eye className="w-4 h-4" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => openOrder(order)}>
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      {(order.status === "completed") && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={downloading === order.id}
+                          onClick={() => handleDownloadInvoice(order)}
+                          title="Download Invoice"
+                        >
+                          <Download className={`w-4 h-4 ${downloading === order.id ? "animate-pulse" : ""}`} />
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -335,6 +362,17 @@ const AdminOrders = () => {
 
               {/* Status Pipeline Actions */}
               <div className="flex flex-wrap gap-3 pt-4 border-t border-border">
+                {(selectedOrder.status === "completed") && (
+                  <Button
+                    variant="outline"
+                    onClick={() => handleDownloadInvoice(selectedOrder)}
+                    disabled={downloading === selectedOrder.id}
+                    className="gap-2"
+                  >
+                    <Download className={`w-4 h-4 ${downloading === selectedOrder.id ? "animate-pulse" : ""}`} />
+                    Download Invoice
+                  </Button>
+                )}
                 {(selectedOrder.status === "created" || selectedOrder.status === "processing") && (
                   <Button onClick={approvePayment} disabled={saving} className="gap-2 bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-white">
                     <CheckCircle className="w-4 h-4" /> Mark Completed
