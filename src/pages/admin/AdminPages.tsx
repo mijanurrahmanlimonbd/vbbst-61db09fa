@@ -115,7 +115,7 @@ const AdminPages = () => {
                   </button>
                   <button
                     onClick={() => {
-                      const knownRoutes: Record<string, string> = { home: "/", about: "/about", contact: "/contact", shop: "/shop" };
+                      const knownRoutes: Record<string, string> = { home: "/", about: "/about", contact: "/contact", shop: "/shop", "terms-of-service": "/terms", "privacy-policy": "/privacy", "refund-policy": "/refund-policy", "replacement-guarantee": "/replacement-guarantee", faq: "/faq", blog: "/blog" };
                       const basePath = knownRoutes[page.slug] || `/page/${page.slug}`;
                       navigate(`${basePath}?edit=true`);
                     }}
