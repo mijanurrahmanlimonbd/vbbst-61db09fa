@@ -109,9 +109,9 @@ const Footer = () => {
                 <Send className="w-4 h-4 text-[hsl(200,100%,40%)]" />
                 @Verifiedbmbuy
               </a>
-              <a href="mailto:info@verifiedbmbuy.com" className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
+              <a href="mailto:info@verifiedbmservices.com" className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
                 <Mail className="w-4 h-4 text-primary" />
-                info@verifiedbmbuy.com
+                info@verifiedbmservices.com
               </a>
               <div className="inline-flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-full mt-1">
                 <Clock className="w-3.5 h-3.5" />
