@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Check, X, Trash2, MessageSquare, Search } from "lucide-react";
+import { Check, X, Trash2, MessageSquare, Search, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
 interface Comment {
@@ -24,6 +25,7 @@ interface Comment {
   content: string;
   status: string;
   created_at: string;
+  parent_id: string | null;
   blog_posts?: { title: string } | null;
 }
 
@@ -49,7 +51,10 @@ const AdminComments = () => {
   const updateStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("comments").update({ status }).eq("id", id);
     if (error) toast.error("Failed to update.");
-    else toast.success(status === "approved" ? "Comment approved." : "Comment rejected.");
+    else {
+      const labels: Record<string, string> = { approved: "Comment approved.", rejected: "Comment rejected.", spam: "Moved to spam." };
+      toast.success(labels[status] || "Status updated.");
+    }
     fetchComments();
   };
 
@@ -66,8 +71,17 @@ const AdminComments = () => {
     .filter((c) => c.author_name.toLowerCase().includes(search.toLowerCase()) || c.content.toLowerCase().includes(search.toLowerCase()))
     .filter((c) => statusFilter === "all" || c.status === statusFilter);
 
+  const counts = {
+    all: comments.length,
+    pending: comments.filter((c) => c.status === "pending").length,
+    approved: comments.filter((c) => c.status === "approved").length,
+    spam: comments.filter((c) => c.status === "spam").length,
+    rejected: comments.filter((c) => c.status === "rejected").length,
+  };
+
   const statusColor = (s: string) => {
     if (s === "approved") return "default";
+    if (s === "spam") return "outline";
     if (s === "rejected") return "destructive";
     return "secondary";
   };
@@ -76,20 +90,19 @@ const AdminComments = () => {
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-foreground">Comments</h2>
 
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search comments…" className="pl-9" />
-        </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-36"><SelectValue placeholder="All" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
-          </SelectContent>
-        </Select>
+      <Tabs value={statusFilter} onValueChange={setStatusFilter}>
+        <TabsList>
+          <TabsTrigger value="all">All ({counts.all})</TabsTrigger>
+          <TabsTrigger value="pending">Pending ({counts.pending})</TabsTrigger>
+          <TabsTrigger value="approved">Approved ({counts.approved})</TabsTrigger>
+          <TabsTrigger value="spam">Spam ({counts.spam})</TabsTrigger>
+          <TabsTrigger value="rejected">Rejected ({counts.rejected})</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search comments…" className="pl-9" />
       </div>
 
       <div className="bg-background rounded-xl border border-border overflow-hidden">
@@ -109,7 +122,7 @@ const AdminComments = () => {
                 <TableHead className="hidden md:table-cell">Comment</TableHead>
                 <TableHead className="hidden sm:table-cell">Post</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="w-32"></TableHead>
+                <TableHead className="w-36"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -119,6 +132,7 @@ const AdminComments = () => {
                     <div>
                       <span className="font-medium text-foreground block">{c.author_name}</span>
                       <span className="text-xs text-muted-foreground">{c.author_email}</span>
+                      {c.parent_id && <span className="text-xs text-primary ml-1">(reply)</span>}
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-sm text-muted-foreground max-w-xs truncate">{c.content}</TableCell>
@@ -135,9 +149,9 @@ const AdminComments = () => {
                           <Check className="w-4 h-4" />
                         </button>
                       )}
-                      {c.status !== "rejected" && (
-                        <button onClick={() => updateStatus(c.id, "rejected")} className="p-1.5 rounded text-muted-foreground hover:text-[hsl(45,93%,47%)] hover:bg-[hsl(45,93%,47%)]/10 transition-colors" title="Reject">
-                          <X className="w-4 h-4" />
+                      {c.status !== "spam" && (
+                        <button onClick={() => updateStatus(c.id, "spam")} className="p-1.5 rounded text-muted-foreground hover:text-[hsl(45,93%,47%)] hover:bg-[hsl(45,93%,47%)]/10 transition-colors" title="Spam">
+                          <AlertTriangle className="w-4 h-4" />
                         </button>
                       )}
                       <button onClick={() => setDeleteId(c.id)} className="p-1.5 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" title="Delete">

@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, Link, useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard,
   FileText,
@@ -31,7 +32,7 @@ const navItems = [
   { title: "Posts", path: "/admin/posts", icon: FileText, section: "posts" },
   { title: "Pages", path: "/admin/pages", icon: File, section: "pages" },
   { title: "Products", path: "/admin/products", icon: Package, section: "dashboard" },
-  { title: "Comments", path: "/admin/comments", icon: MessageSquare, section: "posts" },
+  { title: "Comments", path: "/admin/comments", icon: MessageSquare, section: "posts", badge: true },
   { title: "Subscribers", path: "/admin/subscribers", icon: Mail, section: "dashboard" },
   { title: "Media", path: "/admin/media", icon: Image, section: "media" },
   { title: "Users", path: "/admin/users", icon: Users, section: "users" },
@@ -43,7 +44,21 @@ const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
   const location = useLocation();
+
+  useEffect(() => {
+    const fetchPending = async () => {
+      const { count } = await supabase
+        .from("comments")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending");
+      setPendingCount(count || 0);
+    };
+    fetchPending();
+    const interval = setInterval(fetchPending, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   if (loading) {
     return (
@@ -125,7 +140,17 @@ const AdminLayout = () => {
               )}
             >
               <item.icon className="w-5 h-5 flex-shrink-0" />
-              {sidebarOpen && <span>{item.title}</span>}
+              {sidebarOpen && (
+                <span className="flex-1">{item.title}</span>
+              )}
+              {(item as any).badge && pendingCount > 0 && (
+                <span className={cn(
+                  "min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold flex items-center justify-center",
+                  active ? "bg-primary-foreground text-primary" : "bg-destructive text-destructive-foreground"
+                )}>
+                  {pendingCount > 99 ? "99+" : pendingCount}
+                </span>
+              )}
             </Link>
           );
         })}
