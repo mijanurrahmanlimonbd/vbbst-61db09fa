@@ -20,7 +20,7 @@ import TrackingPixelsTab from "@/components/admin/TrackingPixelsTab";
 import BrandingSection from "@/components/admin/BrandingSection";
 import ActivityLogsTab from "@/components/admin/ActivityLogsTab";
 import MaintenanceTab from "@/components/admin/MaintenanceTab";
-import PageHeroTab from "@/components/admin/PageHeroTab";
+
 
 interface FieldErrors { [key: string]: boolean; }
 
@@ -223,7 +223,7 @@ const AdminSettings = () => {
         <TabsList className="bg-secondary/50 flex-wrap">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="branding">Branding</TabsTrigger>
-          <TabsTrigger value="hero">Page Hero</TabsTrigger>
+          
           <TabsTrigger value="payment">Payment</TabsTrigger>
           <TabsTrigger value="methods">Payment Methods</TabsTrigger>
           <TabsTrigger value="tracking">Tracking & Pixels</TabsTrigger>
@@ -233,12 +233,8 @@ const AdminSettings = () => {
           <TabsTrigger value="profile">Profile</TabsTrigger>
         </TabsList>
 
-        {/* Page Hero */}
-        <TabsContent value="hero">
-          <div className="bg-background rounded-xl border border-border p-6 mt-4">
-            <PageHeroTab />
-          </div>
-        </TabsContent>
+
+
 
         {/* General */}
         <TabsContent value="general">
