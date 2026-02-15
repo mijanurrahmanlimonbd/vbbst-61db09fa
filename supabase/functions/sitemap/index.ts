@@ -2,83 +2,114 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
   "Content-Type": "application/xml; charset=utf-8",
+  "Cache-Control": "public, max-age=3600, s-maxage=3600",
 };
 
-Deno.serve(async () => {
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, supabaseKey);
   const siteUrl = "https://vbbstore.com";
+  const today = new Date().toISOString().split("T")[0];
 
-  // Load sitemap settings from site_settings
+  // Load sitemap settings
   const { data: settings } = await supabase
     .from("site_settings")
     .select("key, value")
     .like("key", "sitemap_%");
 
-  const settingsMap: Record<string, string> = {};
-  if (settings) {
-    for (const s of settings) settingsMap[s.key] = s.value;
-  }
+  const s: Record<string, string> = {};
+  if (settings) for (const r of settings) s[r.key] = r.value;
 
-  const defaultPriority = settingsMap["sitemap_default_priority"] || "0.6";
-  const defaultChangefreq = settingsMap["sitemap_default_changefreq"] || "weekly";
+  const defaultPriority = s["sitemap_default_priority"] || "0.6";
+  const defaultChangefreq = s["sitemap_default_changefreq"] || "weekly";
 
+  // Fetch published posts, products, and pages in parallel
+  const [postsRes, productsRes, pagesRes] = await Promise.all([
+    supabase
+      .from("blog_posts")
+      .select("slug, published_at")
+      .eq("status", "published")
+      .order("published_at", { ascending: false }),
+    supabase
+      .from("products")
+      .select("slug, created_at")
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("pages")
+      .select("slug, updated_at")
+      .eq("status", "published")
+      .order("updated_at", { ascending: false }),
+  ]);
+
+  const posts = postsRes.data || [];
+  const products = productsRes.data || [];
+  const pages = pagesRes.data || [];
+
+  // Static pages
   const staticPages = [
-    { loc: "/", priority: settingsMap["sitemap_priority_home"] || "1.0", changefreq: "daily" },
-    { loc: "/shop", priority: settingsMap["sitemap_priority_shop"] || "0.9", changefreq: "daily" },
-    { loc: "/blog", priority: settingsMap["sitemap_priority_blog"] || "0.8", changefreq: "daily" },
-    { loc: "/contact", priority: settingsMap["sitemap_priority_contact"] || "0.7", changefreq: "monthly" },
-    { loc: "/about", priority: settingsMap["sitemap_priority_about"] || "0.7", changefreq: "monthly" },
+    { loc: "/", priority: s["sitemap_priority_home"] || "1.0", changefreq: "daily", lastmod: today },
+    { loc: "/shop", priority: s["sitemap_priority_shop"] || "0.9", changefreq: "daily", lastmod: today },
+    { loc: "/blog", priority: s["sitemap_priority_blog"] || "0.8", changefreq: "daily", lastmod: today },
+    { loc: "/contact", priority: s["sitemap_priority_contact"] || "0.7", changefreq: "monthly", lastmod: today },
+    { loc: "/about", priority: s["sitemap_priority_about"] || "0.7", changefreq: "monthly", lastmod: today },
   ];
-
-  const { data: posts } = await supabase
-    .from("blog_posts")
-    .select("slug, published_at")
-    .eq("status", "published")
-    .order("published_at", { ascending: false });
-
-  const { data: products } = await supabase
-    .from("products")
-    .select("slug, created_at")
-    .order("created_at", { ascending: false });
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
 
+  // Static pages
   for (const page of staticPages) {
     xml += `
   <url>
     <loc>${siteUrl}${page.loc}</loc>
+    <lastmod>${page.lastmod}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
   </url>`;
   }
 
-  if (posts) {
-    for (const post of posts) {
-      xml += `
+  // Published blog posts (drafts excluded by query)
+  for (const post of posts) {
+    xml += `
   <url>
     <loc>${siteUrl}/blog/${post.slug}</loc>
     <lastmod>${new Date(post.published_at).toISOString().split("T")[0]}</lastmod>
     <changefreq>${defaultChangefreq}</changefreq>
     <priority>${defaultPriority}</priority>
   </url>`;
-    }
   }
 
-  if (products) {
-    const productPriority = settingsMap["sitemap_product_priority"] || "0.7";
-    for (const product of products) {
-      xml += `
+  // Products
+  const productPriority = s["sitemap_product_priority"] || "0.7";
+  for (const product of products) {
+    xml += `
   <url>
     <loc>${siteUrl}/product/${product.slug}</loc>
     <lastmod>${new Date(product.created_at).toISOString().split("T")[0]}</lastmod>
     <changefreq>${defaultChangefreq}</changefreq>
     <priority>${productPriority}</priority>
   </url>`;
-    }
+  }
+
+  // Published pages (drafts excluded by query)
+  for (const page of pages) {
+    // Skip pages that duplicate static routes
+    const skipSlugs = ["home", "about", "contact", "shop", "blog"];
+    if (skipSlugs.includes(page.slug)) continue;
+    xml += `
+  <url>
+    <loc>${siteUrl}/${page.slug}</loc>
+    <lastmod>${new Date(page.updated_at).toISOString().split("T")[0]}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>`;
   }
 
   xml += `
