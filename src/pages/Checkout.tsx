@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Upload, CheckCircle, Copy, QrCode, AlertCircle } from "lucide-react";
+import { ArrowLeft, Loader2, Upload, CheckCircle, Copy, AlertCircle } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 
 interface CartItem {
   id: string;
@@ -346,7 +347,9 @@ const Checkout = () => {
                     </Button>
                   </div>
                   <div className="text-center py-4">
-                    <QrCode className="w-24 h-24 text-muted-foreground mx-auto" />
+                    <div className="inline-block p-3 bg-white rounded-xl">
+                      <QRCodeSVG value={binancePayId} size={160} level="H" />
+                    </div>
                     <p className="text-xs text-muted-foreground mt-2">Scan with Binance app</p>
                   </div>
                   <div className="text-center">
