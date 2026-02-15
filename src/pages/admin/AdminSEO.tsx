@@ -12,7 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import {
   Search, Globe, Image as ImageIcon, BarChart3, Zap, FileWarning,
   Code2, Loader2, Save, CheckCircle, XCircle, Info,
-  Facebook, Twitter, Link2, Eye,
+  Facebook, Twitter, Link2, Eye, Bot, RefreshCw, ExternalLink,
+  MapPin, Languages,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -231,8 +232,10 @@ const AdminSEO = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-secondary/50">
+        <TabsList className="bg-secondary/50 flex-wrap">
           <TabsTrigger value="modules">Modules</TabsTrigger>
+          <TabsTrigger value="crawler">Crawler & Indexing</TabsTrigger>
+          <TabsTrigger value="international">International SEO</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="titles">Titles & Meta</TabsTrigger>
           <TabsTrigger value="social">Social Meta</TabsTrigger>
@@ -245,6 +248,16 @@ const AdminSEO = () => {
           <div className="mt-4">
             <SEOAnalyticsDashboard />
           </div>
+        </TabsContent>
+
+        {/* ────────── CRAWLER & INDEXING TAB ────────── */}
+        <TabsContent value="crawler">
+          <CrawlerIndexingPanel saveSetting={saveSetting} />
+        </TabsContent>
+
+        {/* ────────── INTERNATIONAL SEO TAB ────────── */}
+        <TabsContent value="international">
+          <InternationalSEOPanel />
         </TabsContent>
 
         {/* ────────── MODULES TAB ────────── */}
@@ -503,6 +516,356 @@ const AdminSEO = () => {
           </div>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+};
+
+// ─── Region options for International SEO ───────────────────────────────────
+const REGION_OPTIONS = [
+  { code: "US", label: "United States" },
+  { code: "GB", label: "United Kingdom" },
+  { code: "CA", label: "Canada" },
+  { code: "AU", label: "Australia" },
+  { code: "DE", label: "Germany" },
+  { code: "FR", label: "France" },
+  { code: "IN", label: "India" },
+  { code: "BD", label: "Bangladesh" },
+  { code: "AE", label: "UAE" },
+  { code: "SG", label: "Singapore" },
+  { code: "MY", label: "Malaysia" },
+  { code: "PH", label: "Philippines" },
+  { code: "PK", label: "Pakistan" },
+  { code: "NG", label: "Nigeria" },
+  { code: "KE", label: "Kenya" },
+];
+
+// ─── International SEO Panel ────────────────────────────────────────────────
+const InternationalSEOPanel = () => {
+  const [targetLang, setTargetLang] = useState("en");
+  const [geoRegion, setGeoRegion] = useState("");
+  const [geoPlacename, setGeoPlacename] = useState("");
+  const [targetRegions, setTargetRegions] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "international_seo")
+        .maybeSingle();
+      if (data?.value) {
+        try {
+          const parsed = JSON.parse(data.value);
+          setTargetLang(parsed.targetLang || "en");
+          setGeoRegion(parsed.geoRegion || "");
+          setGeoPlacename(parsed.geoPlacename || "");
+          setTargetRegions(parsed.targetRegions || []);
+        } catch {}
+      }
+      setLoaded(true);
+    };
+    load();
+  }, []);
+
+  const toggleRegion = (code: string) => {
+    setTargetRegions((prev) =>
+      prev.includes(code) ? prev.filter((r) => r !== code) : [...prev, code]
+    );
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    const value = JSON.stringify({ targetLang, geoRegion, geoPlacename, targetRegions });
+    const { data: existing } = await supabase
+      .from("site_settings")
+      .select("key")
+      .eq("key", "international_seo")
+      .maybeSingle();
+    if (existing) {
+      await supabase.from("site_settings").update({ value, updated_at: new Date().toISOString() }).eq("key", "international_seo");
+    } else {
+      await supabase.from("site_settings").insert({ key: "international_seo", value });
+    }
+    toast.success("International SEO settings saved!");
+    setSaving(false);
+  };
+
+  if (!loaded) return null;
+
+  return (
+    <div className="mt-4 space-y-6">
+      {/* Hreflang Configuration */}
+      <div className="bg-background rounded-xl border border-border p-6 space-y-5">
+        <div>
+          <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
+            <Languages className="w-5 h-5 text-primary" /> Hreflang & Language Settings
+          </h3>
+          <p className="text-xs text-muted-foreground mt-1">
+            Hreflang tags tell search engines which language and region your content targets. Since your site is in English targeting the world, the default is <code className="bg-secondary px-1 py-0.5 rounded">en</code> with <code className="bg-secondary px-1 py-0.5 rounded">x-default</code>.
+          </p>
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium mb-1.5 block">Primary Language</Label>
+          <Input value={targetLang} onChange={(e) => setTargetLang(e.target.value)} placeholder="en" className="max-w-[200px]" />
+          <p className="text-[11px] text-muted-foreground mt-1">ISO 639-1 language code (e.g., en, fr, de, bn)</p>
+        </div>
+
+        <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg border border-primary/15">
+          <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+          <div className="text-[11px] text-muted-foreground">
+            <p className="font-medium text-foreground mb-1">Auto-injected on every page:</p>
+            <code className="bg-secondary px-2 py-1 rounded text-[10px] block">{`<link rel="alternate" hreflang="${targetLang}" href="..." />`}</code>
+            <code className="bg-secondary px-2 py-1 rounded text-[10px] block mt-1">{`<link rel="alternate" hreflang="x-default" href="..." />`}</code>
+          </div>
+        </div>
+      </div>
+
+      {/* Target Regions */}
+      <div className="bg-background rounded-xl border border-border p-6 space-y-5">
+        <div>
+          <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-[hsl(142,70%,45%)]" /> Target Regions
+          </h3>
+          <p className="text-xs text-muted-foreground mt-1">
+            Select the countries you want to prioritize. This generates <code className="bg-secondary px-1 py-0.5 rounded">geo.region</code> meta tags for search engines.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {REGION_OPTIONS.map((region) => {
+            const active = targetRegions.includes(region.code);
+            return (
+              <button
+                key={region.code}
+                onClick={() => toggleRegion(region.code)}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors",
+                  active
+                    ? "bg-primary/10 border-primary/30 text-primary"
+                    : "bg-secondary/30 border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
+                )}
+              >
+                {region.label} ({region.code})
+              </button>
+            );
+          })}
+        </div>
+
+        {targetRegions.length > 0 && (
+          <div className="text-[11px] text-muted-foreground p-3 bg-secondary/30 rounded-lg border border-border">
+            <p className="font-medium text-foreground mb-1">Generated meta tags:</p>
+            {targetRegions.map((r) => (
+              <code key={r} className="block bg-secondary px-2 py-0.5 rounded mt-0.5 text-[10px]">{`<meta name="geo.region" content="${r}" />`}</code>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Geo Placename */}
+      <div className="bg-background rounded-xl border border-border p-6 space-y-5">
+        <div>
+          <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
+            <Globe className="w-5 h-5 text-[hsl(262,83%,58%)]" /> Geo Location Meta
+          </h3>
+          <p className="text-xs text-muted-foreground mt-1">
+            Optional: Set your primary business geo location for local SEO signals.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label className="text-sm font-medium mb-1.5 block">Geo Region Code</Label>
+            <Input value={geoRegion} onChange={(e) => setGeoRegion(e.target.value)} placeholder="e.g., US-CA or BD-E" />
+            <p className="text-[11px] text-muted-foreground mt-1">ISO 3166-1/2 region code</p>
+          </div>
+          <div>
+            <Label className="text-sm font-medium mb-1.5 block">Geo Placename</Label>
+            <Input value={geoPlacename} onChange={(e) => setGeoPlacename(e.target.value)} placeholder="e.g., Rangpur, Bangladesh" />
+            <p className="text-[11px] text-muted-foreground mt-1">Human-readable location name</p>
+          </div>
+        </div>
+      </div>
+
+      <Button onClick={handleSave} disabled={saving} className="gap-2">
+        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+        Save International SEO Settings
+      </Button>
+    </div>
+  );
+};
+
+// ─── Crawler & Indexing Panel ───────────────────────────────────────────────
+const DEFAULT_ROBOTS = `# =============================================
+# robots.txt — VBB STORE
+# =============================================
+
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+Disallow: /checkout
+Disallow: /admin/login
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin/
+Disallow: /checkout
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /checkout
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://vbbstore.com/sitemap.xml`;
+
+const CrawlerIndexingPanel = ({ saveSetting }: { saveSetting: (key: string, value: string) => Promise<void> }) => {
+  const [robotsTxt, setRobotsTxt] = useState(DEFAULT_ROBOTS);
+  const [savingRobots, setSavingRobots] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+  const [pinging, setPinging] = useState(false);
+  const [sitemapStats, setSitemapStats] = useState<{ pages: number; products: number; posts: number } | null>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "robots_txt")
+        .single();
+      if (data?.value) setRobotsTxt(data.value);
+
+      const [pagesRes, productsRes, postsRes] = await Promise.all([
+        supabase.from("pages").select("id", { count: "exact", head: true }).eq("status", "published"),
+        supabase.from("products").select("id", { count: "exact", head: true }),
+        supabase.from("blog_posts").select("id", { count: "exact", head: true }).eq("status", "published"),
+      ]);
+      setSitemapStats({
+        pages: (pagesRes.count || 0) + 10,
+        products: productsRes.count || 0,
+        posts: postsRes.count || 0,
+      });
+      setLoadingStats(false);
+    };
+    load();
+  }, []);
+
+  const handleSaveRobots = async () => {
+    setSavingRobots(true);
+    await saveSetting("robots_txt", robotsTxt);
+    toast.success("robots.txt saved!");
+    setSavingRobots(false);
+  };
+
+  const handleRegenerate = async () => {
+    setRegenerating(true);
+    try {
+      await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sitemap`);
+      toast.success("Sitemap regenerated!");
+    } catch {
+      toast.error("Failed to regenerate sitemap.");
+    }
+    setRegenerating(false);
+  };
+
+  const handlePingGoogle = async () => {
+    setPinging(true);
+    try {
+      await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sitemap?ping=true`);
+      toast.success("Google pinged with updated sitemap!");
+    } catch {
+      toast.error("Failed to ping Google.");
+    }
+    setPinging(false);
+  };
+
+  const totalUrls = sitemapStats ? sitemapStats.pages + sitemapStats.products + sitemapStats.posts : 0;
+
+  return (
+    <div className="mt-4 space-y-6">
+      {/* Sitemap Section */}
+      <div className="bg-background rounded-xl border border-border p-6 space-y-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
+              <Globe className="w-5 h-5 text-primary" /> Automatic Sitemap Generator
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1">Dynamically generated from your database with hreflang support for international SEO.</p>
+          </div>
+          <Badge variant="outline" className="text-xs gap-1">
+            <CheckCircle className="w-3 h-3 text-[hsl(142,70%,45%)]" /> Active
+          </Badge>
+        </div>
+
+        {loadingStats ? (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="w-4 h-4 animate-spin" /> Loading stats...
+          </div>
+        ) : sitemapStats && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: "Total URLs", value: totalUrls, color: "text-primary" },
+              { label: "Static Pages", value: sitemapStats.pages, color: "text-[hsl(262,83%,58%)]" },
+              { label: "Products", value: sitemapStats.products, color: "text-[hsl(142,70%,45%)]" },
+              { label: "Blog Posts", value: sitemapStats.posts, color: "text-[hsl(45,93%,47%)]" },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-secondary/30 rounded-lg p-3 border border-border text-center">
+                <p className={cn("text-lg font-bold", stat.color)}>{stat.value}</p>
+                <p className="text-[11px] text-muted-foreground">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="flex flex-wrap gap-3">
+          <Button onClick={handleRegenerate} disabled={regenerating} variant="outline" className="gap-2">
+            {regenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+            Regenerate Sitemap
+          </Button>
+          <Button onClick={handlePingGoogle} disabled={pinging} variant="outline" className="gap-2">
+            {pinging ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
+            Ping Google
+          </Button>
+          <a href={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sitemap`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-primary hover:underline self-center">
+            <Eye className="w-4 h-4" /> View Live Sitemap
+          </a>
+        </div>
+      </div>
+
+      {/* Robots.txt Section */}
+      <div className="bg-background rounded-xl border border-border p-6 space-y-5">
+        <div>
+          <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
+            <Bot className="w-5 h-5 text-[hsl(262,83%,58%)]" /> Robots.txt Manager
+          </h3>
+          <p className="text-xs text-muted-foreground mt-1">Control which parts of your site search engine crawlers can access.</p>
+        </div>
+
+        <Textarea value={robotsTxt} onChange={(e) => setRobotsTxt(e.target.value)} rows={18} className="font-mono text-sm leading-relaxed" />
+
+        <div className="flex gap-3">
+          <Button onClick={handleSaveRobots} disabled={savingRobots} className="gap-2">
+            {savingRobots ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            Save robots.txt
+          </Button>
+          <Button variant="outline" onClick={() => setRobotsTxt(DEFAULT_ROBOTS)} className="gap-2">
+            <RefreshCw className="w-4 h-4" /> Reset to Default
+          </Button>
+          <a href={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/robots-txt`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-primary hover:underline self-center">
+            <Eye className="w-4 h-4" /> View Live
+          </a>
+        </div>
+      </div>
     </div>
   );
 };
