@@ -79,6 +79,7 @@ const Navbar = () => {
       alt={branding.site_title}
       width={160}
       height={32}
+      loading="eager"
       fetchPriority="high"
       decoding="sync"
       className="h-8 w-auto max-w-[160px] object-contain"

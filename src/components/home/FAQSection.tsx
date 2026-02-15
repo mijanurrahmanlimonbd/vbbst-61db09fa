@@ -30,14 +30,14 @@ const FAQSection = () => (
       <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mt-2">Got Questions? We've Got Answers.</h2>
       <p className="text-muted-foreground text-center mt-4">Here's everything people usually ask before buying.</p>
 
-      <div className="max-w-6xl mx-auto mt-8 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+      <div className="max-w-6xl mx-auto mt-8 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-0.5">
         {faqs.map((faq, i) => (
           <Accordion key={i} type="single" collapsible>
             <AccordionItem value={`faq-${i}`} className="bg-card border border-border rounded-lg px-4">
-              <AccordionTrigger className="text-left font-semibold text-foreground py-2.5 text-sm">
-                <span className="line-clamp-1 md:line-clamp-1">{faq.q}</span>
+              <AccordionTrigger className="text-left font-semibold text-foreground py-2 text-sm">
+                <span className="truncate block">{faq.q}</span>
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground text-sm pb-2.5">{faq.a}</AccordionContent>
+              <AccordionContent className="text-muted-foreground text-sm pb-2">{faq.a}</AccordionContent>
             </AccordionItem>
           </Accordion>
         ))}
