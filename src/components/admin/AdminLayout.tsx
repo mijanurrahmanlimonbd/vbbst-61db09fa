@@ -19,6 +19,7 @@ import {
   Package,
   MessageSquare,
   Mail,
+  ShoppingCart,
 } from "lucide-react";
 import {
   Tooltip,
@@ -32,6 +33,7 @@ const navItems = [
   { title: "Posts", path: "/admin/posts", icon: FileText, section: "posts" },
   { title: "Pages", path: "/admin/pages", icon: File, section: "pages" },
   { title: "Products", path: "/admin/products", icon: Package, section: "dashboard" },
+  { title: "Orders", path: "/admin/orders", icon: ShoppingCart, section: "dashboard" },
   { title: "Comments", path: "/admin/comments", icon: MessageSquare, section: "posts", badge: true },
   { title: "Subscribers", path: "/admin/subscribers", icon: Mail, section: "dashboard" },
   { title: "Media", path: "/admin/media", icon: Image, section: "media" },

@@ -1,1 +1,7 @@
 project_id = "xukkejkvcgixogvbllmf"
+
+[functions.cryptomus-webhook]
+verify_jwt = false
+
+[functions.timeout-orders]
+verify_jwt = false

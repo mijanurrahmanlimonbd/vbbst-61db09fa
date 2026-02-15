@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
@@ -8,6 +8,7 @@ import { Star, Shield, Zap, Headphones, MessageCircle, Send, ArrowLeft, CheckCir
 
 const ProductDetail = () => {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<any>(null);
   const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -160,15 +161,22 @@ const ProductDetail = () => {
                 <span className="flex items-center gap-1"><Headphones className="w-4 h-4 text-primary" /> 24/7 Support</span>
               </div>
 
-              <div className="grid grid-cols-3 gap-3 mt-8">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8">
                 <a href="https://wa.me/8801302669333" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 rounded-lg bg-[hsl(142,70%,45%)] text-primary-foreground font-medium hover:opacity-90 transition-opacity">
                   <MessageCircle className="w-5 h-5" /> WhatsApp
                 </a>
                 <a href="https://t.me/Verifiedbmbuy" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 rounded-lg bg-[hsl(200,100%,40%)] text-primary-foreground font-medium hover:opacity-90 transition-opacity">
                   <Send className="w-5 h-5" /> Telegram
                 </a>
-                <button className="flex items-center justify-center py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity" disabled={!inStock}>
-                  {inStock ? "Contact to Buy" : "Sold Out"}
+                <button
+                  onClick={() => inStock && navigate("/checkout", { state: { items: [{ id: product.id, title: product.title, price: product.price, sale_price: product.sale_price, quantity: 1, image_url: product.image_url }] } })}
+                  className="flex items-center justify-center py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+                  disabled={!inStock}
+                >
+                  {inStock ? "Buy Now" : "Sold Out"}
+                </button>
+                <button className="flex items-center justify-center py-3 rounded-lg border border-border text-foreground font-medium hover:bg-accent transition-colors" disabled={!inStock}>
+                  Contact to Buy
                 </button>
               </div>
 

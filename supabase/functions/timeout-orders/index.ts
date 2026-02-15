@@ -1,0 +1,43 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+};
+
+// This function should be called periodically (e.g. via cron or manual trigger)
+// to time out manual orders that haven't uploaded proof within 30 minutes.
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+
+    const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+
+    // Find pending_verification orders with no proof uploaded, older than 30 min
+    const { data: timedOut, error } = await supabase
+      .from("orders")
+      .update({ status: "timed_out" })
+      .eq("payment_method", "binance")
+      .in("status", ["pending", "pending_verification"])
+      .is("proof_image_url", null)
+      .lt("created_at", thirtyMinAgo)
+      .select("id");
+
+    console.log(`Timed out ${timedOut?.length || 0} orders`, error);
+
+    return new Response(
+      JSON.stringify({ timed_out: timedOut?.length || 0 }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  } catch (err) {
+    console.error("Timeout error:", err);
+    return new Response("Error", { status: 500 });
+  }
+});
