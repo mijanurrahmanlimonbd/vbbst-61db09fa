@@ -161,7 +161,7 @@ const AIChatWidget = () => {
                 href="https://wa.me/8801302669333"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-primary-foreground/15 hover:bg-primary-foreground/25 transition-colors text-primary-foreground text-xs font-medium"
+                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] transition-colors text-white text-xs font-medium"
               >
                 <MessageCircle className="w-3.5 h-3.5" />
                 WhatsApp
@@ -170,7 +170,7 @@ const AIChatWidget = () => {
                 href="https://t.me/Verifiedbmbuy"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-primary-foreground/15 hover:bg-primary-foreground/25 transition-colors text-primary-foreground text-xs font-medium"
+                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-[hsl(200,100%,45%)] hover:bg-[hsl(200,100%,40%)] transition-colors text-white text-xs font-medium"
               >
                 <Send className="w-3.5 h-3.5" />
                 Telegram
