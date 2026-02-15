@@ -9,6 +9,15 @@ const HeroSection = () => {
   return (
     <section className="py-16 md:py-24 bg-background overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Badge centered above hero */}
+        <div className="flex justify-center md:justify-start md:pl-[calc(18rem+3rem)] mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-secondary text-sm text-foreground">
+            <span className="text-[hsl(45,93%,47%)]">★</span>
+            Best Verified Business Manager 2026
+            <span className="w-2 h-2 rounded-full bg-[hsl(142,70%,45%)]"></span>
+          </div>
+        </div>
+
         <div className="flex flex-col md:flex-row items-center gap-12">
           {/* Animated Logo */}
           <motion.div
@@ -22,7 +31,6 @@ const HeroSection = () => {
               animate={{ y: [0, -8, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             >
-              {/* Pulsing glow */}
               <motion.div
                 className="absolute inset-0 rounded-2xl"
                 animate={{ opacity: [0.15, 0.35, 0.15] }}
@@ -49,18 +57,13 @@ const HeroSection = () => {
             </motion.div>
           </motion.div>
 
-          {/* Content – slides in from right */}
+          {/* Content */}
           <motion.div
             className="flex-1 text-center md:text-left"
             initial={{ x: 40, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-secondary text-sm text-foreground mb-6">
-              <span className="text-[hsl(45,93%,47%)]">★</span>
-              Best Verified Business Manager 2026
-              <span className="w-2 h-2 rounded-full bg-[hsl(142,70%,45%)]"></span>
-            </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
               Buy Verified BM<br />And WhatsApp Business API
