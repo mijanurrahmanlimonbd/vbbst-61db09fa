@@ -74,48 +74,57 @@ Deno.serve(async (req) => {
   ];
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">`;
+
+  const hreflang = (url: string) => `
+    <xhtml:link rel="alternate" hreflang="en" href="${url}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${url}" />`;
 
   for (const page of staticPages) {
+    const fullUrl = `${siteUrl}${page.loc}`;
     xml += `
   <url>
-    <loc>${siteUrl}${page.loc}</loc>
+    <loc>${fullUrl}</loc>
     <lastmod>${page.lastmod}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
-    <priority>${page.priority}</priority>
+    <priority>${page.priority}</priority>${hreflang(fullUrl)}
   </url>`;
   }
 
   for (const post of posts) {
+    const postUrl = `${siteUrl}/blog/${post.slug}`;
     xml += `
   <url>
-    <loc>${siteUrl}/blog/${post.slug}</loc>
+    <loc>${postUrl}</loc>
     <lastmod>${new Date(post.published_at).toISOString().split("T")[0]}</lastmod>
     <changefreq>${defaultChangefreq}</changefreq>
-    <priority>${defaultPriority}</priority>
+    <priority>${defaultPriority}</priority>${hreflang(postUrl)}
   </url>`;
   }
 
   const productPriority = s["sitemap_product_priority"] || "0.7";
   for (const product of products) {
+    const prodUrl = `${siteUrl}/product/${product.slug}`;
     xml += `
   <url>
-    <loc>${siteUrl}/product/${product.slug}</loc>
+    <loc>${prodUrl}</loc>
     <lastmod>${new Date(product.created_at).toISOString().split("T")[0]}</lastmod>
     <changefreq>${defaultChangefreq}</changefreq>
-    <priority>${productPriority}</priority>
+    <priority>${productPriority}</priority>${hreflang(prodUrl)}
   </url>`;
   }
 
   const skipSlugs = ["home", "about", "contact", "shop", "blog"];
   for (const page of pages) {
     if (skipSlugs.includes(page.slug)) continue;
+    const pageUrl = `${siteUrl}/${page.slug}`;
     xml += `
   <url>
-    <loc>${siteUrl}/${page.slug}</loc>
+    <loc>${pageUrl}</loc>
     <lastmod>${new Date(page.updated_at).toISOString().split("T")[0]}</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.5</priority>${hreflang(pageUrl)}
   </url>`;
   }
 
