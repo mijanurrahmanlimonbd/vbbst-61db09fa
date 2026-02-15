@@ -894,10 +894,23 @@ const SchemaConfigPanel = () => {
   const { config, loading } = useSchemaConfig();
   const [localConfig, setLocalConfig] = useState<SchemaConfig>(config);
   const [saving, setSaving] = useState(false);
+  const [customJsonLd, setCustomJsonLd] = useState("");
 
   useEffect(() => {
     setLocalConfig(config);
   }, [config]);
+
+  useEffect(() => {
+    const loadCustom = async () => {
+      const { data } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "custom_json_ld")
+        .single();
+      if (data?.value) setCustomJsonLd(data.value);
+    };
+    loadCustom();
+  }, []);
 
   const handleToggle = (key: keyof SchemaConfig) => {
     setLocalConfig((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -906,6 +919,17 @@ const SchemaConfigPanel = () => {
   const handleSave = async () => {
     setSaving(true);
     await saveSchemaConfig(localConfig);
+    // Save custom JSON-LD
+    const { data: existing } = await supabase
+      .from("site_settings")
+      .select("key")
+      .eq("key", "custom_json_ld")
+      .single();
+    if (existing) {
+      await supabase.from("site_settings").update({ value: customJsonLd, updated_at: new Date().toISOString() }).eq("key", "custom_json_ld");
+    } else if (customJsonLd.trim()) {
+      await supabase.from("site_settings").insert({ key: "custom_json_ld", value: customJsonLd });
+    }
     toast.success("Schema configuration saved!");
     setSaving(false);
   };
@@ -944,6 +968,27 @@ const SchemaConfigPanel = () => {
           ))}
         </div>
       ))}
+
+      {/* Custom JSON-LD Script */}
+      <div className="space-y-2">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Custom Script</p>
+        <div className="p-3 rounded-lg bg-secondary/30 border border-border space-y-2">
+          <div>
+            <p className="text-sm font-medium text-foreground">Custom JSON-LD</p>
+            <p className="text-[11px] text-muted-foreground">Paste a custom JSON-LD script to inject into all pages. Must be valid JSON.</p>
+          </div>
+          <Textarea
+            value={customJsonLd}
+            onChange={(e) => setCustomJsonLd(e.target.value)}
+            placeholder='{"@context":"https://schema.org","@type":"Organization",...}'
+            className="font-mono text-xs min-h-[120px]"
+          />
+          {customJsonLd.trim() && (() => {
+            try { JSON.parse(customJsonLd); return <p className="text-[11px] text-primary flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Valid JSON</p>; }
+            catch { return <p className="text-[11px] text-destructive flex items-center gap-1"><XCircle className="w-3 h-3" /> Invalid JSON</p>; }
+          })()}
+        </div>
+      </div>
 
       <Button onClick={handleSave} disabled={saving} className="gap-2">
         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}

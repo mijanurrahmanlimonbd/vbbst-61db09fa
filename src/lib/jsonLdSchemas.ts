@@ -29,7 +29,7 @@ export interface SchemaConfig {
 
 export const DEFAULT_SCHEMA_CONFIG: SchemaConfig = {
   organization: true,
-  localBusiness: false,
+  localBusiness: true,
   website: true,
   webPage: true,
   breadcrumbList: true,
@@ -135,7 +135,7 @@ export function generateLocalBusiness(branding: BrandingData, biz: BusinessInfo 
       opens: h.split(" ")[1]?.split("-")[0] || "00:00",
       closes: h.split(" ")[1]?.split("-")[1] || "23:59",
     })),
-    priceRange: "$",
+    priceRange: "$$",
   };
 }
 
