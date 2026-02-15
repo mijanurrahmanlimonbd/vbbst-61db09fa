@@ -52,7 +52,7 @@ const ProductCard = ({ product }: { product: Product }) => {
             {displayBadge}
           </span>
         )}
-        <div className="aspect-[4/3] bg-secondary overflow-hidden">
+        <div className="aspect-square bg-secondary overflow-hidden">
           {product.image_url ? (
             <img src={product.image_url} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" width={400} height={300} decoding="async" />
           ) : (
