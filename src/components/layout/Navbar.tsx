@@ -109,6 +109,9 @@ const Navbar = () => {
                       <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                     </div>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                      My Dashboard
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/admin")}>
                       Admin Panel
                     </DropdownMenuItem>

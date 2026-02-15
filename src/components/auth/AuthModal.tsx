@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useBranding } from "@/hooks/useBranding";
@@ -13,6 +14,7 @@ interface AuthModalProps {
 }
 
 const AuthModal = ({ open, onClose }: AuthModalProps) => {
+  const navigate = useNavigate();
   const [tab, setTab] = useState<"login" | "register">("login");
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
@@ -64,6 +66,7 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
       toast.success("Welcome back!");
       resetFields();
       onClose();
+      navigate("/dashboard");
     }
   };
 
