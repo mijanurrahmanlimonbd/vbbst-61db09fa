@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSchemaConfig, saveSchemaConfig } from "@/hooks/useSchemaConfig";
+import type { SchemaConfig } from "@/lib/jsonLdSchemas";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -84,6 +86,7 @@ const SETTING_KEYS = {
   schemaArticle: "seo_schema_article",
   schemaProduct: "seo_schema_product",
   schemaLocalBiz: "seo_schema_local_business",
+  schemaConfig: "schema_config",
   imageAutoAlt: "seo_image_auto_alt",
   imageAutoTitle: "seo_image_auto_title",
 };
@@ -293,27 +296,7 @@ const AdminSEO = () => {
 
             {/* Schema sub-settings when active */}
             {activeModules.includes("schema") && (
-              <div className="bg-background rounded-xl border border-border p-5 space-y-4">
-                <div className="flex items-center gap-2">
-                  <Code2 className="w-4 h-4 text-[hsl(262,83%,58%)]" />
-                  <h3 className="text-sm font-semibold text-foreground">Schema Types</h3>
-                </div>
-                <div className="space-y-3">
-                  {[
-                    { label: "Article Schema", desc: "Add JSON-LD Article markup to blog posts.", checked: schemaArticle, set: setSchemaArticle },
-                    { label: "Product Schema", desc: "Add JSON-LD Product markup to product pages.", checked: schemaProduct, set: setSchemaProduct },
-                    { label: "Local Business Schema", desc: "Add JSON-LD LocalBusiness markup site-wide.", checked: schemaLocalBiz, set: setSchemaLocalBiz },
-                  ].map((item) => (
-                    <div key={item.label} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 border border-border">
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{item.label}</p>
-                        <p className="text-[11px] text-muted-foreground">{item.desc}</p>
-                      </div>
-                      <Switch checked={item.checked} onCheckedChange={item.set} />
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <SchemaConfigPanel />
             )}
 
             {/* Image SEO sub-settings */}
@@ -520,6 +503,89 @@ const AdminSEO = () => {
           </div>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+};
+
+/** Comprehensive Schema Config Panel — all 28 types grouped */
+const SCHEMA_TYPES: { key: keyof SchemaConfig; label: string; desc: string; group: string }[] = [
+  // Core Identity
+  { key: "organization", label: "Organization + Logo", desc: "Brand identity, contact points, and social links.", group: "Core Identity" },
+  { key: "localBusiness", label: "LocalBusiness + Geo", desc: "Physical address, opening hours, and geo coordinates.", group: "Core Identity" },
+  // Site Structure
+  { key: "website", label: "WebSite + SearchAction", desc: "Sitelinks searchbox and site-wide search integration.", group: "Site Structure" },
+  { key: "webPage", label: "WebPage", desc: "Page-level metadata with ImageObject support.", group: "Site Structure" },
+  { key: "breadcrumbList", label: "BreadcrumbList", desc: "Navigation path with ListItem and EntryPoint.", group: "Site Structure" },
+  // E-commerce
+  { key: "product", label: "Product + Offer", desc: "Product pricing, availability, SKU, and brand.", group: "E-commerce" },
+  // Content
+  { key: "article", label: "Article + Author", desc: "Blog post schema with publisher and dates.", group: "Content" },
+  { key: "faqPage", label: "FAQPage + Q&A", desc: "Auto-detect FAQ sections and wrap in Question/Answer.", group: "Content" },
+  // Events
+  { key: "event", label: "Event + Place + Organizer", desc: "Optional: for workshops, webinars, or events.", group: "Events" },
+  // Actions
+  { key: "readAction", label: "ReadAction + PropertyValue", desc: "Map CTA buttons to help AI agents understand intent.", group: "Technical Actions" },
+];
+
+const SchemaConfigPanel = () => {
+  const { config, loading } = useSchemaConfig();
+  const [localConfig, setLocalConfig] = useState<SchemaConfig>(config);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setLocalConfig(config);
+  }, [config]);
+
+  const handleToggle = (key: keyof SchemaConfig) => {
+    setLocalConfig((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    await saveSchemaConfig(localConfig);
+    toast.success("Schema configuration saved!");
+    setSaving(false);
+  };
+
+  if (loading) return null;
+
+  const groups = SCHEMA_TYPES.reduce((acc, t) => {
+    if (!acc[t.group]) acc[t.group] = [];
+    acc[t.group].push(t);
+    return acc;
+  }, {} as Record<string, typeof SCHEMA_TYPES>);
+
+  return (
+    <div className="bg-background rounded-xl border border-border p-5 space-y-5">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Code2 className="w-4 h-4 text-[hsl(262,83%,58%)]" />
+          <h3 className="text-sm font-semibold text-foreground">JSON-LD Schema Types (28 Types)</h3>
+        </div>
+        <Badge variant="outline" className="text-[10px]">
+          {Object.values(localConfig).filter(Boolean).length} Active
+        </Badge>
+      </div>
+
+      {Object.entries(groups).map(([group, types]) => (
+        <div key={group} className="space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{group}</p>
+          {types.map((t) => (
+            <div key={t.key} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 border border-border">
+              <div>
+                <p className="text-sm font-medium text-foreground">{t.label}</p>
+                <p className="text-[11px] text-muted-foreground">{t.desc}</p>
+              </div>
+              <Switch checked={localConfig[t.key]} onCheckedChange={() => handleToggle(t.key)} />
+            </div>
+          ))}
+        </div>
+      ))}
+
+      <Button onClick={handleSave} disabled={saving} className="gap-2">
+        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+        Save Schema Config
+      </Button>
     </div>
   );
 };
