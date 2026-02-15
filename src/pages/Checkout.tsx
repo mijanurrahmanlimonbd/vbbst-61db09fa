@@ -67,13 +67,9 @@ const Checkout = () => {
         .order("sort_order", { ascending: true });
       setPaymentMethods((data || []) as PaymentMethod[]);
 
-      // Load Binance Pay ID from settings
-      const { data: setting } = await supabase
-        .from("site_settings")
-        .select("value")
-        .eq("key", "binance_pay_id")
-        .maybeSingle();
-      if (setting?.value) setBinancePayId(setting.value);
+      // Load Binance Pay ID using get_setting function (bypasses RLS for public access)
+      const { data: setting } = await supabase.rpc("get_setting", { setting_key: "binance_pay_id" });
+      if (setting) setBinancePayId(setting);
 
       setMethodsLoading(false);
     };
