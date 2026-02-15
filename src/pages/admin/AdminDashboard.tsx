@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { FileText, Mail, MessageSquare, Image, Clock, ArrowRight, Save } from "lucide-react";
+import SEOHealthWidget from "@/components/admin/SEOHealthWidget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -249,6 +250,8 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
+      {/* SEO Health Report */}
+      <SEOHealthWidget />
     </div>
   );
 };
