@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Outlet, Link, useLocation, Navigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBranding } from "@/hooks/useBranding";
 import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard,
@@ -51,6 +53,7 @@ const navItems = [
 
 const AdminLayout = () => {
   const { user, profile, role, loading, signOut, canAccess } = useAuth();
+  const { branding } = useBranding();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -97,14 +100,24 @@ const AdminLayout = () => {
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       <div className="h-16 flex items-center px-6 border-b border-border">
-        <Link to="/admin" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-sm">
-            VS
-          </div>
-          {sidebarOpen && (
-            <span className="text-base font-bold text-foreground whitespace-nowrap">
-              VBB Admin
-            </span>
+        <Link to="/admin" className="flex items-center gap-2 min-w-0">
+          {branding.header_logo ? (
+            <img
+              src={branding.header_logo}
+              alt={branding.site_title || "Admin"}
+              className={sidebarOpen ? "h-9 max-w-[180px] object-contain" : "h-8 w-8 object-contain"}
+            />
+          ) : (
+            <>
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0">
+                {(branding.site_title || "VS").substring(0, 2).toUpperCase()}
+              </div>
+              {sidebarOpen && (
+                <span className="text-base font-bold text-foreground whitespace-nowrap truncate">
+                  {branding.site_title || "VBB Admin"}
+                </span>
+              )}
+            </>
           )}
         </Link>
       </div>
@@ -187,6 +200,11 @@ const AdminLayout = () => {
 
   return (
     <div className="min-h-screen bg-[hsl(210,20%,96%)]">
+      {branding.favicon && (
+        <Helmet>
+          <link rel="icon" href={branding.favicon} type="image/png" />
+        </Helmet>
+      )}
       <aside
         className={cn(
           "fixed top-0 left-0 z-40 h-screen bg-background border-r border-border transition-all duration-300 hidden md:block",
