@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Edit, Trash2, FileText } from "lucide-react";
+import { Plus, Edit, Trash2, FileText, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
@@ -75,8 +75,16 @@ const AdminPages = () => {
                   <button
                     onClick={() => navigate(`/admin/pages/${page.id}/edit`)}
                     className="p-2 rounded text-primary text-xs font-medium hover:bg-primary/10 transition-colors"
+                    title="Edit in Admin"
                   >
                     <Edit className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => window.open(`/${page.slug}?edit=true`, "_blank")}
+                    className="p-2 rounded text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                    title="Visual Edit (opens page)"
+                  >
+                    <ExternalLink className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => deletePage(page.id, page.title)}

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { EditModeProvider } from "@/contexts/EditModeContext";
 import Index from "./pages/Index";
 import Shop from "./pages/Shop";
 import Blog from "./pages/Blog";
@@ -44,6 +45,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <EditModeProvider>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/shop" element={<Shop />} />
@@ -77,6 +79,7 @@ const App = () => (
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </EditModeProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
