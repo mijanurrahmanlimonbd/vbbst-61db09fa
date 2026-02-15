@@ -3,6 +3,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import WhatsAppButton from "./WhatsAppButton";
 import NewsletterPopup from "@/components/newsletter/NewsletterPopup";
+import TrackingScripts from "@/components/tracking/TrackingScripts";
 
 const Layout = ({ children }: { children: ReactNode }) => {
   return (
@@ -12,6 +13,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       <Footer />
       <WhatsAppButton />
       <NewsletterPopup />
+      <TrackingScripts />
     </div>
   );
 };
