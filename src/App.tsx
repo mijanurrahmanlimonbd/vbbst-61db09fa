@@ -15,6 +15,7 @@ import About from "./pages/About";
 import ProductDetail from "./pages/ProductDetail";
 import Search from "./pages/Search";
 import NotFound from "./pages/NotFound";
+import DynamicPage from "./pages/DynamicPage";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminPosts from "./pages/admin/AdminPosts";
@@ -77,6 +78,7 @@ const App = () => (
               <Route path="testimonials" element={<AdminTestimonials />} />
               <Route path="faqs" element={<AdminFAQs />} />
             </Route>
+            <Route path="/page/:slug" element={<DynamicPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </EditModeProvider>
