@@ -7,9 +7,9 @@ const Footer = () => {
   const { branding } = useBranding();
 
   const logoElement = branding.footer_logo ? (
-    <img src={branding.footer_logo} alt={branding.site_title} className="h-8 max-w-[160px] object-contain" />
+    <img src={branding.footer_logo} alt={branding.site_title} className="h-8 max-w-[160px] object-contain" loading="lazy" />
   ) : branding.header_logo ? (
-    <img src={branding.header_logo} alt={branding.site_title} className="h-8 max-w-[160px] object-contain" />
+    <img src={branding.header_logo} alt={branding.site_title} className="h-8 max-w-[160px] object-contain" loading="lazy" />
   ) : (
     <div className="flex items-center gap-2">
       <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-bold text-sm">VS</div>
