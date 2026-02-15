@@ -20,6 +20,7 @@ import {
   MessageSquare,
   Mail,
   ShoppingCart,
+  Search,
 } from "lucide-react";
 import {
   Tooltip,
@@ -38,6 +39,7 @@ const navItems = [
   { title: "Subscribers", path: "/admin/subscribers", icon: Mail, section: "dashboard" },
   { title: "Media", path: "/admin/media", icon: Image, section: "media" },
   { title: "Users", path: "/admin/users", icon: Users, section: "users" },
+  { title: "SEO", path: "/admin/seo", icon: Search, section: "settings" },
   { title: "Settings", path: "/admin/settings", icon: Settings, section: "settings" },
 ];
 
