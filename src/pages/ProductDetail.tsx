@@ -49,7 +49,7 @@ const ProductDetail = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div className="aspect-square bg-secondary rounded-xl overflow-hidden border border-border">
               {product.image_url ? (
-                <img src={product.image_url} alt={product.title} className="w-full h-full object-cover" />
+                <img src={product.image_url} alt={product.title} className="w-full h-full object-cover" loading="lazy" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-muted-foreground">{product.category}</div>
               )}

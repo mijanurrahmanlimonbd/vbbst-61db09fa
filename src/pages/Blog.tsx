@@ -62,7 +62,7 @@ const Blog = () => {
                 <Link key={post.id} to={`/blog/${post.slug}`} className="group bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="aspect-video bg-primary/10 overflow-hidden">
                     {post.featured_image ? (
-                      <img src={post.featured_image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <img src={post.featured_image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-primary font-bold text-lg uppercase">{post.category}</div>
                     )}
