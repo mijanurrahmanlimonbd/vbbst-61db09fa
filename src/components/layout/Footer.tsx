@@ -28,8 +28,8 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-sm text-primary-foreground/70">
               <li><Link to="/" className="hover:text-primary-foreground transition-colors">Home</Link></li>
-              <li><Link to="/shop" className="hover:text-primary-foreground transition-colors">Shop</Link></li>
               <li><Link to="/blog" className="hover:text-primary-foreground transition-colors">Blog</Link></li>
+              <li><Link to="/shop" className="hover:text-primary-foreground transition-colors">Shop</Link></li>
               <li><Link to="/contact" className="hover:text-primary-foreground transition-colors">Contact Us</Link></li>
               <li><Link to="/about" className="hover:text-primary-foreground transition-colors">About Us</Link></li>
             </ul>
@@ -41,8 +41,6 @@ const Footer = () => {
               <li><Link to="/shop" className="hover:text-primary-foreground transition-colors">Verified Business Managers</Link></li>
               <li><Link to="/shop" className="hover:text-primary-foreground transition-colors">WhatsApp Business API</Link></li>
               <li><Link to="/shop" className="hover:text-primary-foreground transition-colors">Facebook Ads Accounts</Link></li>
-              <li><Link to="/shop" className="hover:text-primary-foreground transition-colors">TikTok Ads</Link></li>
-              <li><Link to="/shop" className="hover:text-primary-foreground transition-colors">Reinstated Profiles</Link></li>
             </ul>
           </div>
 
@@ -56,8 +54,9 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-primary-foreground/10 text-center text-sm text-primary-foreground/50">
-          © {new Date().getFullYear()} VBB STORE. All rights reserved.
+        <div className="mt-12 pt-8 border-t border-primary-foreground/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-primary-foreground/50">
+          <span>© {new Date().getFullYear()} VBB STORE. All rights reserved.</span>
+          <Link to="/admin/login" className="hover:text-primary-foreground transition-colors">Login</Link>
         </div>
       </div>
     </footer>
