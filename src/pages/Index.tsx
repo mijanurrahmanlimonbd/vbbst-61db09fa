@@ -16,6 +16,7 @@ import FAQSection from "@/components/home/FAQSection";
 import AboutSection from "@/components/home/AboutSection";
 import ContactMapSection from "@/components/home/ContactMapSection";
 import BuyVerifiedBMGuide from "@/components/home/BuyVerifiedBMGuide";
+import FloatingEditBar from "@/components/editor/FloatingEditBar";
 
 const Index = () => {
   return (
@@ -41,6 +42,7 @@ const Index = () => {
       <AboutSection />
       <ContactMapSection />
       <BuyVerifiedBMGuide />
+      <FloatingEditBar slug="home" />
     </Layout>
   );
 };
