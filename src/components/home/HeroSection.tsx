@@ -87,7 +87,7 @@ const HeroSection = () => {
             >
               <a href="https://wa.me/8801302669333" target="_blank" rel="noopener noreferrer" className="flex-1 min-w-[120px]">
                 <div className="neon-btn-wrap bg-[hsl(142,50%,30%)]">
-                  {neonActive && <div className="absolute inset-[-50%] animate-border-rotate will-change-transform z-0" style={{ background: "conic-gradient(from 0deg, #000 0%, #000 40%, hsl(142,80%,65%) 46%, white 50%, hsl(142,80%,65%) 54%, #000 60%, #000 100%)" }} />}
+                  {neonActive && <div className="absolute inset-[-50%] animate-border-rotate will-change-transform z-0" style={{ background: "conic-gradient(from 0deg, white 0%, white 40%, hsl(142,80%,65%) 46%, white 50%, hsl(142,80%,65%) 54%, white 60%, white 100%)" }} />}
                   <Button size="lg" className="relative z-[2] w-full h-12 rounded-[9px] px-6 font-bold bg-[hsl(142,50%,30%)] hover:bg-[hsl(142,50%,25%)] text-white transition-all">
                     <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
                   </Button>
@@ -95,7 +95,7 @@ const HeroSection = () => {
               </a>
               <a href="https://t.me/Verifiedbmbuy" target="_blank" rel="noopener noreferrer" className="flex-1 min-w-[120px]">
                 <div className="neon-btn-wrap bg-[hsl(200,70%,30%)]">
-                  {neonActive && <div className="absolute inset-[-50%] animate-border-rotate will-change-transform z-0" style={{ background: "conic-gradient(from 0deg, #000 0%, #000 40%, hsl(200,100%,70%) 46%, white 50%, hsl(200,100%,70%) 54%, #000 60%, #000 100%)" }} />}
+                  {neonActive && <div className="absolute inset-[-50%] animate-border-rotate will-change-transform z-0" style={{ background: "conic-gradient(from 0deg, white 0%, white 40%, hsl(200,100%,70%) 46%, white 50%, hsl(200,100%,70%) 54%, white 60%, white 100%)" }} />}
                   <Button size="lg" className="relative z-[2] w-full h-12 rounded-[9px] px-6 font-bold bg-[hsl(200,70%,30%)] hover:bg-[hsl(200,70%,25%)] text-white transition-all">
                     <Send className="mr-2 h-4 w-4" /> Telegram
                   </Button>
@@ -103,7 +103,7 @@ const HeroSection = () => {
               </a>
               <a href="http://m.me/101736778209833" target="_blank" rel="noopener noreferrer" className="flex-1 min-w-[120px]">
                 <div className="neon-btn-wrap bg-primary">
-                  {neonActive && <div className="absolute inset-[-50%] animate-border-rotate will-change-transform z-0" style={{ background: "conic-gradient(from 0deg, #000 0%, #000 40%, hsl(220,100%,80%) 46%, white 50%, hsl(220,100%,80%) 54%, #000 60%, #000 100%)" }} />}
+                  {neonActive && <div className="absolute inset-[-50%] animate-border-rotate will-change-transform z-0" style={{ background: "conic-gradient(from 0deg, white 0%, white 40%, hsl(220,100%,80%) 46%, white 50%, hsl(220,100%,80%) 54%, white 60%, white 100%)" }} />}
                   <Button size="lg" className="relative z-[2] w-full h-12 rounded-[9px] px-6 font-bold bg-primary hover:bg-primary/90 text-primary-foreground transition-all">
                     <Facebook className="mr-2 h-4 w-4" /> Facebook
                   </Button>
@@ -111,7 +111,7 @@ const HeroSection = () => {
               </a>
               <a href="mailto:info@verifiedbmbuy.com" className="flex-1 min-w-[120px]">
                 <div className="neon-btn-wrap bg-destructive">
-                  {neonActive && <div className="absolute inset-[-50%] animate-border-rotate will-change-transform z-0" style={{ background: "conic-gradient(from 0deg, #000 0%, #000 40%, hsl(0,100%,75%) 46%, white 50%, hsl(0,100%,75%) 54%, #000 60%, #000 100%)" }} />}
+                  {neonActive && <div className="absolute inset-[-50%] animate-border-rotate will-change-transform z-0" style={{ background: "conic-gradient(from 0deg, white 0%, white 40%, hsl(0,100%,75%) 46%, white 50%, hsl(0,100%,75%) 54%, white 60%, white 100%)" }} />}
                   <Button size="lg" className="relative z-[2] w-full h-12 rounded-[9px] px-6 font-bold bg-destructive hover:bg-destructive/90 text-destructive-foreground transition-all">
                     <Mail className="mr-2 h-4 w-4" /> Email
                   </Button>
