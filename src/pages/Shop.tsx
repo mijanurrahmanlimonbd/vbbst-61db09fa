@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
+import JsonLdSchema from "@/components/seo/JsonLdSchema";
 import PageHeader from "@/components/layout/PageHeader";
 import ProductCard from "@/components/shared/ProductCard";
 
@@ -31,6 +32,11 @@ const Shop = () => {
   return (
     <Layout>
       <SEOHead title="Shop - Verified Accounts" description="Browse and buy premium verified Meta accounts, WhatsApp Business API, Facebook Ads accounts. Instant delivery and 7-day replacement guarantee." />
+      <JsonLdSchema
+        pageTitle="Shop - Verified Accounts"
+        pageDescription="Browse and buy premium verified Meta accounts, WhatsApp Business API, Facebook Ads accounts."
+        breadcrumbs={[{ name: "Home", url: "/" }, { name: "Shop", url: "/shop" }]}
+      />
       <PageHeader
         breadcrumb="Shop"
         subtitle="BROWSE & BUY"
