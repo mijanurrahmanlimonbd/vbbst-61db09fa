@@ -54,8 +54,27 @@ const ProductDetail = () => {
   const allImages = [product.image_url, ...(product.gallery_images || [])].filter(Boolean);
   const inStock = product.stock_status === "in_stock";
   const attrs = product.attributes && typeof product.attributes === "object" ? product.attributes : {};
-  const attrEntries = Object.entries(attrs);
+  const attrEntries = Object.entries(attrs).filter(([key]) => !key.startsWith("_"));
   const hasAttributes = attrEntries.length > 0;
+
+  // Dynamic spec groups from admin or fallback defaults
+  const specGroups: { title: string; items: string[] }[] = (attrs as any)._specs?.length > 0
+    ? (attrs as any)._specs
+    : [
+        { title: "Account Type", items: ["Verified Business Manager", "Full Admin Access", "Meta Verified Status", "Ready-to-use immediately"] },
+        { title: "Security & Compliance", items: ["Anti-ban guide included", "Warm-up strategy provided", "SSL encrypted delivery", "Clean account history"] },
+        { title: "Delivery & Support", items: ["Same-day delivery (1–4 hrs)", "Setup assistance included", "7-day replacement guarantee", "Priority customer support"] },
+      ];
+
+  // Dynamic trust points from admin or fallback defaults
+  const trustPoints: string[] = (attrs as any)._trust_points?.length > 0
+    ? (attrs as any)._trust_points
+    : [
+        "Instant delivery — usually within 1-4 hours",
+        "7-day replacement guarantee included",
+        "Setup guide & compliance documentation",
+        "SSL encrypted, secure credential handover",
+      ];
 
   return (
     <Layout>
@@ -227,17 +246,16 @@ const ProductDetail = () => {
 
               {/* Trust Info Checklist */}
               <div className="mt-6 rounded-xl border border-border bg-card p-5 space-y-3">
-                {[
-                  { icon: Zap, text: "Instant delivery — usually within 1-4 hours" },
-                  { icon: RefreshCw, text: "7-day replacement guarantee included" },
-                  { icon: FileText, text: "Setup guide & compliance documentation" },
-                  { icon: Lock, text: "SSL encrypted, secure credential handover" },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <item.icon className="w-5 h-5 text-primary shrink-0" />
-                    <span>{item.text}</span>
-                  </div>
-                ))}
+                {trustPoints.map((text, i) => {
+                  const icons = [Zap, RefreshCw, FileText, Lock, Shield, Clock, Globe, Award];
+                  const Icon = icons[i % icons.length];
+                  return (
+                    <div key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
+                      <Icon className="w-5 h-5 text-primary shrink-0" />
+                      <span>{text}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -278,28 +296,28 @@ const ProductDetail = () => {
           <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Product Details</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
-            {[
-              { title: "Account Type", icon: ShieldCheck, items: ["Verified Business Manager", "Full Admin Access", "Meta Verified Status", "Ready-to-use immediately"] },
-              { title: "Security & Compliance", icon: Shield, items: ["Anti-ban guide included", "Warm-up strategy provided", "SSL encrypted delivery", "Clean account history"] },
-              { title: "Delivery & Support", icon: Headphones, items: ["Same-day delivery (1–4 hrs)", "Setup assistance included", "7-day replacement guarantee", "Priority customer support"] },
-            ].map((spec, i) => (
-              <div key={i} className="rounded-xl border border-border bg-card p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <spec.icon className="w-5 h-5 text-primary" />
+            {specGroups.map((spec, i) => {
+              const icons = [ShieldCheck, Shield, Headphones, Globe, Award, Lock];
+              const Icon = icons[i % icons.length];
+              return (
+                <div key={i} className="rounded-xl border border-border bg-card p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <h3 className="font-bold text-foreground">{spec.title}</h3>
                   </div>
-                  <h3 className="font-bold text-foreground">{spec.title}</h3>
+                  <ul className="space-y-2.5">
+                    {spec.items.map((item, j) => (
+                      <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CheckCircle className="w-4 h-4 text-[hsl(142,70%,45%)] mt-0.5 shrink-0" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="space-y-2.5">
-                  {spec.items.map((item, j) => (
-                    <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <CheckCircle className="w-4 h-4 text-[hsl(142,70%,45%)] mt-0.5 shrink-0" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
