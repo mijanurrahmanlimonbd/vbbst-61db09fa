@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Bot, X, Send, Loader2 } from "lucide-react";
+import { Bot, X, Send, Loader2, MessageCircle } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
@@ -141,19 +141,41 @@ const AIChatWidget = () => {
       {open && (
         <div className="fixed bottom-20 lg:bottom-6 right-4 lg:right-6 z-[10000] w-[380px] max-w-[calc(100vw-2rem)] h-[460px] lg:h-[520px] max-h-[calc(100vh-8rem)] flex flex-col rounded-2xl border border-border bg-background shadow-2xl animate-fade-in">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary rounded-t-2xl">
-            <div className="flex items-center gap-2">
-              <Bot className="w-5 h-5 text-primary-foreground" />
-              <div>
-                <span className="text-sm font-semibold text-primary-foreground">VBB Store Assistant</span>
-                <span className="flex items-center gap-1 text-xs text-primary-foreground/70">
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent" /> Online
-                </span>
+          <div className="border-b border-border bg-primary rounded-t-2xl">
+            <div className="flex items-center justify-between px-4 py-3">
+              <div className="flex items-center gap-2">
+                <Bot className="w-5 h-5 text-primary-foreground" />
+                <div>
+                  <span className="text-sm font-semibold text-primary-foreground">VBB Store Assistant</span>
+                  <span className="flex items-center gap-1 text-xs text-primary-foreground/70">
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent" /> Online
+                  </span>
+                </div>
               </div>
+              <button onClick={() => setOpen(false)} className="text-primary-foreground/80 hover:text-primary-foreground">
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <button onClick={() => setOpen(false)} className="text-primary-foreground/80 hover:text-primary-foreground">
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex gap-2 px-4 pb-3">
+              <a
+                href="https://wa.me/8801302669333"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-primary-foreground/15 hover:bg-primary-foreground/25 transition-colors text-primary-foreground text-xs font-medium"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                WhatsApp
+              </a>
+              <a
+                href="https://t.me/Verifiedbmbuy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-primary-foreground/15 hover:bg-primary-foreground/25 transition-colors text-primary-foreground text-xs font-medium"
+              >
+                <Send className="w-3.5 h-3.5" />
+                Telegram
+              </a>
+            </div>
           </div>
 
           {/* Messages */}
