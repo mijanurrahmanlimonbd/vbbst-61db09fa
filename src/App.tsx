@@ -5,8 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
 import { EditModeProvider } from "@/contexts/EditModeContext";
 import MaintenanceGuard from "@/components/MaintenanceGuard";
+import CartDrawer from "@/components/cart/CartDrawer";
 import Index from "./pages/Index";
 import Shop from "./pages/Shop";
 import Blog from "./pages/Blog";
@@ -52,7 +54,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <CartProvider>
           <EditModeProvider>
+          <CartDrawer />
           <MaintenanceGuard>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -96,6 +100,7 @@ const App = () => (
           </Routes>
           </MaintenanceGuard>
           </EditModeProvider>
+          </CartProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
