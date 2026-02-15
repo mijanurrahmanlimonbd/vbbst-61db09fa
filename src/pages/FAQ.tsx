@@ -102,11 +102,11 @@ const FAQ = () => {
       </section>
 
       {/* Body */}
-      <section className="py-10 md:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-6 md:py-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Group filters */}
           {groups.length > 1 && (
-            <div className="flex flex-wrap gap-2 mb-8 print:hidden">
+            <div className="flex flex-wrap gap-2 mb-6 print:hidden">
               <button
                 onClick={() => setActiveGroup(null)}
                 className={cn(
@@ -137,21 +137,23 @@ const FAQ = () => {
           ) : filtered.length === 0 ? (
             <p className="text-center text-muted-foreground py-12">No matching questions found. Try a different search term.</p>
           ) : (
-            <div className="space-y-10">
+            <div className="space-y-6">
               {Object.entries(faqsByGroup).map(([group, items]) => (
                 <div key={group}>
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                       {groupIcons[group] || <HelpCircle className="w-4 h-4" />}
                     </div>
-                    <h2 className="text-lg font-bold text-foreground">{group}</h2>
+                    <h2 className="text-base font-bold text-foreground">{group}</h2>
                     <span className="text-xs text-muted-foreground">({items.length})</span>
                   </div>
-                  <Accordion type="single" collapsible className="space-y-2">
+                  <Accordion type="single" collapsible className="space-y-1">
                     {items.map((faq) => (
-                      <AccordionItem key={faq.id} value={faq.id} className="bg-card border border-border rounded-lg px-6">
-                        <AccordionTrigger className="text-left font-semibold text-foreground">{faq.question}</AccordionTrigger>
-                        <AccordionContent className="text-muted-foreground">{faq.answer}</AccordionContent>
+                      <AccordionItem key={faq.id} value={faq.id} className="bg-card border border-border rounded-lg px-4">
+                        <AccordionTrigger className="text-left font-semibold text-foreground py-2.5 text-sm">
+                          <span className="line-clamp-1 md:line-clamp-1">{faq.question}</span>
+                        </AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground text-sm pb-2.5">{faq.answer}</AccordionContent>
                       </AccordionItem>
                     ))}
                   </Accordion>
@@ -159,7 +161,6 @@ const FAQ = () => {
               ))}
             </div>
           )}
-
           {/* Still need help CTA */}
           <div className="mt-16 bg-card border border-border rounded-2xl p-8 md:p-12 text-center">
             <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
