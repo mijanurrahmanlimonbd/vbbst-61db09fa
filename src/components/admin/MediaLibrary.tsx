@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { convertToWebP } from "@/lib/imageUtils";
 import {
   Upload,
   Search,
@@ -100,15 +101,18 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
       img.src = URL.createObjectURL(file);
     });
 
-  const uploadFile = async (file: File) => {
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      toast.error(`"${file.name}" is not allowed. Only JPG, PNG, and WebP images are supported.`);
+  const uploadFile = async (originalFile: File) => {
+    if (!ALLOWED_TYPES.includes(originalFile.type)) {
+      toast.error(`"${originalFile.name}" is not allowed. Only JPG, PNG, and WebP images are supported.`);
       return;
     }
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error(`"${file.name}" exceeds the 10MB size limit.`);
+    if (originalFile.size > MAX_FILE_SIZE) {
+      toast.error(`"${originalFile.name}" exceeds the 10MB size limit.`);
       return;
     }
+
+    // Auto-convert to WebP at 80% quality
+    const file = await convertToWebP(originalFile, 0.8);
 
     const uploadId = crypto.randomUUID();
     const ext = file.name.split(".").pop();
@@ -130,6 +134,9 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
 
       const { data: urlData } = supabase.storage.from("media").getPublicUrl(filePath);
 
+      // Auto-generate alt text from filename (strip extension, replace dashes/underscores)
+      const autoAlt = file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
+
       await supabase.from("media_files").insert({
         file_name: file.name,
         file_path: filePath,
@@ -137,7 +144,7 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
         mime_type: file.type,
         width: dims.width,
         height: dims.height,
-        alt_text: "",
+        alt_text: autoAlt,
         caption: "",
         url: urlData.publicUrl,
       });
