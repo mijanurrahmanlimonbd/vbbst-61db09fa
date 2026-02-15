@@ -16,7 +16,7 @@ const HeroSection = () => {
     <section className="relative overflow-hidden bg-background pt-10 pb-3 md:pt-12 md:pb-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Main two-column layout */}
-        <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:gap-12">
+        <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:gap-16">
           {/* Left — Logo with rotating border */}
           <div
             className="flex shrink-0 items-center justify-center lg:w-auto animate-hero-fade-left"
@@ -105,7 +105,7 @@ const HeroSection = () => {
 
         {/* Stats row */}
         <div
-          className="mt-10 grid grid-cols-2 gap-3 md:grid-cols-4 animate-hero-fade-up"
+          className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6 animate-hero-fade-up"
           style={{ animationDelay: "0.55s" }}
         >
           {stats.map(({ icon: Icon, label, value }) => (

@@ -32,7 +32,7 @@ const ProductCard = ({ product }: { product: Product }) => {
   };
 
   return (
-    <div className="group bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 relative flex flex-col">
+    <div className="group bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 relative flex flex-col h-full">
       {!inStock && (
         <div className="absolute inset-0 bg-background/60 z-20 flex items-center justify-center pointer-events-none">
           <Badge variant="destructive" className="text-sm px-4 py-1">Out of Stock</Badge>
@@ -63,7 +63,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       </Link>
 
       {/* Content */}
-      <div className="p-5 flex flex-col flex-1">
+      <div className="p-5 flex flex-col flex-1 justify-between">
         <span className="text-xs font-semibold tracking-wide text-primary uppercase">{product.category}</span>
         <h3 className="font-bold text-foreground mt-1.5 text-[15px] leading-snug line-clamp-2">{product.title}</h3>
         {product.short_description && (
@@ -114,7 +114,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col gap-2 mt-4">
+        <div className="flex flex-col gap-2 mt-auto pt-4">
           <a
             href="https://wa.me/8801302669333"
             target="_blank"
