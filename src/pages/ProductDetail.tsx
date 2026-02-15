@@ -148,23 +148,22 @@ const ProductDetail = () => {
                 <span className="flex items-center gap-1"><Headphones className="w-4 h-4 text-primary" /> 24/7 Support</span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8">
-                <a href="https://wa.me/8801302669333" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 rounded-lg bg-[hsl(142,70%,45%)] text-primary-foreground font-medium hover:opacity-90 transition-opacity">
-                  <MessageCircle className="w-5 h-5" /> WhatsApp
-                </a>
-                <a href="https://t.me/Verifiedbmbuy" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 rounded-lg bg-[hsl(200,100%,40%)] text-primary-foreground font-medium hover:opacity-90 transition-opacity">
-                  <Send className="w-5 h-5" /> Telegram
-                </a>
+              <div className="flex flex-col gap-3 mt-8">
                 <button
                   onClick={() => inStock && navigate("/checkout", { state: { items: [{ id: product.id, title: product.title, price: product.price, sale_price: product.sale_price, quantity: 1, image_url: product.image_url }] } })}
-                  className="flex items-center justify-center py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+                  className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-[hsl(25,95%,55%)] text-white text-lg font-bold hover:bg-[hsl(25,95%,48%)] transition-colors disabled:opacity-50"
                   disabled={!inStock}
                 >
-                  {inStock ? "Buy Now" : "Sold Out"}
+                  {inStock ? `Buy Now — $${(product.sale_price || product.price).toFixed(2)}` : "Sold Out"} {inStock && <span>→</span>}
                 </button>
-                <button className="flex items-center justify-center py-3 rounded-lg border border-border text-foreground font-medium hover:bg-accent transition-colors" disabled={!inStock}>
-                  Contact to Buy
-                </button>
+                <div className="grid grid-cols-2 gap-3">
+                  <a href="https://wa.me/8801302669333" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 rounded-xl bg-[hsl(142,70%,45%)] text-white font-semibold hover:bg-[hsl(142,70%,40%)] transition-colors">
+                    <MessageCircle className="w-5 h-5" /> WhatsApp
+                  </a>
+                  <a href="https://t.me/Verifiedbmbuy" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 rounded-xl bg-[hsl(200,100%,40%)] text-white font-semibold hover:bg-[hsl(200,100%,35%)] transition-colors">
+                    <Send className="w-5 h-5" /> Telegram
+                  </a>
+                </div>
               </div>
 
               <p className="text-xs text-muted-foreground text-center mt-4">Verified Account • Delivered Same Day</p>
