@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import WhatsAppButton from "./WhatsAppButton";
+import AIChatWidget from "@/components/chat/AIChatWidget";
 import MobileBottomNav from "./MobileBottomNav";
 import NewsletterPopup from "@/components/newsletter/NewsletterPopup";
 import TrackingScripts from "@/components/tracking/TrackingScripts";
@@ -124,7 +124,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       <main ref={mainRef} className="flex-1">{children}</main>
       <Footer />
       <MobileBottomNav />
-      <WhatsAppButton />
+      <AIChatWidget />
       <NewsletterPopup />
       <TrackingScripts />
       <OrderThankYouPopup />
