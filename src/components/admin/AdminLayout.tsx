@@ -21,6 +21,9 @@ import {
   Mail,
   ShoppingCart,
   Search,
+  Briefcase,
+  MessageCircle,
+  HelpCircle,
 } from "lucide-react";
 import {
   Tooltip,
@@ -39,6 +42,9 @@ const navItems = [
   { title: "Subscribers", path: "/admin/subscribers", icon: Mail, section: "dashboard" },
   { title: "Media", path: "/admin/media", icon: Image, section: "media" },
   { title: "Users", path: "/admin/users", icon: Users, section: "users" },
+  { title: "Work Samples", path: "/admin/work-samples", icon: Briefcase, section: "dashboard" },
+  { title: "Testimonials", path: "/admin/testimonials", icon: MessageCircle, section: "dashboard" },
+  { title: "FAQs", path: "/admin/faqs", icon: HelpCircle, section: "dashboard" },
   { title: "SEO", path: "/admin/seo", icon: Search, section: "settings" },
   { title: "Settings", path: "/admin/settings", icon: Settings, section: "settings" },
 ];
