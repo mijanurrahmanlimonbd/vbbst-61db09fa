@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ShoppingCart, User, Menu, X, Search, LogOut } from "lucide-react";
 import { useBranding } from "@/hooks/useBranding";
@@ -32,6 +32,28 @@ const Navbar = () => {
   const { user, profile, signOut } = useAuth();
   const { openCart, totalItems } = useCart();
 
+  // Close mobile menu on route change (state syncing)
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
+
+  // Click-outside listener for mobile menu
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest("[data-mobile-menu]") || target.closest("[data-menu-toggle]")) return;
+      setMobileOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [mobileOpen]);
+
+  const toggleMenu = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setMobileOpen((prev) => !prev);
+  }, []);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -40,6 +62,16 @@ const Navbar = () => {
       setSearchQuery("");
     }
   };
+
+  const handleAccountClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (user) {
+      navigate("/dashboard");
+    } else {
+      setAuthModalOpen(true);
+    }
+    setMobileOpen(false);
+  }, [user, navigate]);
 
   const logoElement = branding.header_logo ? (
     <img src={branding.header_logo} alt={branding.site_title} className="h-8 max-w-[160px] object-contain" />
@@ -77,10 +109,16 @@ const Navbar = () => {
             </div>
 
             <div className="flex items-center gap-4">
-              <button onClick={() => setSearchOpen(!searchOpen)} className="text-foreground hover:text-primary transition-colors">
+              <button
+                onClick={(e) => { e.stopPropagation(); setSearchOpen(!searchOpen); }}
+                className="text-foreground hover:text-primary transition-colors"
+              >
                 <Search className="w-5 h-5" />
               </button>
-              <button onClick={openCart} className="relative text-foreground hover:text-primary transition-colors">
+              <button
+                onClick={(e) => { e.stopPropagation(); openCart(); }}
+                className="relative text-foreground hover:text-primary transition-colors"
+              >
                 <ShoppingCart className="w-5 h-5" />
                 {totalItems > 0 && (
                   <span className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
@@ -131,14 +169,18 @@ const Navbar = () => {
                 </DropdownMenu>
               ) : (
                 <button
-                  onClick={() => setAuthModalOpen(true)}
+                  onClick={(e) => { e.stopPropagation(); setAuthModalOpen(true); }}
                   className="text-foreground hover:text-primary transition-colors"
                 >
                   <User className="w-5 h-5" />
                 </button>
               )}
 
-              <button className="md:hidden text-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
+              <button
+                data-menu-toggle
+                className="md:hidden text-foreground"
+                onClick={toggleMenu}
+              >
                 {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
@@ -161,23 +203,44 @@ const Navbar = () => {
           </div>
         )}
 
+        {/* Mobile menu overlay + slide-out */}
         {mobileOpen && (
-          <div className="md:hidden border-t border-border bg-background">
-            <div className="px-4 py-4 space-y-3">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  onClick={() => setMobileOpen(false)}
-                  className={`block text-sm font-medium transition-colors hover:text-primary ${
-                    location.pathname === link.path ? "text-primary" : "text-foreground"
-                  }`}
+          <>
+            {/* Backdrop blur overlay — clicking closes menu */}
+            <div
+              className="fixed inset-0 z-[9998] bg-black/40 backdrop-blur-sm md:hidden"
+              onClick={() => setMobileOpen(false)}
+            />
+            {/* Menu panel */}
+            <div
+              data-mobile-menu
+              className="fixed top-16 left-0 right-0 z-[9999] bg-background border-b border-border md:hidden animate-fade-in"
+            >
+              <div className="px-4 py-4 space-y-3 max-h-[calc(100vh-120px)] overflow-y-auto">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    onClick={() => setMobileOpen(false)}
+                    className={`block text-sm font-medium transition-colors hover:text-primary ${
+                      location.pathname === link.path ? "text-primary" : "text-foreground"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+
+                {/* My Account link inside mobile menu */}
+                <button
+                  onClick={handleAccountClick}
+                  className="flex items-center gap-2 w-full text-left text-sm font-medium text-foreground hover:text-primary transition-colors pt-3 border-t border-border"
                 >
-                  {link.label}
-                </Link>
-              ))}
+                  <User className="w-4 h-4" />
+                  {user ? "My Account" : "Sign In / Register"}
+                </button>
+              </div>
             </div>
-          </div>
+          </>
         )}
       </nav>
 

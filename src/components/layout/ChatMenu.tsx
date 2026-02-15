@@ -32,7 +32,7 @@ const ChatMenu = ({ open, onClose, position = "desktop" }: ChatMenuProps) => {
   return (
     <div
       ref={menuRef}
-      className={`fixed z-[60] w-64 rounded-xl bg-background border border-border shadow-xl animate-fade-in ${positionClasses}`}
+      className={`fixed z-[10000] w-64 rounded-xl bg-background border border-border shadow-xl animate-fade-in ${positionClasses}`}
     >
       <div className="p-3 space-y-2">
         <a
