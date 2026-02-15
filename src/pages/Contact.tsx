@@ -8,11 +8,13 @@ import { MessageCircle, Send, Mail, Facebook, Users, Clock, Globe, Star, Headpho
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { usePageHeroBySlug } from "@/hooks/usePageHeroBySlug";
 
 const Contact = () => {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
+  const { heroImage, heroOverlay } = usePageHeroBySlug("contact");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +77,8 @@ const Contact = () => {
         description="We're here to help 24/7. Reach out through any of our channels."
         showCTAs
         showSocials
+        heroImage={heroImage}
+        heroOverlay={heroOverlay}
       />
 
       {/* Stats */}

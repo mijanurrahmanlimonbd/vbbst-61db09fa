@@ -19,6 +19,8 @@ interface PageData {
   meta_title: string | null;
   meta_description: string | null;
   components: Record<string, boolean>;
+  hero_image: string | null;
+  hero_overlay: number;
 }
 
 const DynamicPage = () => {
@@ -33,7 +35,7 @@ const DynamicPage = () => {
 
     const load = async () => {
       // Admins in edit mode can see drafts too
-      let query = supabase.from("pages").select("title, slug, content, meta_title, meta_description, components").eq("slug", slug);
+      let query = supabase.from("pages").select("title, slug, content, meta_title, meta_description, components, hero_image, hero_overlay").eq("slug", slug);
       
       const { data, error } = await query.single();
 
@@ -43,6 +45,8 @@ const DynamicPage = () => {
         setPage({
           ...data,
           components: (data.components as Record<string, boolean>) || {},
+          hero_image: data.hero_image || null,
+          hero_overlay: data.hero_overlay ?? 50,
         });
       }
       setLoading(false);
@@ -80,6 +84,8 @@ const DynamicPage = () => {
         subtitle={page.title.toUpperCase()}
         title={content.page_title || page.title}
         description={content.page_description || ""}
+        heroImage={page.hero_image}
+        heroOverlay={page.hero_overlay}
       />
 
       <section className="py-16">

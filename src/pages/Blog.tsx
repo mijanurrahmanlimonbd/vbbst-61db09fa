@@ -5,6 +5,7 @@ import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
 import PageHeader from "@/components/layout/PageHeader";
 import { Clock, ArrowRight } from "lucide-react";
+import { usePageHeroBySlug } from "@/hooks/usePageHeroBySlug";
 
 const categories = ["All", "Verified BM", "WhatsApp API", "Tips & Guides", "Guides"];
 
@@ -12,6 +13,7 @@ const Blog = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { heroImage, heroOverlay } = usePageHeroBySlug("blog");
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -32,6 +34,8 @@ const Blog = () => {
         subtitle="Our Blog"
         title="Insights & Guides"
         description="Expert tips, industry insights, and guides on Meta advertising, verified Business Managers, and WhatsApp API."
+        heroImage={heroImage}
+        heroOverlay={heroOverlay}
       />
 
       <section className="py-12">

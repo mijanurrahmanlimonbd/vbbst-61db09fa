@@ -8,6 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Search, Calendar, Printer, HelpCircle, MessageCircle, Send, ShoppingCart, Shield, CreditCard, Headphones } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { usePageHeroBySlug } from "@/hooks/usePageHeroBySlug";
 
 interface FaqItem {
   id: string;
@@ -29,6 +30,7 @@ const FAQ = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
+  const { heroImage, heroOverlay } = usePageHeroBySlug("faq");
 
   useEffect(() => {
     const load = async () => {
@@ -66,6 +68,8 @@ const FAQ = () => {
         title="Frequently Asked Questions"
         subtitle="HELP CENTER"
         description="Find quick answers to common questions about our products, payments, and support."
+        heroImage={heroImage}
+        heroOverlay={heroOverlay}
       />
 
       {/* Search & Meta bar */}

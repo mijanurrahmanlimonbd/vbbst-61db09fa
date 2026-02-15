@@ -12,6 +12,8 @@ interface PageHeaderProps {
   onSearchChange?: (val: string) => void;
   showCTAs?: boolean;
   showSocials?: boolean;
+  heroImage?: string | null;
+  heroOverlay?: number | null;
 }
 
 const PageHeader = ({
@@ -22,9 +24,15 @@ const PageHeader = ({
   showSearch,
   searchValue,
   onSearchChange,
+  heroImage,
+  heroOverlay,
 }: PageHeaderProps) => {
-  const { settings } = usePageHero();
-  const hasImage = !!settings.image;
+  const { settings: globalSettings } = usePageHero();
+
+  // Per-page overrides take priority over global settings
+  const image = heroImage ?? globalSettings.image;
+  const overlay = heroOverlay ?? globalSettings.overlay;
+  const hasImage = !!image;
 
   return (
     <section
@@ -32,7 +40,7 @@ const PageHeader = ({
       style={
         hasImage
           ? {
-              backgroundImage: `url(${settings.image})`,
+              backgroundImage: `url(${image})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
             }
@@ -44,7 +52,7 @@ const PageHeader = ({
         className="absolute inset-0"
         style={
           hasImage
-            ? { backgroundColor: `rgba(0,0,0,${settings.overlay / 100})` }
+            ? { backgroundColor: `rgba(0,0,0,${overlay / 100})` }
             : undefined
         }
       >

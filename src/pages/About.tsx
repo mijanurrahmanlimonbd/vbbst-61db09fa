@@ -8,11 +8,13 @@ import { usePageContent, usePageComponents } from "@/hooks/usePageContent";
 import { WorkSamplesSection, TestimonialsSection, FAQsSection } from "@/components/shared/PageComponents";
 import EditableText from "@/components/editor/EditableText";
 import { useEditMode } from "@/contexts/EditModeContext";
+import { usePageHeroBySlug } from "@/hooks/usePageHeroBySlug";
 
 const About = () => {
   const { content: c } = usePageContent("about");
   const components = usePageComponents("about");
   const { isEditMode } = useEditMode();
+  const { heroImage, heroOverlay } = usePageHeroBySlug("about");
 
   const features = [
     { icon: <Clock className="w-6 h-6 text-primary" />, title: "5+ Years of Experience", desc: "Providing verified Meta advertising accounts since 2019 with a proven track record." },
@@ -46,6 +48,8 @@ const About = () => {
         title={c.page_title || "Who We Are"}
         description={c.page_description || "Trusted by advertisers worldwide since day one."}
         showSocials
+        heroImage={heroImage}
+        heroOverlay={heroOverlay}
       />
 
       {/* Stats */}
