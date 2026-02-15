@@ -183,7 +183,7 @@ const AdminLayout = () => {
     <div className="min-h-screen bg-[hsl(210,20%,96%)]">
       <aside
         className={cn(
-          "fixed top-0 left-0 z-40 h-screen bg-background border-r border-border transition-all duration-300 hidden lg:block",
+          "fixed top-0 left-0 z-40 h-screen bg-background border-r border-border transition-all duration-300 hidden md:block",
           sidebarOpen ? "w-60" : "w-[68px]"
         )}
       >
@@ -191,30 +191,30 @@ const AdminLayout = () => {
       </aside>
 
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 bg-foreground/50 lg:hidden" onClick={() => setMobileOpen(false)} />
+        <div className="fixed inset-0 z-40 bg-foreground/50 md:hidden" onClick={() => setMobileOpen(false)} />
       )}
 
       <aside
         className={cn(
-          "fixed top-0 left-0 z-50 h-screen w-60 bg-background border-r border-border transition-transform duration-300 lg:hidden",
+          "fixed top-0 left-0 z-50 h-screen w-60 bg-background border-r border-border transition-transform duration-300 md:hidden",
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <SidebarContent />
       </aside>
 
-      <div className={cn("transition-all duration-300", sidebarOpen ? "lg:ml-60" : "lg:ml-[68px]")}>
+      <div className={cn("transition-all duration-300", sidebarOpen ? "md:ml-60" : "md:ml-[68px]")}>
         <header className="sticky top-0 z-30 h-16 bg-background border-b border-border flex items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="lg:hidden p-2 rounded-lg text-muted-foreground hover:bg-accent transition-colors"
+              className="md:hidden p-2 rounded-lg text-muted-foreground hover:bg-accent transition-colors"
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="hidden lg:flex p-2 rounded-lg text-muted-foreground hover:bg-accent transition-colors"
+              className="hidden md:flex p-2 rounded-lg text-muted-foreground hover:bg-accent transition-colors"
             >
               <Menu className="w-5 h-5" />
             </button>
