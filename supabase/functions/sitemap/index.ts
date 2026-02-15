@@ -15,7 +15,8 @@ Deno.serve(async (req) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, supabaseKey);
-  // Dynamic: read from site_settings or fall back to SITE_URL env var
+
+  // Read site URL
   const { data: siteUrlRow } = await supabase
     .from("site_settings")
     .select("value")
@@ -58,19 +59,23 @@ Deno.serve(async (req) => {
   const products = productsRes.data || [];
   const pages = pagesRes.data || [];
 
-  // Static pages
+  // Static pages (including new policy/legal pages)
   const staticPages = [
     { loc: "/", priority: s["sitemap_priority_home"] || "1.0", changefreq: "daily", lastmod: today },
     { loc: "/shop", priority: s["sitemap_priority_shop"] || "0.9", changefreq: "daily", lastmod: today },
     { loc: "/blog", priority: s["sitemap_priority_blog"] || "0.8", changefreq: "daily", lastmod: today },
     { loc: "/contact", priority: s["sitemap_priority_contact"] || "0.7", changefreq: "monthly", lastmod: today },
     { loc: "/about", priority: s["sitemap_priority_about"] || "0.7", changefreq: "monthly", lastmod: today },
+    { loc: "/faq", priority: "0.6", changefreq: "weekly", lastmod: today },
+    { loc: "/terms", priority: "0.4", changefreq: "monthly", lastmod: today },
+    { loc: "/privacy", priority: "0.4", changefreq: "monthly", lastmod: today },
+    { loc: "/refund-policy", priority: "0.4", changefreq: "monthly", lastmod: today },
+    { loc: "/replacement-guarantee", priority: "0.5", changefreq: "monthly", lastmod: today },
   ];
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
 
-  // Static pages
   for (const page of staticPages) {
     xml += `
   <url>
@@ -81,7 +86,6 @@ Deno.serve(async (req) => {
   </url>`;
   }
 
-  // Published blog posts (drafts excluded by query)
   for (const post of posts) {
     xml += `
   <url>
@@ -92,7 +96,6 @@ Deno.serve(async (req) => {
   </url>`;
   }
 
-  // Products
   const productPriority = s["sitemap_product_priority"] || "0.7";
   for (const product of products) {
     xml += `
@@ -104,10 +107,8 @@ Deno.serve(async (req) => {
   </url>`;
   }
 
-  // Published pages (drafts excluded by query)
+  const skipSlugs = ["home", "about", "contact", "shop", "blog"];
   for (const page of pages) {
-    // Skip pages that duplicate static routes
-    const skipSlugs = ["home", "about", "contact", "shop", "blog"];
     if (skipSlugs.includes(page.slug)) continue;
     xml += `
   <url>
@@ -120,6 +121,16 @@ Deno.serve(async (req) => {
 
   xml += `
 </urlset>`;
+
+  // If ping=true query param, ping Google
+  const url = new URL(req.url);
+  if (url.searchParams.get("ping") === "true") {
+    try {
+      await fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(siteUrl + "/sitemap.xml")}`);
+    } catch {
+      // silently fail ping
+    }
+  }
 
   return new Response(xml, { headers: corsHeaders });
 });
