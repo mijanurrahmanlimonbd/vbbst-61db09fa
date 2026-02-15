@@ -11,12 +11,26 @@ Deno.serve(async () => {
   const supabase = createClient(supabaseUrl, supabaseKey);
   const siteUrl = "https://vbbstore.com";
 
+  // Load sitemap settings from site_settings
+  const { data: settings } = await supabase
+    .from("site_settings")
+    .select("key, value")
+    .like("key", "sitemap_%");
+
+  const settingsMap: Record<string, string> = {};
+  if (settings) {
+    for (const s of settings) settingsMap[s.key] = s.value;
+  }
+
+  const defaultPriority = settingsMap["sitemap_default_priority"] || "0.6";
+  const defaultChangefreq = settingsMap["sitemap_default_changefreq"] || "weekly";
+
   const staticPages = [
-    { loc: "/", priority: "1.0", changefreq: "daily" },
-    { loc: "/shop", priority: "0.9", changefreq: "daily" },
-    { loc: "/blog", priority: "0.8", changefreq: "daily" },
-    { loc: "/contact", priority: "0.7", changefreq: "monthly" },
-    { loc: "/about", priority: "0.7", changefreq: "monthly" },
+    { loc: "/", priority: settingsMap["sitemap_priority_home"] || "1.0", changefreq: "daily" },
+    { loc: "/shop", priority: settingsMap["sitemap_priority_shop"] || "0.9", changefreq: "daily" },
+    { loc: "/blog", priority: settingsMap["sitemap_priority_blog"] || "0.8", changefreq: "daily" },
+    { loc: "/contact", priority: settingsMap["sitemap_priority_contact"] || "0.7", changefreq: "monthly" },
+    { loc: "/about", priority: settingsMap["sitemap_priority_about"] || "0.7", changefreq: "monthly" },
   ];
 
   const { data: posts } = await supabase
@@ -48,20 +62,21 @@ Deno.serve(async () => {
   <url>
     <loc>${siteUrl}/blog/${post.slug}</loc>
     <lastmod>${new Date(post.published_at).toISOString().split("T")[0]}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
+    <changefreq>${defaultChangefreq}</changefreq>
+    <priority>${defaultPriority}</priority>
   </url>`;
     }
   }
 
   if (products) {
+    const productPriority = settingsMap["sitemap_product_priority"] || "0.7";
     for (const product of products) {
       xml += `
   <url>
     <loc>${siteUrl}/product/${product.slug}</loc>
     <lastmod>${new Date(product.created_at).toISOString().split("T")[0]}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <changefreq>${defaultChangefreq}</changefreq>
+    <priority>${productPriority}</priority>
   </url>`;
     }
   }

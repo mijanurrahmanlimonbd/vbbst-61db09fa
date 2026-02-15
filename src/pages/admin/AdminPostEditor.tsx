@@ -29,6 +29,7 @@ import {
 import { Button } from "@/components/ui/button";
 import MediaLibraryModal from "@/components/admin/MediaLibraryModal";
 import SEOSettingsPanel from "@/components/admin/SEOSettingsPanel";
+import SEOScoreWidget from "@/components/admin/SEOScoreWidget";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -77,6 +78,8 @@ const AdminPostEditor = () => {
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
   const [focusKeyword, setFocusKeyword] = useState("");
+  const [canonicalUrl, setCanonicalUrl] = useState("");
+  const [noIndex, setNoIndex] = useState(false);
   const [titleError, setTitleError] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"saved" | "unsaved" | "saving">("saved");
@@ -520,6 +523,18 @@ const AdminPostEditor = () => {
                 </div>
               </div>
 
+              {/* SEO Score Widget */}
+              <SEOScoreWidget
+                data={{
+                  focusKeyword,
+                  metaTitle,
+                  metaDescription,
+                  slug,
+                  content: editor?.getHTML() || "",
+                  postTitle: title,
+                }}
+              />
+
               {/* SEO Settings */}
               <SEOSettingsPanel
                 metaTitle={metaTitle}
@@ -527,9 +542,14 @@ const AdminPostEditor = () => {
                 focusKeyword={focusKeyword}
                 postTitle={title}
                 slug={slug}
+                featuredImage={featuredImage}
+                canonicalUrl={canonicalUrl}
+                noIndex={noIndex}
                 onMetaTitleChange={(v) => { setMetaTitle(v); markUnsaved(); }}
                 onMetaDescriptionChange={(v) => { setMetaDescription(v); markUnsaved(); }}
                 onFocusKeywordChange={(v) => { setFocusKeyword(v); markUnsaved(); }}
+                onCanonicalUrlChange={(v) => { setCanonicalUrl(v); markUnsaved(); }}
+                onNoIndexChange={(v) => { setNoIndex(v); markUnsaved(); }}
               />
             </div>
           </div>
