@@ -83,10 +83,10 @@ const AdminPages = () => {
                     onClick={() => {
                       const knownRoutes: Record<string, string> = { home: "/", about: "/about", contact: "/contact", shop: "/shop" };
                       const basePath = knownRoutes[page.slug] || `/page/${page.slug}`;
-                      window.open(`${basePath}?edit=true`, "_blank");
+                      navigate(`${basePath}?edit=true`);
                     }}
                     className="p-2 rounded text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                    title="Visual Edit (opens page)"
+                    title="Visual Edit"
                   >
                     <ExternalLink className="w-4 h-4" />
                   </button>
