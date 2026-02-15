@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { Bot, X, Send, Loader2, MessageCircle, User, ExternalLink } from "lucide-react";
+import { X, Send, Loader2, MessageCircle, User, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
@@ -272,7 +272,7 @@ const AIChatWidget = () => {
           className="fixed bottom-[76px] lg:bottom-6 right-4 lg:right-6 z-50 flex w-12 h-12 lg:w-14 lg:h-14 bg-primary rounded-full items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110"
           aria-label="Open AI Chat"
         >
-          <Bot className="w-7 h-7 text-primary-foreground" />
+          <MessageCircle className="w-7 h-7 text-primary-foreground" />
         </button>
       )}
 
@@ -283,7 +283,7 @@ const AIChatWidget = () => {
           <div className="border-b border-border bg-primary rounded-t-2xl">
             <div className="flex items-center justify-between px-4 py-3">
               <div className="flex items-center gap-2">
-                <Bot className="w-5 h-5 text-primary-foreground" />
+                <MessageCircle className="w-5 h-5 text-primary-foreground" />
                 <div>
                   <span className="text-sm font-semibold text-primary-foreground">VBB Store Assistant</span>
                   <span className="flex items-center gap-1 text-xs text-primary-foreground/70">
@@ -354,7 +354,7 @@ const AIChatWidget = () => {
               <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
                 {messages.length === 0 && (
                   <div className="text-center py-8 space-y-3">
-                    <Bot className="w-10 h-10 mx-auto text-primary/50" />
+                    <MessageCircle className="w-10 h-10 mx-auto text-primary/50" />
                     <p className="text-sm text-muted-foreground">Hi {visitorName}! 👋 I'm the VBB Store AI Assistant. Ask me anything about our products, pricing, or how to get started!</p>
                     <div className="grid grid-cols-2 gap-2">
                       {[
