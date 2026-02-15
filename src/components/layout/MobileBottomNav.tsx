@@ -13,6 +13,14 @@ const MobileBottomNav = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const baseClasses = "flex-1 flex flex-col items-center justify-center transition-all duration-150 active:scale-110 relative";
+  const inactiveClasses = "text-muted-foreground";
+  const activeClasses = "text-primary";
+
+  const Dot = () => (
+    <span className="absolute top-1.5 w-[6px] h-[6px] rounded-full bg-primary" />
+  );
+
   return (
     <>
       <ChatMenu open={chatOpen} onClose={() => setChatOpen(false)} position="mobile" />
@@ -23,49 +31,46 @@ const MobileBottomNav = () => {
       >
         <Link
           to="/"
-          className={`flex-1 flex items-center justify-center transition-colors ${
-            isActive("/") ? "text-primary" : "text-muted-foreground"
-          }`}
+          className={`${baseClasses} ${isActive("/") ? activeClasses : inactiveClasses}`}
           aria-label="Home"
         >
-          <Home className="w-6 h-6" />
+          {isActive("/") && <Dot />}
+          <Home className="w-6 h-6" strokeWidth={2} />
         </Link>
 
         <Link
           to="/shop"
-          className={`flex-1 flex items-center justify-center transition-colors ${
-            isActive("/shop") ? "text-primary" : "text-muted-foreground"
-          }`}
+          className={`${baseClasses} ${isActive("/shop") ? activeClasses : inactiveClasses}`}
           aria-label="Shop"
         >
-          <ShoppingBag className="w-6 h-6" />
+          {isActive("/shop") && <Dot />}
+          <ShoppingBag className="w-6 h-6" strokeWidth={2} />
         </Link>
 
         <button
           onClick={() => setChatOpen((v) => !v)}
-          className="flex-1 flex items-center justify-center text-muted-foreground transition-colors"
+          className={`${baseClasses} text-[hsl(142,70%,49%)]`}
           aria-label="Chat support"
         >
-          <MessageCircle className="w-6 h-6" />
+          <MessageCircle className="w-6 h-6" strokeWidth={2} />
         </button>
 
         {user ? (
           <Link
             to="/dashboard"
-            className={`flex-1 flex items-center justify-center transition-colors ${
-              isActive("/dashboard") ? "text-primary" : "text-muted-foreground"
-            }`}
+            className={`${baseClasses} ${isActive("/dashboard") ? activeClasses : inactiveClasses}`}
             aria-label="My Account"
           >
-            <User className="w-6 h-6" />
+            {isActive("/dashboard") && <Dot />}
+            <User className="w-6 h-6" strokeWidth={2} />
           </Link>
         ) : (
           <button
             onClick={() => setAuthOpen(true)}
-            className="flex-1 flex items-center justify-center text-muted-foreground transition-colors"
+            className={`${baseClasses} ${inactiveClasses}`}
             aria-label="My Account"
           >
-            <User className="w-6 h-6" />
+            <User className="w-6 h-6" strokeWidth={2} />
           </button>
         )}
       </nav>
