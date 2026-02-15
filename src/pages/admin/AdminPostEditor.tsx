@@ -24,6 +24,7 @@ import {
   Redo,
   Upload,
   ImageIcon,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MediaLibraryModal from "@/components/admin/MediaLibraryModal";
@@ -267,7 +268,7 @@ const AdminPostEditor = () => {
             disabled={saving}
             className="gap-1.5"
           >
-            <Save className="w-3.5 h-3.5" />
+            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
             <span className="hidden sm:inline">Save Draft</span>
           </Button>
           <Button
@@ -276,7 +277,7 @@ const AdminPostEditor = () => {
             disabled={saving}
             className="gap-1.5"
           >
-            <Send className="w-3.5 h-3.5" />
+            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
             Publish
           </Button>
         </div>
