@@ -412,17 +412,12 @@ const AIChatWidget = () => {
                                 components={{
                                   a: ({ href, children }) => {
                                     const external = isExternal(href || "");
-                                    const isShopLink = (href || "").includes("/shop/");
                                     return (
                                       <a
                                         href={href}
                                         target={external ? "_blank" : "_self"}
                                         rel={external ? "noopener noreferrer" : undefined}
-                                        className={`underline decoration-1 hover:decoration-2 font-medium transition-all ${
-                                          isShopLink
-                                            ? "text-[hsl(211,100%,50%)] hover:text-[hsl(211,100%,40%)]"
-                                            : "text-[hsl(211,100%,50%)] hover:text-[hsl(211,100%,40%)]"
-                                        }`}
+                                        className="text-[#007AFF] underline decoration-[#007AFF] decoration-1 hover:decoration-2 font-semibold transition-all"
                                       >
                                         {children}
                                       </a>

@@ -49,7 +49,17 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         navigateFallbackDenylist: [/^\/~oauth/],
+        navigateFallback: null,
         runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "pages",
+              networkTimeoutSeconds: 5,
+              expiration: { maxEntries: 50, maxAgeSeconds: 86400 },
+            },
+          },
           {
             urlPattern: /^https:\/\/xukkejkvcgixogvbllmf\.supabase\.co/,
             handler: "NetworkFirst",
@@ -60,7 +70,7 @@ export default defineConfig(({ mode }) => ({
           },
           {
             urlPattern: /\.(png|jpg|jpeg|webp|svg|gif|ico)$/,
-            handler: "CacheFirst",
+            handler: "StaleWhileRevalidate",
             options: {
               cacheName: "images",
               expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
@@ -75,7 +85,6 @@ export default defineConfig(({ mode }) => ({
             },
           },
         ],
-        navigateFallback: "offline.html",
       },
     }),
   ].filter(Boolean),
