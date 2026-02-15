@@ -49,6 +49,7 @@ const AdminSettings = () => {
   const [siteDescription, setSiteDescription] = useState("Your trusted source for verified Facebook Business Managers");
   const [contactEmail, setContactEmail] = useState("info@verifiedbmbuy.com");
   const [whatsapp, setWhatsapp] = useState("+1 234 567 890");
+  const [homepageProductCount, setHomepageProductCount] = useState("6");
 
   // Profile
   const [displayName, setDisplayName] = useState("Admin");
@@ -78,13 +79,14 @@ const AdminSettings = () => {
   const [errors, setErrors] = useState<FieldErrors>({});
   const [activeTab, setActiveTab] = useState("general");
 
-  // Load payment settings & methods
+  // Load payment settings & methods & homepage product count
   useEffect(() => {
     const load = async () => {
       setPaymentLoading(true);
-      const [settingsRes, methodsRes] = await Promise.all([
+      const [settingsRes, methodsRes, countRes] = await Promise.all([
         supabase.from("site_settings").select("key, value").in("key", ["cryptomus_api_key", "cryptomus_merchant_id", "binance_pay_id", "binance_qr_url"]),
         supabase.from("payment_methods").select("*").order("sort_order", { ascending: true }),
+        supabase.from("site_settings").select("value").eq("key", "homepage_product_count").single(),
       ]);
 
       if (settingsRes.data) {
@@ -96,6 +98,7 @@ const AdminSettings = () => {
         }
       }
       if (methodsRes.data) setPaymentMethods(methodsRes.data as PaymentMethod[]);
+      if (countRes.data?.value) setHomepageProductCount(countRes.data.value);
       setPaymentLoading(false);
     };
     load();
@@ -140,6 +143,24 @@ const AdminSettings = () => {
     await new Promise((r) => setTimeout(r, 1000));
     setSaving(false);
     toast.success("Settings saved successfully.");
+  };
+
+  const handleSaveGeneral = async () => {
+    const fieldErrors = validateGeneral();
+    setErrors(fieldErrors);
+    if (Object.keys(fieldErrors).length > 0) { toast.error("Please fill in all required fields."); return; }
+    setSaving(true);
+    try {
+      // Save homepage product count
+      const { data: existing } = await supabase.from("site_settings").select("key").eq("key", "homepage_product_count").single();
+      if (existing) {
+        await supabase.from("site_settings").update({ value: homepageProductCount, updated_at: new Date().toISOString() }).eq("key", "homepage_product_count");
+      } else {
+        await supabase.from("site_settings").insert({ key: "homepage_product_count", value: homepageProductCount });
+      }
+      toast.success("Settings saved successfully.");
+    } catch { toast.error("Failed to save settings."); }
+    finally { setSaving(false); }
   };
 
   const savePaymentSettings = async () => {
@@ -257,7 +278,27 @@ const AdminSettings = () => {
               <label className="text-sm font-medium text-foreground mb-1.5 block">WhatsApp Number</label>
               <Input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} />
             </div>
-            <Button onClick={() => handleSave("general")} disabled={saving} className="gap-2">
+
+            <div className="border-t border-border pt-5">
+              <h3 className="text-base font-semibold text-foreground mb-1">Home Page Layout</h3>
+              <p className="text-xs text-muted-foreground mb-4">Control how many products appear on the home page grid.</p>
+              <div>
+                <Label className="mb-1.5 block">Number of Products to Display</Label>
+                <Select value={homepageProductCount} onValueChange={setHomepageProductCount}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="3">3 Products</SelectItem>
+                    <SelectItem value="6">6 Products</SelectItem>
+                    <SelectItem value="9">9 Products</SelectItem>
+                    <SelectItem value="12">12 Products</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <Button onClick={() => handleSaveGeneral()} disabled={saving} className="gap-2">
               {saving && <Loader2 className="w-4 h-4 animate-spin" />} Save Changes
             </Button>
           </div>
