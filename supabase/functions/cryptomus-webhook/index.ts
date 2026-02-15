@@ -51,21 +51,16 @@ Deno.serve(async (req) => {
 
     // Cryptomus statuses: paid, paid_over, confirm_check, wrong_amount, etc.
     if (status === "paid" || status === "paid_over") {
-      // Get order first to check current status
       const { data: order } = await supabase
         .from("orders")
         .select("id, status")
         .eq("id", orderId)
         .single();
 
-      if (order && order.status !== "paid") {
-        // Mark as paid
+      if (order && order.status !== "completed") {
         await supabase
           .from("orders")
-          .update({
-            status: "paid",
-            paid_at: new Date().toISOString(),
-          })
+          .update({ status: "completed", paid_at: new Date().toISOString() })
           .eq("id", orderId);
 
         // Reduce stock

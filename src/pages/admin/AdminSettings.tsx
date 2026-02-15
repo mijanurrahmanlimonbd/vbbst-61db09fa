@@ -4,13 +4,39 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Loader2, Eye, EyeOff, Plus, Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-interface FieldErrors {
-  [key: string]: boolean;
+interface FieldErrors { [key: string]: boolean; }
+
+interface PaymentMethod {
+  id: string;
+  name: string;
+  slug: string;
+  type: string;
+  is_active: boolean;
+  icon: string | null;
+  description: string | null;
+  instructions: string | null;
+  custom_note: string | null;
+  config: any;
+  sort_order: number;
 }
+
+const emptyMethod = (): Partial<PaymentMethod> => ({
+  name: "", slug: "", type: "manual", is_active: false, icon: "",
+  description: "", instructions: "", custom_note: "", config: {}, sort_order: 0,
+});
 
 const AdminSettings = () => {
   // General
@@ -29,33 +55,48 @@ const AdminSettings = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // Payment
+  // Payment settings
   const [cryptomusApiKey, setCryptomusApiKey] = useState("");
   const [cryptomusMerchantId, setCryptomusMerchantId] = useState("");
   const [binancePayId, setBinancePayId] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(true);
 
+  // Payment methods
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [methodEditorOpen, setMethodEditorOpen] = useState(false);
+  const [editMethod, setEditMethod] = useState<Partial<PaymentMethod>>(emptyMethod());
+
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [activeTab, setActiveTab] = useState("general");
 
-  // Load payment settings
+  // Load payment settings & methods
   useEffect(() => {
-    const loadPaymentSettings = async () => {
+    const load = async () => {
       setPaymentLoading(true);
-      const keys = ["cryptomus_api_key", "cryptomus_merchant_id", "binance_pay_id"];
-      const { data } = await supabase.from("site_settings").select("key, value").in("key", keys);
-      if (data) {
-        for (const row of data) {
+      const [settingsRes, methodsRes] = await Promise.all([
+        supabase.from("site_settings").select("key, value").in("key", ["cryptomus_api_key", "cryptomus_merchant_id", "binance_pay_id"]),
+        supabase.from("payment_methods").select("*").order("sort_order", { ascending: true }),
+      ]);
+
+      if (settingsRes.data) {
+        for (const row of settingsRes.data) {
           if (row.key === "cryptomus_api_key") setCryptomusApiKey(row.value);
           if (row.key === "cryptomus_merchant_id") setCryptomusMerchantId(row.value);
           if (row.key === "binance_pay_id") setBinancePayId(row.value);
         }
       }
+      if (methodsRes.data) setPaymentMethods(methodsRes.data as PaymentMethod[]);
       setPaymentLoading(false);
     };
-    loadPaymentSettings();
+    load();
   }, []);
+
+  const fetchMethods = async () => {
+    const { data } = await supabase.from("payment_methods").select("*").order("sort_order", { ascending: true });
+    if (data) setPaymentMethods(data as PaymentMethod[]);
+  };
 
   const validateGeneral = () => {
     const e: FieldErrors = {};
@@ -85,13 +126,8 @@ const AdminSettings = () => {
     if (tab === "general") fieldErrors = validateGeneral();
     else if (tab === "profile") fieldErrors = validateProfile();
     else if (tab === "security") fieldErrors = validateSecurity();
-
     setErrors(fieldErrors);
-    if (Object.keys(fieldErrors).length > 0) {
-      toast.error("Please fill in all required fields.");
-      return;
-    }
-
+    if (Object.keys(fieldErrors).length > 0) { toast.error("Please fill in all required fields."); return; }
     setSaving(true);
     await new Promise((r) => setTimeout(r, 1000));
     setSaving(false);
@@ -108,31 +144,67 @@ const AdminSettings = () => {
       ].filter((s) => s.value);
 
       for (const setting of settings) {
-        const { data: existing } = await supabase
-          .from("site_settings")
-          .select("key")
-          .eq("key", setting.key)
-          .single();
-
+        const { data: existing } = await supabase.from("site_settings").select("key").eq("key", setting.key).single();
         if (existing) {
           await supabase.from("site_settings").update({ value: setting.value, updated_at: new Date().toISOString() }).eq("key", setting.key);
         } else {
           await supabase.from("site_settings").insert(setting);
         }
       }
-
       toast.success("Payment settings saved!");
-    } catch {
-      toast.error("Failed to save payment settings.");
-    } finally {
-      setSaving(false);
+    } catch { toast.error("Failed to save payment settings."); }
+    finally { setSaving(false); }
+  };
+
+  const toggleMethod = async (method: PaymentMethod) => {
+    const { error } = await supabase.from("payment_methods").update({ is_active: !method.is_active }).eq("id", method.id);
+    if (error) toast.error("Failed to update.");
+    else { toast.success(`${method.name} ${!method.is_active ? "enabled" : "disabled"}.`); fetchMethods(); }
+  };
+
+  const openMethodEditor = (m?: PaymentMethod) => {
+    setEditMethod(m ? { ...m } : emptyMethod());
+    setMethodEditorOpen(true);
+  };
+
+  const saveMethod = async () => {
+    if (!editMethod.name?.trim() || !editMethod.slug?.trim()) {
+      toast.error("Name and slug are required.");
+      return;
     }
+    setSaving(true);
+    const payload = {
+      name: editMethod.name!,
+      slug: editMethod.slug!,
+      type: editMethod.type || "manual",
+      is_active: editMethod.is_active || false,
+      icon: editMethod.icon || null,
+      description: editMethod.description || null,
+      instructions: editMethod.instructions || null,
+      custom_note: editMethod.custom_note || null,
+      sort_order: editMethod.sort_order || 0,
+    };
+
+    if (editMethod.id) {
+      const { error } = await supabase.from("payment_methods").update(payload).eq("id", editMethod.id);
+      if (error) toast.error("Failed to update."); else toast.success("Payment method updated.");
+    } else {
+      const { error } = await supabase.from("payment_methods").insert(payload);
+      if (error) toast.error(error.message?.includes("duplicate") ? "Slug must be unique." : "Failed to create.");
+      else toast.success("Payment method created.");
+    }
+    setSaving(false);
+    setMethodEditorOpen(false);
+    fetchMethods();
+  };
+
+  const deleteMethod = async (id: string) => {
+    const { error } = await supabase.from("payment_methods").delete().eq("id", id);
+    if (error) toast.error("Failed to delete."); else { toast.success("Deleted."); fetchMethods(); }
   };
 
   const inputClass = (field: string) =>
     cn(errors[field] && "border-destructive ring-destructive focus-visible:ring-destructive");
-
-  const [activeTab, setActiveTab] = useState("general");
 
   return (
     <div className="space-y-6">
@@ -142,6 +214,7 @@ const AdminSettings = () => {
         <TabsList className="bg-secondary/50">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="payment">Payment</TabsTrigger>
+          <TabsTrigger value="methods">Payment Methods</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="profile">Profile</TabsTrigger>
         </TabsList>
@@ -173,7 +246,7 @@ const AdminSettings = () => {
           </div>
         </TabsContent>
 
-        {/* Payment */}
+        {/* Payment Settings */}
         <TabsContent value="payment">
           <div className="bg-background rounded-xl border border-border p-6 space-y-6 mt-4">
             {paymentLoading ? (
@@ -191,18 +264,8 @@ const AdminSettings = () => {
                     <div>
                       <label className="text-sm font-medium text-foreground mb-1.5 block">API Key</label>
                       <div className="relative">
-                        <Input
-                          type={showApiKey ? "text" : "password"}
-                          value={cryptomusApiKey}
-                          onChange={(e) => setCryptomusApiKey(e.target.value)}
-                          placeholder="Enter Cryptomus API Key"
-                          className="pr-10"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowApiKey(!showApiKey)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                        >
+                        <Input type={showApiKey ? "text" : "password"} value={cryptomusApiKey} onChange={(e) => setCryptomusApiKey(e.target.value)} placeholder="Enter Cryptomus API Key" className="pr-10" />
+                        <button type="button" onClick={() => setShowApiKey(!showApiKey)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                           {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
@@ -212,7 +275,7 @@ const AdminSettings = () => {
 
                 <div className="border-t border-border pt-6">
                   <h3 className="text-base font-semibold text-foreground mb-1">Binance Pay (Manual)</h3>
-                  <p className="text-xs text-muted-foreground mb-4">Your Binance Pay ID will be shown to customers for manual transfers.</p>
+                  <p className="text-xs text-muted-foreground mb-4">Your Binance Pay ID shown to customers for manual transfers.</p>
                   <div>
                     <label className="text-sm font-medium text-foreground mb-1.5 block">Binance Pay ID</label>
                     <Input value={binancePayId} onChange={(e) => setBinancePayId(e.target.value)} placeholder="e.g. 895693102" />
@@ -225,6 +288,119 @@ const AdminSettings = () => {
               </>
             )}
           </div>
+        </TabsContent>
+
+        {/* Payment Methods Management */}
+        <TabsContent value="methods">
+          <div className="bg-background rounded-xl border border-border p-6 space-y-6 mt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-semibold text-foreground">Payment Methods</h3>
+                <p className="text-xs text-muted-foreground mt-1">Manage which payment methods appear on the checkout page.</p>
+              </div>
+              <Button onClick={() => openMethodEditor()} size="sm" className="gap-2">
+                <Plus className="w-4 h-4" /> Add Method
+              </Button>
+            </div>
+
+            {paymentLoading ? (
+              <div className="text-center py-8 text-muted-foreground">Loading…</div>
+            ) : (
+              <div className="space-y-3">
+                {paymentMethods.map((pm) => (
+                  <div key={pm.id} className="flex items-center justify-between p-4 rounded-lg border border-border bg-secondary/20">
+                    <div className="flex items-center gap-4">
+                      <Switch checked={pm.is_active} onCheckedChange={() => toggleMethod(pm)} />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{pm.icon}</span>
+                          <span className="font-medium text-foreground">{pm.name}</span>
+                          <Badge variant="outline" className="text-xs capitalize">{pm.type}</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">{pm.description}</p>
+                        {pm.custom_note && <p className="text-xs text-primary mt-0.5">{pm.custom_note}</p>}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => openMethodEditor(pm)} className="p-2 rounded text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => deleteMethod(pm.id)} className="p-2 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {paymentMethods.length === 0 && (
+                  <p className="text-center py-8 text-muted-foreground">No payment methods configured.</p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Method Editor Dialog */}
+          <Dialog open={methodEditorOpen} onOpenChange={setMethodEditorOpen}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>{editMethod.id ? "Edit Payment Method" : "Add Payment Method"}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Name *</Label>
+                    <Input value={editMethod.name || ""} onChange={(e) => setEditMethod({ ...editMethod, name: e.target.value })} placeholder="e.g. PayPal" className="mt-1.5" />
+                  </div>
+                  <div>
+                    <Label>Slug *</Label>
+                    <Input value={editMethod.slug || ""} onChange={(e) => setEditMethod({ ...editMethod, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "") })} placeholder="e.g. paypal" className="mt-1.5 font-mono" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Type</Label>
+                    <Select value={editMethod.type || "manual"} onValueChange={(v) => setEditMethod({ ...editMethod, type: v })}>
+                      <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="manual">Manual (Proof Upload)</SelectItem>
+                        <SelectItem value="api">API (Automatic)</SelectItem>
+                        <SelectItem value="placeholder">Placeholder (Coming Soon)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Icon (Emoji)</Label>
+                    <Input value={editMethod.icon || ""} onChange={(e) => setEditMethod({ ...editMethod, icon: e.target.value })} placeholder="e.g. 💳" className="mt-1.5" />
+                  </div>
+                </div>
+                <div>
+                  <Label>Description</Label>
+                  <Input value={editMethod.description || ""} onChange={(e) => setEditMethod({ ...editMethod, description: e.target.value })} placeholder="Short description for customers" className="mt-1.5" />
+                </div>
+                <div>
+                  <Label>Instructions (HTML)</Label>
+                  <Textarea value={editMethod.instructions || ""} onChange={(e) => setEditMethod({ ...editMethod, instructions: e.target.value })} placeholder="Payment instructions shown during checkout…" rows={4} className="mt-1.5" />
+                </div>
+                <div>
+                  <Label>Custom Note</Label>
+                  <Input value={editMethod.custom_note || ""} onChange={(e) => setEditMethod({ ...editMethod, custom_note: e.target.value })} placeholder="e.g. 'Discount for Crypto users!'" className="mt-1.5" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Sort Order</Label>
+                    <Input type="number" value={editMethod.sort_order || 0} onChange={(e) => setEditMethod({ ...editMethod, sort_order: Number(e.target.value) })} className="mt-1.5" />
+                  </div>
+                  <div className="flex items-center gap-3 pt-6">
+                    <Switch checked={editMethod.is_active || false} onCheckedChange={(v) => setEditMethod({ ...editMethod, is_active: v })} />
+                    <Label>Active</Label>
+                  </div>
+                </div>
+                <Button onClick={saveMethod} disabled={saving} className="w-full gap-2">
+                  {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {editMethod.id ? "Update Method" : "Create Method"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
 
         {/* Security */}
