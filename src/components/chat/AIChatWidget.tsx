@@ -130,7 +130,7 @@ const AIChatWidget = () => {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 z-50 hidden lg:flex w-14 h-14 bg-primary rounded-full items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110"
+          className="fixed bottom-[76px] lg:bottom-6 right-4 lg:right-6 z-50 flex w-12 h-12 lg:w-14 lg:h-14 bg-primary rounded-full items-center justify-center shadow-lg hover:shadow-xl transition-all hover:scale-110"
           aria-label="Open AI Chat"
         >
           <Bot className="w-7 h-7 text-primary-foreground" />
