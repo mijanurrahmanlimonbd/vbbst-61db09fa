@@ -16,6 +16,7 @@ import {
 import { Loader2, Eye, EyeOff, Plus, Edit, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import TrackingPixelsTab from "@/components/admin/TrackingPixelsTab";
 
 interface FieldErrors { [key: string]: boolean; }
 
@@ -215,10 +216,11 @@ const AdminSettings = () => {
       <h2 className="text-2xl font-bold text-foreground">Settings</h2>
 
       <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setErrors({}); }}>
-        <TabsList className="bg-secondary/50">
+        <TabsList className="bg-secondary/50 flex-wrap">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="payment">Payment</TabsTrigger>
           <TabsTrigger value="methods">Payment Methods</TabsTrigger>
+          <TabsTrigger value="tracking">Tracking & Pixels</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="profile">Profile</TabsTrigger>
         </TabsList>
@@ -461,6 +463,11 @@ const AdminSettings = () => {
               </div>
             </DialogContent>
           </Dialog>
+        </TabsContent>
+
+        {/* Tracking & Pixels */}
+        <TabsContent value="tracking">
+          <TrackingPixelsTab />
         </TabsContent>
 
         {/* Security */}
