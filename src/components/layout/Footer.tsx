@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Facebook, Instagram, Youtube, Send, MessageCircle } from "lucide-react";
+import { Home, ShoppingBag, FileText, Users, Headphones, Shield, RefreshCw, HelpCircle, Lock, MapPin, MessageCircle, Send, Mail, Clock } from "lucide-react";
 import NewsletterForm from "@/components/newsletter/NewsletterForm";
 import { useBranding } from "@/hooks/useBranding";
 
@@ -9,91 +9,123 @@ const Footer = () => {
   const logoElement = branding.footer_logo ? (
     <img src={branding.footer_logo} alt={branding.site_title} className="h-8 max-w-[160px] object-contain" />
   ) : branding.header_logo ? (
-    <img src={branding.header_logo} alt={branding.site_title} className="h-8 max-w-[160px] object-contain brightness-0 invert" />
+    <img src={branding.header_logo} alt={branding.site_title} className="h-8 max-w-[160px] object-contain" />
   ) : (
     <div className="flex items-center gap-2">
       <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-bold text-sm">VS</div>
-      <span className="text-lg font-bold">VBB <span className="text-primary">STORE</span></span>
+      <span className="text-lg font-bold text-foreground">VBB <span className="text-primary">STORE</span></span>
     </div>
   );
 
+  const quickLinks = [
+    { to: "/", label: "Homepage", icon: <Home className="w-4 h-4" /> },
+    { to: "/shop", label: "All Products", icon: <ShoppingBag className="w-4 h-4" /> },
+    { to: "/blog", label: "Latest Articles", icon: <FileText className="w-4 h-4" /> },
+    { to: "/about", label: "About VBB STORE", icon: <Users className="w-4 h-4" /> },
+    { to: "/contact", label: "Support & Contact", icon: <Headphones className="w-4 h-4" /> },
+  ];
+
+  const trustLinks = [
+    { to: "/terms", label: "Terms of Service", icon: <Shield className="w-4 h-4" /> },
+    { to: "/privacy", label: "Privacy Policy", icon: <Lock className="w-4 h-4" /> },
+    { to: "/refund-policy", label: "Refund Policy", icon: <RefreshCw className="w-4 h-4" /> },
+    { to: "/replacement-guarantee", label: "Replacement Guarantee", icon: <Shield className="w-4 h-4" /> },
+    { to: "/faq", label: "FAQ", icon: <HelpCircle className="w-4 h-4" /> },
+  ];
+
   return (
-    <footer className="bg-foreground text-primary-foreground">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Newsletter Section */}
-        <div className="mb-12 pb-12 border-b border-primary-foreground/10">
+    <footer className="bg-secondary/40 border-t border-border">
+      {/* Newsletter */}
+      <div className="border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="max-w-xl mx-auto text-center">
-            <h3 className="text-xl font-bold mb-2">Join our Newsletter</h3>
-            <p className="text-sm text-primary-foreground/70 mb-4">
-              Get exclusive deals, tips & updates delivered to your inbox weekly.
-            </p>
+            <h3 className="text-lg font-bold text-foreground mb-1">Join our Newsletter</h3>
+            <p className="text-sm text-muted-foreground mb-4">Get exclusive deals, tips & updates delivered to your inbox weekly.</p>
             <NewsletterForm variant="footer" />
           </div>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+      {/* Main columns */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+          {/* Col 1: Brand */}
           <div>
-            <div className="mb-4">
-              {logoElement}
-            </div>
-            <p className="text-sm text-primary-foreground/70 mb-4">
-              Your trusted source for verified Facebook Business Managers, WhatsApp API accounts, and premium digital advertising products.
+            <div className="mb-4">{logoElement}</div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Trusted provider of verified Meta Business Managers and WhatsApp Business API accounts since 2020. Serving 10,000+ advertisers globally.
             </p>
-            <div className="flex gap-3">
-              <a href="https://www.facebook.com/verifiedbmbuy" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary transition-colors"><Facebook className="w-4 h-4" /></a>
-              <a href="https://www.instagram.com/verifiedbmbuy" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary transition-colors"><Instagram className="w-4 h-4" /></a>
-              <a href="https://x.com/verifiedbmbuy" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary transition-colors"><svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-              <a href="https://www.youtube.com/@verifiedbmbuy" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary transition-colors"><Youtube className="w-4 h-4" /></a>
-              <a href="https://t.me/Verifiedbmbuy" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary transition-colors"><Send className="w-4 h-4" /></a>
-              <a href="https://wa.me/8801302669333" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary transition-colors"><MessageCircle className="w-4 h-4" /></a>
+          </div>
+
+          {/* Col 2: Quick Links */}
+          <div>
+            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Quick Links</h4>
+            <ul className="space-y-1">
+              {quickLinks.map((l) => (
+                <li key={l.to}>
+                  <Link
+                    to={l.to}
+                    className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors"
+                  >
+                    {l.icon}
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Col 3: Trust Center */}
+          <div>
+            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Trust Center</h4>
+            <ul className="space-y-1">
+              {trustLinks.map((l) => (
+                <li key={l.to}>
+                  <Link
+                    to={l.to}
+                    className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors"
+                  >
+                    {l.icon}
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Col 4: Contact */}
+          <div>
+            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Contact Us</h4>
+            <div className="space-y-3">
+              <div className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-primary" />
+                <span>Madergonj, Pirgonj, Rangpur, Bangladesh&nbsp;-&nbsp;5470</span>
+              </div>
+              <a href="https://wa.me/8801302669333" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
+                <MessageCircle className="w-4 h-4 text-[hsl(142,70%,45%)]" />
+                +880 1302 669333
+              </a>
+              <a href="https://t.me/Verifiedbmbuy" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
+                <Send className="w-4 h-4 text-[hsl(200,100%,40%)]" />
+                @Verifiedbmbuy
+              </a>
+              <a href="mailto:info@verifiedbmbuy.com" className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
+                <Mail className="w-4 h-4 text-primary" />
+                info@verifiedbmbuy.com
+              </a>
+              <div className="inline-flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-full mt-1">
+                <Clock className="w-3.5 h-3.5" />
+                Available 24/7
+              </div>
             </div>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2 text-sm text-primary-foreground/70">
-              <li><Link to="/" className="hover:text-primary-foreground transition-colors">Home</Link></li>
-              <li><Link to="/shop" className="hover:text-primary-foreground transition-colors">Shop</Link></li>
-              <li><Link to="/blog" className="hover:text-primary-foreground transition-colors">Blog</Link></li>
-              <li><Link to="/contact" className="hover:text-primary-foreground transition-colors">Contact Us</Link></li>
-              <li><Link to="/about" className="hover:text-primary-foreground transition-colors">About Us</Link></li>
-              <li><Link to="/faq" className="hover:text-primary-foreground transition-colors">FAQ</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4">Policies</h4>
-            <ul className="space-y-2 text-sm text-primary-foreground/70">
-              <li><Link to="/terms" className="hover:text-primary-foreground transition-colors">Terms of Service</Link></li>
-              <li><Link to="/privacy" className="hover:text-primary-foreground transition-colors">Privacy Policy</Link></li>
-              <li><Link to="/refund-policy" className="hover:text-primary-foreground transition-colors">Refund Policy</Link></li>
-              <li><Link to="/replacement-guarantee" className="hover:text-primary-foreground transition-colors">Replacement Guarantee</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4">Products</h4>
-            <ul className="space-y-2 text-sm text-primary-foreground/70">
-              <li><Link to="/shop" className="hover:text-primary-foreground transition-colors">Verified Business Managers</Link></li>
-              <li><Link to="/shop" className="hover:text-primary-foreground transition-colors">WhatsApp Business API</Link></li>
-              <li><Link to="/shop" className="hover:text-primary-foreground transition-colors">Facebook Ads Accounts</Link></li>
-              <li><Link to="/shop" className="hover:text-primary-foreground transition-colors">TikTok Ads</Link></li>
-              <li><Link to="/shop" className="hover:text-primary-foreground transition-colors">Reinstated Profiles</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4">Contact</h4>
-            <ul className="space-y-2 text-sm text-primary-foreground/70">
-              <li>VBB STORE, Madergonj, Pirgonj, Rangpur, Bangladesh - 5470</li>
-              <li><a href="https://wa.me/8801302669333" target="_blank" rel="noopener noreferrer" className="hover:text-primary-foreground transition-colors">+880 1302 669333</a></li>
-              <li><a href="mailto:info@verifiedbmbuy.com" className="hover:text-primary-foreground transition-colors">info@verifiedbmbuy.com</a></li>
-            </ul>
           </div>
         </div>
+      </div>
 
-        <div className="mt-12 pt-8 border-t border-primary-foreground/10 text-center text-sm text-primary-foreground/50">
-          © {new Date().getFullYear()} {branding.site_title || "VBB STORE"}. All rights reserved.
+      {/* Copyright */}
+      <div className="border-t border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 text-center text-xs text-muted-foreground">
+          © {new Date().getFullYear()} {branding.site_title || "VBB STORE"}. All rights reserved. | Verified BM &amp; WhatsApp API Provider
         </div>
       </div>
     </footer>
