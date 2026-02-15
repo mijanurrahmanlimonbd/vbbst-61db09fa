@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import ReactMarkdown from "react-markdown";
 
 type Msg = { role: "user" | "assistant" | "admin"; content: string };
 
@@ -349,7 +350,22 @@ const AIChatWidget = () => {
                       {m.role === "admin" && (
                         <span className="text-[10px] font-semibold text-[hsl(210,100%,50%)] block mb-0.5">Admin</span>
                       )}
-                      {m.content}
+                      {m.role === "user" ? (
+                        m.content
+                      ) : (
+                        <ReactMarkdown
+                          components={{
+                            a: ({ href, children }) => (
+                              <a href={href} target="_blank" rel="noopener noreferrer" className="underline font-medium text-primary-foreground/90 hover:text-primary-foreground">
+                                {children}
+                              </a>
+                            ),
+                            p: ({ children }) => <span>{children}</span>,
+                          }}
+                        >
+                          {m.content}
+                        </ReactMarkdown>
+                      )}
                     </div>
                   </div>
                 ))}
