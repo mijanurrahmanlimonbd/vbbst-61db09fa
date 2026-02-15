@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import DOMPurify from "dompurify";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
+import JsonLdSchema from "@/components/seo/JsonLdSchema";
 import CommentSection from "@/components/blog/CommentSection";
 import { ArrowLeft, Clock } from "lucide-react";
 
@@ -26,22 +27,19 @@ const BlogPost = () => {
 
   return (
     <Layout>
-      {/* Article JSON-LD Schema */}
-      {(() => {
-        const jsonLd = {
-          "@context": "https://schema.org",
-          "@type": "Article",
-          headline: post.title,
-          description: (post as any).meta_description || post.excerpt || "",
-          image: post.featured_image || undefined,
-          author: { "@type": "Person", name: post.author || "Admin" },
-          publisher: { "@type": "Organization", name: "VBB STORE", logo: { "@type": "ImageObject", url: "https://vbbstore.com/favicon.png" } },
-          datePublished: post.published_at,
-          dateModified: post.created_at,
-          mainEntityOfPage: { "@type": "WebPage", "@id": `https://vbbstore.com/blog/${post.slug}` },
-        };
-        return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />;
-      })()}
+      <JsonLdSchema
+        pageTitle={post.meta_title || post.title}
+        pageDescription={post.meta_description || post.excerpt || ""}
+        pageImage={post.featured_image}
+        datePublished={post.published_at}
+        dateModified={post.created_at}
+        article={post}
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Blog", url: "/blog" },
+          { name: post.title, url: `/blog/${post.slug}` },
+        ]}
+      />
       <SEOHead
         title={(post as any).meta_title || post.title}
         description={(post as any).meta_description || post.excerpt || `Read ${post.title} on VBB STORE blog.`}

@@ -1,5 +1,6 @@
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
+import JsonLdSchema from "@/components/seo/JsonLdSchema";
 import PageHeader from "@/components/layout/PageHeader";
 import { Clock, Users, Globe, Star, Shield, Zap, Headphones, RefreshCw, DollarSign, TrendingUp, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -34,6 +35,11 @@ const About = () => {
   return (
     <Layout>
       <SEOHead title="About Us" description="Learn about VBB STORE — trusted by 10,000+ advertisers in 50+ countries." />
+      <JsonLdSchema
+        pageTitle="About Us"
+        pageDescription="Learn about VBB STORE — trusted by 10,000+ advertisers in 50+ countries."
+        breadcrumbs={[{ name: "Home", url: "/" }, { name: "About Us", url: "/about" }]}
+      />
       <PageHeader
         breadcrumb="About Us"
         subtitle="ABOUT US"

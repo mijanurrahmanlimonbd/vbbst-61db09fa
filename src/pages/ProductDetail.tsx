@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
+import JsonLdSchema from "@/components/seo/JsonLdSchema";
 import ProductCard from "@/components/shared/ProductCard";
 import { Star, Shield, Zap, Headphones, MessageCircle, Send, ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 
@@ -38,30 +39,6 @@ const ProductDetail = () => {
   const allImages = [product.image_url, ...(product.gallery_images || [])].filter(Boolean);
   const inStock = product.stock_status === "in_stock";
 
-  // JSON-LD Product Schema
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.title,
-    description: product.meta_description || product.description || product.short_description || "",
-    image: allImages,
-    sku: product.sku || undefined,
-    brand: { "@type": "Brand", name: "VBB STORE" },
-    offers: {
-      "@type": "Offer",
-      price: product.sale_price || product.price,
-      priceCurrency: "USD",
-      availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-      url: `https://verifiedbmbuy.com/product/${product.slug}`,
-    },
-    aggregateRating: product.rating ? {
-      "@type": "AggregateRating",
-      ratingValue: product.rating,
-      bestRating: 5,
-      ratingCount: 1,
-    } : undefined,
-  };
-
   return (
     <Layout>
       <SEOHead
@@ -70,8 +47,17 @@ const ProductDetail = () => {
         ogImage={product.image_url || undefined}
         ogType="product"
       />
-      {/* JSON-LD */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <JsonLdSchema
+        pageTitle={product.meta_title || product.title}
+        pageDescription={product.meta_description || product.description || ""}
+        pageImage={product.image_url}
+        product={product}
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Shop", url: "/shop" },
+          { name: product.title, url: `/product/${product.slug}` },
+        ]}
+      />
 
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
