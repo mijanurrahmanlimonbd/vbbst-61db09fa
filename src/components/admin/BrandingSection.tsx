@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { convertToWebP } from "@/lib/imageUtils";
 import { Button } from "@/components/ui/button";
 import { Loader2, Upload, X, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -42,21 +43,27 @@ const BrandingSection = () => {
 
     setUploading((p) => ({ ...p, [key]: true }));
     try {
-      // Compress if it's a large image (not SVG/ICO)
-      let uploadFile: File | Blob = file;
-      if (file.type.startsWith("image/") && !file.type.includes("svg") && !file.name.endsWith(".ico") && file.size > 200 * 1024) {
-        uploadFile = await compressImage(file, key === "favicon" ? 128 : 800);
+      // Convert to WebP first (skip SVG/ICO)
+      let processedFile: File | Blob = file;
+      if (file.type.startsWith("image/") && !file.type.includes("svg") && !file.name.endsWith(".ico")) {
+        processedFile = await convertToWebP(file, 0.8);
       }
 
-      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      // Compress if still large (not SVG/ICO)
+      if (processedFile instanceof File && processedFile.type.startsWith("image/") && !processedFile.type.includes("svg") && !processedFile.name.endsWith(".ico") && processedFile.size > 200 * 1024) {
+        processedFile = await compressImage(processedFile, key === "favicon" ? 128 : 800);
+      }
+
+      const isWebP = processedFile instanceof File && processedFile.type === "image/webp";
+      const ext = isWebP ? "webp" : (file.name.split(".").pop()?.toLowerCase() || "png");
       const path = `${key}.${ext}`;
 
       // Delete old file if exists
       await supabase.storage.from("branding").remove([path]);
 
-      const { error: upErr } = await supabase.storage.from("branding").upload(path, uploadFile, {
+      const { error: upErr } = await supabase.storage.from("branding").upload(path, processedFile, {
         upsert: true,
-        contentType: file.type,
+        contentType: isWebP ? "image/webp" : file.type,
       });
       if (upErr) throw upErr;
 
