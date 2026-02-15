@@ -21,7 +21,7 @@ const ContactMapSection = () => (
               { icon: <Globe className="w-5 h-5 text-primary" />, label: "Online Store", desc: "vbbstore.verifiedbmbuy.com – Shop 24/7 from anywhere in the world", href: "https://vbbstore.verifiedbmbuy.com/" },
               { icon: <MessageCircle className="w-5 h-5 text-primary" />, label: "WhatsApp", desc: "+880 1302 669333 – Chat with us anytime", href: "https://wa.me/8801302669333" },
               { icon: <Send className="w-5 h-5 text-primary" />, label: "Telegram", desc: "@Verifiedbmbuy – Message us on Telegram", href: "https://t.me/Verifiedbmbuy" },
-              { icon: <Mail className="w-5 h-5 text-primary" />, label: "Email", desc: "info@vbbstore.verifiedbmbuy.com", href: "mailto:info@vbbstore.verifiedbmbuy.com" },
+              { icon: <Mail className="w-5 h-5 text-primary" />, label: "Email", desc: "info@verifiedbmservices.com", href: "mailto:info@verifiedbmservices.com" },
             ].map((c, i) => (
               <a key={i} href={c.href} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 p-4 bg-card border border-border rounded-lg hover:shadow-md transition-shadow">
                 {c.icon}

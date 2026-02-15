@@ -47,7 +47,7 @@ const AdminSettings = () => {
   // General
   const [siteTitle, setSiteTitle] = useState("Verified BM services");
   const [siteDescription, setSiteDescription] = useState("Your trusted source for verified Facebook Business Managers");
-  const [contactEmail, setContactEmail] = useState("info@verifiedbmbuy.com");
+  const [contactEmail, setContactEmail] = useState("info@verifiedbmservices.com");
   const [whatsapp, setWhatsapp] = useState("+1 234 567 890");
   const [homepageProductCount, setHomepageProductCount] = useState("6");
 

@@ -106,7 +106,7 @@ const sections: PolicySection[] = [
         <ul>
           <li>WhatsApp: +880 1302 669333 (fastest)</li>
           <li>Telegram: @Verifiedbmbuy</li>
-          <li>Email: info@verifiedbmbuy.com</li>
+          <li>Email: info@verifiedbmservices.com</li>
         </ul>
         <p>Please include your order ID and a description of the issue when contacting us.</p>
       </>
