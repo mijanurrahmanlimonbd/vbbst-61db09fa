@@ -18,4 +18,29 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Minify with esbuild (fastest) — removes dead code, whitespace, shortens names
+    minify: "esbuild",
+    // Strip console.log and debugger in production
+    esbuild:
+      mode === "production"
+        ? {
+            drop: ["console", "debugger"],
+          }
+        : undefined,
+    // Chunk splitting for better caching
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom"],
+          ui: ["@radix-ui/react-dialog", "@radix-ui/react-tabs", "@radix-ui/react-tooltip"],
+          query: ["@tanstack/react-query"],
+        },
+      },
+    },
+    // Enable source maps for debugging (won't ship to users)
+    sourcemap: mode !== "production",
+    // Target modern browsers
+    target: "es2020",
+  },
 }));
