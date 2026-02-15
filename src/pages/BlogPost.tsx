@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import DOMPurify from "dompurify";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
+import CommentSection from "@/components/blog/CommentSection";
 import { ArrowLeft, Clock } from "lucide-react";
 
 const BlogPost = () => {
@@ -54,6 +55,8 @@ const BlogPost = () => {
             className="prose prose-lg max-w-none text-foreground"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content || post.excerpt || "") }}
           />
+          
+          <CommentSection postId={post.id} />
         </div>
       </section>
     </Layout>
