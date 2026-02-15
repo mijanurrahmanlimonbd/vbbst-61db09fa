@@ -18,6 +18,8 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import TrackingPixelsTab from "@/components/admin/TrackingPixelsTab";
 import BrandingSection from "@/components/admin/BrandingSection";
+import ActivityLogsTab from "@/components/admin/ActivityLogsTab";
+import MaintenanceTab from "@/components/admin/MaintenanceTab";
 
 interface FieldErrors { [key: string]: boolean; }
 
@@ -223,6 +225,8 @@ const AdminSettings = () => {
           <TabsTrigger value="payment">Payment</TabsTrigger>
           <TabsTrigger value="methods">Payment Methods</TabsTrigger>
           <TabsTrigger value="tracking">Tracking & Pixels</TabsTrigger>
+          <TabsTrigger value="maintenance">Maintenance & Backup</TabsTrigger>
+          <TabsTrigger value="logs">Activity Logs</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="profile">Profile</TabsTrigger>
         </TabsList>
@@ -477,6 +481,16 @@ const AdminSettings = () => {
         {/* Tracking & Pixels */}
         <TabsContent value="tracking">
           <TrackingPixelsTab />
+        </TabsContent>
+
+        {/* Maintenance & Backup */}
+        <TabsContent value="maintenance">
+          <MaintenanceTab />
+        </TabsContent>
+
+        {/* Activity Logs */}
+        <TabsContent value="logs">
+          <ActivityLogsTab />
         </TabsContent>
 
         {/* Security */}

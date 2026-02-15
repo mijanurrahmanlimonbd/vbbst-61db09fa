@@ -10,6 +10,7 @@ import {
   Loader2,
   CheckSquare,
   Square,
+  Copy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -455,6 +456,20 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
               Select Image
             </Button>
           )}
+
+          {/* Copy URL */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full gap-2"
+            onClick={() => {
+              navigator.clipboard.writeText(selectedFile.url);
+              toast.success("URL copied to clipboard!");
+            }}
+          >
+            <Copy className="w-3.5 h-3.5" />
+            Copy URL
+          </Button>
 
           {/* Delete */}
           <Button
