@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, Search, Package, Edit, Image as ImageIcon, X, Check } from "lucide-react";
+import { Plus, Trash2, Search, Package, Edit, Image as ImageIcon, X, Check, PlusCircle, MinusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +26,11 @@ import { toast } from "sonner";
 
 const CATEGORIES = ["Verified BM", "WhatsApp API", "Facebook Accounts", "TikTok Ads", "Agency Accounts"];
 
+interface ProductAttribute {
+  key: string;
+  value: string;
+}
+
 interface Product {
   id: string;
   title: string;
@@ -47,6 +52,7 @@ interface Product {
   meta_title: string | null;
   meta_description: string | null;
   created_at: string;
+  attributes?: Record<string, string> | null;
 }
 
 const generateSlug = (title: string) =>
@@ -72,6 +78,7 @@ const AdminProducts = () => {
   const [mediaOpen, setMediaOpen] = useState(false);
   const [mediaTarget, setMediaTarget] = useState<"main" | "gallery">("main");
   const [skuError, setSkuError] = useState("");
+  const [attributes, setAttributes] = useState<ProductAttribute[]>([]);
 
   // Inline editing
   const [inlineEditId, setInlineEditId] = useState<string | null>(null);
@@ -87,8 +94,14 @@ const AdminProducts = () => {
 
   useEffect(() => { fetchProducts(); }, []);
 
-  const openNew = () => { setEditProduct(emptyProduct()); setSkuError(""); setEditorOpen(true); };
-  const openEdit = (p: Product) => { setEditProduct({ ...p, gallery_images: p.gallery_images || [] }); setSkuError(""); setEditorOpen(true); };
+  const openNew = () => { setEditProduct(emptyProduct()); setSkuError(""); setAttributes([]); setEditorOpen(true); };
+  const openEdit = (p: Product) => {
+    setEditProduct({ ...p, gallery_images: p.gallery_images || [] });
+    setSkuError("");
+    const attrs = p.attributes || {};
+    setAttributes(Object.entries(attrs).map(([key, value]) => ({ key, value: String(value) })));
+    setEditorOpen(true);
+  };
 
   const validateProduct = () => {
     if (!editProduct.title?.trim()) { toast.error("Title is required."); return false; }
@@ -125,6 +138,7 @@ const AdminProducts = () => {
       stock_status: editProduct.stock_status || "in_stock",
       meta_title: editProduct.meta_title || null,
       meta_description: editProduct.meta_description || null,
+      attributes: attributes.reduce((acc, a) => { if (a.key.trim()) acc[a.key.trim()] = a.value; return acc; }, {} as Record<string, string>),
     };
 
     if (editProduct.id) {
@@ -341,6 +355,7 @@ const AdminProducts = () => {
             <TabsList className="w-full">
               <TabsTrigger value="basic" className="flex-1">Basic Info</TabsTrigger>
               <TabsTrigger value="pricing" className="flex-1">Pricing & Stock</TabsTrigger>
+              <TabsTrigger value="attributes" className="flex-1">Attributes</TabsTrigger>
               <TabsTrigger value="images" className="flex-1">Images</TabsTrigger>
               <TabsTrigger value="seo" className="flex-1">SEO</TabsTrigger>
             </TabsList>
@@ -434,6 +449,48 @@ const AdminProducts = () => {
                 <input type="checkbox" checked={editProduct.is_featured || false} onChange={(e) => setEditProduct({ ...editProduct, is_featured: e.target.checked })} className="rounded border-border" />
                 <span className="text-foreground">Featured Product</span>
               </label>
+            </TabsContent>
+
+            <TabsContent value="attributes" className="space-y-4 pt-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-base font-semibold">Product Attributes</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">Add custom key-value pairs like "Country: USA", "Spend Limit: $500/day"</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => setAttributes((prev) => [...prev, { key: "", value: "" }])} className="gap-1.5">
+                  <PlusCircle className="w-4 h-4" /> Add
+                </Button>
+              </div>
+              {attributes.length === 0 ? (
+                <div className="py-8 text-center text-muted-foreground text-sm border border-dashed border-border rounded-lg">
+                  No attributes yet. Click "Add" to create one.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {attributes.map((attr, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <Input
+                        value={attr.key}
+                        onChange={(e) => setAttributes((prev) => prev.map((a, j) => j === i ? { ...a, key: e.target.value } : a))}
+                        placeholder="Key (e.g. Country)"
+                        className="flex-1"
+                      />
+                      <Input
+                        value={attr.value}
+                        onChange={(e) => setAttributes((prev) => prev.map((a, j) => j === i ? { ...a, value: e.target.value } : a))}
+                        placeholder="Value (e.g. USA)"
+                        className="flex-1"
+                      />
+                      <button
+                        onClick={() => setAttributes((prev) => prev.filter((_, j) => j !== i))}
+                        className="p-2 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0"
+                      >
+                        <MinusCircle className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="images" className="space-y-4 pt-4">
