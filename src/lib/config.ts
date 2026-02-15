@@ -4,7 +4,7 @@
  * in development, preview, and production.
  */
 
-export const SITE_NAME = "Verified BM service";
+export const SITE_NAME = "Verified BM services";
 
 /**
  * Returns the base URL of the site.

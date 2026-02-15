@@ -12,7 +12,7 @@ const reasons = [
 const WhyVBBStore = () => (
   <section className="py-16 bg-background">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <p className="text-sm font-semibold tracking-widest uppercase text-primary text-center">Why Verified BM service?</p>
+      <p className="text-sm font-semibold tracking-widest uppercase text-primary text-center">Why Verified BM services?</p>
       <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mt-2">Why People Keep Coming Back</h2>
       <p className="text-muted-foreground text-center mt-4">We're not the only ones selling verified BMs — but we're the ones people trust.</p>
 

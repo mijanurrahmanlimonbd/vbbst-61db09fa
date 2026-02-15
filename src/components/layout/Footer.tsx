@@ -13,7 +13,7 @@ const Footer = () => {
   ) : (
     <div className="flex items-center gap-2">
       <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-bold text-sm">V</div>
-      <span className="text-lg font-bold text-foreground">Verified BM <span className="text-primary">service</span></span>
+      <span className="text-lg font-bold text-foreground">Verified BM <span className="text-primary">services</span></span>
     </div>
   );
 
@@ -125,7 +125,7 @@ const Footer = () => {
       {/* Copyright */}
       <div className="border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} {branding.site_title || "Verified BM service"}. All rights reserved. | Verified BM &amp; WhatsApp API Provider
+          © {new Date().getFullYear()} {branding.site_title || "Verified BM services"}. All rights reserved. | Verified BM &amp; WhatsApp API Provider
         </div>
       </div>
     </footer>

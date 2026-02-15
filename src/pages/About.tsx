@@ -36,10 +36,10 @@ const About = () => {
 
   return (
     <Layout>
-      <SEOHead title="About Us" description="Learn about Verified BM service — trusted by 10,000+ advertisers in 50+ countries." />
+      <SEOHead title="About Us" description="Learn about Verified BM services — trusted by 10,000+ advertisers in 50+ countries." />
       <JsonLdSchema
         pageTitle="About Us"
-        pageDescription="Learn about Verified BM service — trusted by 10,000+ advertisers in 50+ countries."
+        pageDescription="Learn about Verified BM services — trusted by 10,000+ advertisers in 50+ countries."
         breadcrumbs={[{ name: "Home", url: "/" }, { name: "About Us", url: "/about" }]}
       />
       <PageHeader
@@ -78,14 +78,14 @@ const About = () => {
           <EditableText
             fieldKey="about_heading"
             value={c.about_heading || ""}
-            fallback="About Verified BM service — Your Trusted Source to Buy Verified BM"
+            fallback="About Verified BM services — Your Trusted Source to Buy Verified BM"
             as="h2"
             className="text-3xl font-bold text-foreground"
           />
           <EditableText
             fieldKey="about_text"
             value={c.about_text || ""}
-            fallback="Verified BM service has been the leading provider of verified Facebook Business Manager accounts, WhatsApp Business API accounts, and premium digital advertising accounts since 2019."
+            fallback="Verified BM services has been the leading provider of verified Facebook Business Manager accounts, WhatsApp Business API accounts, and premium digital advertising accounts since 2019."
             as="div"
             className="text-muted-foreground mt-6 prose prose-sm max-w-none mx-auto"
             richText
@@ -96,7 +96,7 @@ const About = () => {
       {/* Features */}
       <section className="py-16 bg-secondary/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-foreground text-center">What Sets Verified BM service Apart</h2>
+          <h2 className="text-2xl font-bold text-foreground text-center">What Sets Verified BM services Apart</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
             {features.map((f, i) => (
               <div key={i} className="bg-card border border-border rounded-xl p-6">
@@ -128,8 +128,8 @@ const About = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-sm font-semibold tracking-widest uppercase text-primary">Our Story</p>
           <EditableText fieldKey="story_title" value={c.story_title || ""} fallback="Your Trusted Partner in Meta Advertising" as="h2" className="text-3xl font-bold text-foreground mt-2" />
-          <EditableText fieldKey="story_text" value={c.story_text || ""} fallback="Verified BM service started with a simple idea: advertisers need reliable, verified accounts without the hassle. Every account we sell comes with genuine documentation. Over the past 5+ years, we've served more than 10,000 customers in 50+ countries." as="div" className="text-muted-foreground mt-6 prose prose-sm max-w-none mx-auto" richText />
-          <p className="text-sm text-muted-foreground mt-6">Verified BM service, Madergonj, Pirgonj, Rangpur, Bangladesh - 5470</p>
+          <EditableText fieldKey="story_text" value={c.story_text || ""} fallback="Verified BM services started with a simple idea: advertisers need reliable, verified accounts without the hassle. Every account we sell comes with genuine documentation. Over the past 5+ years, we've served more than 10,000 customers in 50+ countries." as="div" className="text-muted-foreground mt-6 prose prose-sm max-w-none mx-auto" richText />
+          <p className="text-sm text-muted-foreground mt-6">Verified BM services, Madergonj, Pirgonj, Rangpur, Bangladesh - 5470</p>
         </div>
       </section>
 

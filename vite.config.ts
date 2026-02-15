@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => ({
       registerType: "autoUpdate",
       includeAssets: ["favicon.png", "favicon.ico", "pwa-192x192.png", "pwa-512x512.png", "offline.html"],
       manifest: {
-        name: "Verified BM service",
+        name: "Verified BM services",
         short_name: "VBM",
         description: "Buy verified BM, WhatsApp API, Facebook Ads accounts. Instant delivery, 7-day guarantee, 24/7 support.",
         start_url: "/",

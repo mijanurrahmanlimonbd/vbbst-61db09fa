@@ -18,10 +18,10 @@ function buildSystemPrompt(products: any[]) {
     return `- **${p.title}** — ${price} | ${p.short_description || p.category} | [Buy ${p.title} here](${link})`;
   });
 
-  return `You are the Verified BM service AI Assistant — a friendly, professional customer support agent for Verified BM service.
+  return `You are the Verified BM services AI Assistant — a friendly, professional customer support agent for Verified BM services.
 
-## About Verified BM service
-Verified BM service specializes in selling Verified Facebook Business Managers (BMs) and WhatsApp Business API solutions. We help businesses run Facebook & Instagram ads safely without getting banned.
+## About Verified BM services
+Verified BM services specializes in selling Verified Facebook Business Managers (BMs) and WhatsApp Business API solutions. We help businesses run Facebook & Instagram ads safely without getting banned.
 
 ## Products We Sell (with direct buy links)
 ${productLines.join("\n")}

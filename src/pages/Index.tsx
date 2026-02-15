@@ -33,11 +33,11 @@ const Index = () => {
     <Layout>
       <SEOHead
         title="Buy Verified BM and WhatsApp Business API"
-        description="Buy verified BM, WhatsApp API, Facebook Ads accounts from Verified BM service. Instant delivery, 7-day guarantee, 24/7 support. Trusted by 10,000+ advertisers."
+        description="Buy verified BM, WhatsApp API, Facebook Ads accounts from Verified BM services. Instant delivery, 7-day guarantee, 24/7 support. Trusted by 10,000+ advertisers."
       />
       <JsonLdSchema
-        pageTitle="Buy Verified Business Manager | Verified BM service"
-        pageDescription="Buy verified BM, WhatsApp API, Facebook Ads accounts from Verified BM service. Instant delivery, 7-day guarantee, 24/7 support."
+        pageTitle="Buy Verified Business Manager | Verified BM services"
+        pageDescription="Buy verified BM, WhatsApp API, Facebook Ads accounts from Verified BM services. Instant delivery, 7-day guarantee, 24/7 support."
         faqs={homeFaqs}
       />
       <HeroSection />
