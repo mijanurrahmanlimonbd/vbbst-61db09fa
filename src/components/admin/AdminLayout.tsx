@@ -17,6 +17,7 @@ import {
   Lock,
   Package,
   MessageSquare,
+  Mail,
 } from "lucide-react";
 import {
   Tooltip,
@@ -31,6 +32,7 @@ const navItems = [
   { title: "Pages", path: "/admin/pages", icon: File, section: "pages" },
   { title: "Products", path: "/admin/products", icon: Package, section: "dashboard" },
   { title: "Comments", path: "/admin/comments", icon: MessageSquare, section: "posts" },
+  { title: "Subscribers", path: "/admin/subscribers", icon: Mail, section: "dashboard" },
   { title: "Media", path: "/admin/media", icon: Image, section: "media" },
   { title: "Users", path: "/admin/users", icon: Users, section: "users" },
   { title: "Settings", path: "/admin/settings", icon: Settings, section: "settings" },

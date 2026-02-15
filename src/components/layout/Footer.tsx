@@ -1,10 +1,22 @@
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Youtube, Send, MessageCircle } from "lucide-react";
+import NewsletterForm from "@/components/newsletter/NewsletterForm";
 
 const Footer = () => {
   return (
     <footer className="bg-foreground text-primary-foreground">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        {/* Newsletter Section */}
+        <div className="mb-12 pb-12 border-b border-primary-foreground/10">
+          <div className="max-w-xl mx-auto text-center">
+            <h3 className="text-xl font-bold mb-2">Join our Newsletter</h3>
+            <p className="text-sm text-primary-foreground/70 mb-4">
+              Get exclusive deals, tips & updates delivered to your inbox weekly.
+            </p>
+            <NewsletterForm variant="footer" />
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
