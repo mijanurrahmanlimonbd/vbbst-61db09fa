@@ -41,7 +41,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import RefundPolicy from "./pages/RefundPolicy";
 import ReplacementGuarantee from "./pages/ReplacementGuarantee";
 import FAQ from "./pages/FAQ";
-
+import Dashboard from "./pages/Dashboard";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -69,6 +69,7 @@ const App = () => (
             <Route path="/refund-policy" element={<RefundPolicy />} />
             <Route path="/replacement-guarantee" element={<ReplacementGuarantee />} />
             <Route path="/faq" element={<FAQ />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
