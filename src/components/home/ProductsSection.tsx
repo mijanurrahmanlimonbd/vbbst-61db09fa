@@ -1,21 +1,49 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import ProductCard from "@/components/shared/ProductCard";
 
 const categories = ["All", "Verified BM", "WhatsApp API", "Facebook Accounts", "TikTok Ads", "Google Ads", "Reinstated Profiles", "Snapchat Ads"];
 
+const CACHE_KEY = "vbb_products_cache";
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 const ProductsSection = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const fetchedRef = useRef(false);
 
   useEffect(() => {
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
+
+    // Stale-while-revalidate: show cached data immediately, revalidate in background
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try {
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < CACHE_TTL) {
+          setProducts(data);
+          setLoading(false);
+          // Still revalidate in background
+        } else {
+          setProducts(data); // show stale
+          setLoading(false);
+        }
+      } catch {
+        // corrupt cache, ignore
+      }
+    }
+
     const fetchProducts = async () => {
       const { data } = await supabase
         .from("products")
-        .select("*")
+        .select("id,title,slug,short_description,price,sale_price,category,badge,image_url,rating,stock_status,sort_order")
         .order("sort_order", { ascending: true });
-      setProducts(data || []);
+      if (data) {
+        setProducts(data);
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+      }
       setLoading(false);
     };
     fetchProducts();
