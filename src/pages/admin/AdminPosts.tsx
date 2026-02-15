@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, ArrowLeft, Search, FileText, ArrowUpDown } from "lucide-react";
+import { Plus, Trash2, Search, FileText, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -56,33 +56,21 @@ const mockPosts: BlogPost[] = [
   { id: "mock-6", title: "Setting Up WhatsApp API for E-Commerce", slug: "whatsapp-ecommerce-setup", content: "E-commerce businesses can leverage…", excerpt: "Integrate WhatsApp into your online store.", featured_image: null, category: "WhatsApp API", read_time: "9 min read", published_at: null, created_at: "2026-01-15T16:00:00Z", author: "Admin", status: "draft" },
 ];
 
-const emptyPost: Omit<BlogPost, "id" | "created_at"> = {
-  title: "",
-  slug: "",
-  content: "",
-  excerpt: "",
-  featured_image: "",
-  category: "Verified BM",
-  read_time: "5 min read",
-  published_at: null,
-  author: "Admin",
-  status: "draft",
-};
+
+
 
 type SortField = "title" | "author" | "status" | "created_at";
 type SortDir = "asc" | "desc";
 
 const AdminPosts = () => {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortField, setSortField] = useState<SortField>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
-  const [editorOpen, setEditorOpen] = useState(false);
-  const [editingPost, setEditingPost] = useState<Partial<BlogPost> | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -93,7 +81,6 @@ const AdminPosts = () => {
     if (!error && data && data.length > 0) {
       setPosts(data as unknown as BlogPost[]);
     } else {
-      // Use mock data as fallback for testing
       setPosts(mockPosts);
     }
     setLoading(false);
@@ -102,55 +89,6 @@ const AdminPosts = () => {
   useEffect(() => {
     fetchPosts();
   }, []);
-
-  const openNewPost = () => {
-    setEditingPost({ ...emptyPost });
-    setEditorOpen(true);
-  };
-
-  const openEditPost = (post: BlogPost) => {
-    setEditingPost({ ...post });
-    setEditorOpen(true);
-  };
-
-  const handleSave = async () => {
-    if (!editingPost?.title || !editingPost?.slug) {
-      toast.error("Title and slug are required.");
-      return;
-    }
-    setSaving(true);
-
-    const payload = {
-      title: editingPost.title,
-      slug: editingPost.slug,
-      content: editingPost.content || null,
-      excerpt: editingPost.excerpt || null,
-      featured_image: editingPost.featured_image || null,
-      category: editingPost.category || "Verified BM",
-      read_time: editingPost.read_time || "5 min read",
-      author: editingPost.author || "Admin",
-      status: editingPost.status || "draft",
-      published_at: editingPost.status === "published" ? new Date().toISOString() : null,
-    };
-
-    if (editingPost.id && !editingPost.id.startsWith("mock-")) {
-      const { error } = await supabase
-        .from("blog_posts")
-        .update(payload)
-        .eq("id", editingPost.id);
-      if (error) toast.error("Failed to update post.");
-      else toast.success("Post updated.");
-    } else {
-      const { error } = await supabase.from("blog_posts").insert(payload);
-      if (error) toast.error("Failed to create post.");
-      else toast.success("Post created.");
-    }
-
-    setSaving(false);
-    setEditorOpen(false);
-    setEditingPost(null);
-    fetchPosts();
-  };
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -180,145 +118,11 @@ const AdminPosts = () => {
       const bVal = (b[sortField] || "").toString().toLowerCase();
       return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
     });
-
-  const updateField = (field: string, value: string | null) => {
-    setEditingPost((prev) => (prev ? { ...prev, [field]: value } : prev));
-  };
-
-  // Full-screen editor
-  if (editorOpen && editingPost) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => {
-              setEditorOpen(false);
-              setEditingPost(null);
-            }}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Posts
-          </button>
-          <div className="flex items-center gap-3">
-            <Select
-              value={editingPost.status || "draft"}
-              onValueChange={(v) => updateField("status", v)}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="published">Published</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? "Saving…" : editingPost.id ? "Update Post" : "Create Post"}
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main editor */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="bg-background rounded-xl border border-border p-6 space-y-4">
-              <div>
-                <label className="text-sm font-medium text-foreground mb-1.5 block">Title</label>
-                <Input
-                  value={editingPost.title || ""}
-                  onChange={(e) => updateField("title", e.target.value)}
-                  placeholder="Post title"
-                  className="text-lg"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground mb-1.5 block">Slug</label>
-                <Input
-                  value={editingPost.slug || ""}
-                  onChange={(e) => updateField("slug", e.target.value)}
-                  placeholder="post-slug"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground mb-1.5 block">Excerpt</label>
-                <Textarea
-                  value={editingPost.excerpt || ""}
-                  onChange={(e) => updateField("excerpt", e.target.value)}
-                  placeholder="Short description…"
-                  rows={3}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground mb-1.5 block">Content</label>
-                <Textarea
-                  value={editingPost.content || ""}
-                  onChange={(e) => updateField("content", e.target.value)}
-                  placeholder="Write your post content here…"
-                  rows={16}
-                  className="font-mono text-sm"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-4">
-            <div className="bg-background rounded-xl border border-border p-6 space-y-4">
-              <div>
-                <label className="text-sm font-medium text-foreground mb-1.5 block">Author</label>
-                <Input
-                  value={editingPost.author || ""}
-                  onChange={(e) => updateField("author", e.target.value)}
-                  placeholder="Author name"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground mb-1.5 block">Category</label>
-                <Select
-                  value={editingPost.category || "Verified BM"}
-                  onValueChange={(v) => updateField("category", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Verified BM">Verified BM</SelectItem>
-                    <SelectItem value="WhatsApp API">WhatsApp API</SelectItem>
-                    <SelectItem value="Tips & Guides">Tips & Guides</SelectItem>
-                    <SelectItem value="Guides">Guides</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground mb-1.5 block">Read Time</label>
-                <Input
-                  value={editingPost.read_time || ""}
-                  onChange={(e) => updateField("read_time", e.target.value)}
-                  placeholder="5 min read"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground mb-1.5 block">Featured Image URL</label>
-                <Input
-                  value={editingPost.featured_image || ""}
-                  onChange={(e) => updateField("featured_image", e.target.value)}
-                  placeholder="https://…"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // List view
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h2 className="text-2xl font-bold text-foreground">Posts</h2>
-        <Button onClick={openNewPost} className="gap-2">
+        <Button onClick={() => navigate("/admin/posts/new")} className="gap-2">
           <Plus className="w-4 h-4" />
           New Post
         </Button>
@@ -361,7 +165,7 @@ const AdminPosts = () => {
                 : "Get started by creating your first blog post."}
             </p>
             {!search && statusFilter === "all" && (
-              <Button onClick={openNewPost} className="gap-2">
+              <Button onClick={() => navigate("/admin/posts/new")} className="gap-2">
                 <Plus className="w-4 h-4" />
                 Create First Post
               </Button>
@@ -399,7 +203,7 @@ const AdminPosts = () => {
                 <TableRow
                   key={post.id}
                   className="cursor-pointer"
-                  onClick={() => openEditPost(post)}
+                  onClick={() => navigate(post.id.startsWith("mock-") ? "/admin/posts/new" : `/admin/posts/${post.id}/edit`)}
                 >
                   <TableCell className="font-medium text-foreground">
                     <div>
