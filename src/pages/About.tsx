@@ -6,7 +6,6 @@ import { Link } from "react-router-dom";
 import { usePageContent, usePageComponents } from "@/hooks/usePageContent";
 import { WorkSamplesSection, TestimonialsSection, FAQsSection } from "@/components/shared/PageComponents";
 import EditableText from "@/components/editor/EditableText";
-import FloatingEditBar from "@/components/editor/FloatingEditBar";
 import { useEditMode } from "@/contexts/EditModeContext";
 
 const About = () => {
@@ -145,8 +144,8 @@ const About = () => {
       {components.testimonials && <TestimonialsSection />}
       {components.faqs && <FAQsSection />}
 
-      {/* Floating Edit Bar */}
-      <FloatingEditBar slug="about" />
+
+      {components.faqs && <FAQsSection />}
     </Layout>
   );
 };
