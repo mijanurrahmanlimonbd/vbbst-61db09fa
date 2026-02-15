@@ -1,10 +1,10 @@
 /**
  * Dynamic site configuration.
  * Automatically detects the current domain so all URLs work
- * in development, preview, and production (Hostinger).
+ * in development, preview, and production.
  */
 
-export const SITE_NAME = "VBB STORE";
+export const SITE_NAME = "Verified BM service";
 
 /**
  * Returns the base URL of the site.
@@ -15,7 +15,7 @@ export const getSiteUrl = (): string => {
   if (typeof window !== "undefined") {
     return window.location.origin;
   }
-  return import.meta.env.VITE_SITE_URL || "https://vbbstore.com";
+  return import.meta.env.VITE_SITE_URL || "https://verifiedbmservices.com";
 };
 
 export const DEFAULT_DESCRIPTION =

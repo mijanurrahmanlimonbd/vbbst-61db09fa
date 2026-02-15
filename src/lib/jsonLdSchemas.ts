@@ -64,9 +64,9 @@ export interface BusinessInfo {
 }
 
 const DEFAULT_BUSINESS: BusinessInfo = {
-  name: "VBB STORE",
+  name: "Verified BM service",
   description: DEFAULT_DESCRIPTION,
-  email: "support@vbbstore.com",
+  email: "support@verifiedbmservices.com",
   phone: "+8801302669333",
   address: {
     street: "Madergonj, Pirgonj",

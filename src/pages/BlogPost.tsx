@@ -43,7 +43,7 @@ const BlogPost = () => {
       />
       <SEOHead
         title={(post as any).meta_title || post.title}
-        description={(post as any).meta_description || post.excerpt || `Read ${post.title} on VBB STORE blog.`}
+        description={(post as any).meta_description || post.excerpt || `Read ${post.title} on Verified BM service blog.`}
         ogImage={post.featured_image || undefined}
         ogType="article"
       />

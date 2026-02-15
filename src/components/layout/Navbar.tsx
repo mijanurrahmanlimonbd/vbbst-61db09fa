@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ShoppingCart, User, Menu, X, Search, LogOut } from "lucide-react";
 import { useBranding } from "@/hooks/useBranding";
-import vbbStoreLogo from "@/assets/vbb-store-logo.png";
+import headerLogo from "@/assets/verified-bm-services-header.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import AuthModal from "@/components/auth/AuthModal";
@@ -76,14 +76,14 @@ const Navbar = () => {
 
   const logoElement = (
     <img
-      src={vbbStoreLogo}
-      alt={branding.site_title || "VBB STORE"}
-      width={160}
+      src={headerLogo}
+      alt={branding.site_title || "Verified BM service"}
+      width={180}
       height={38}
       loading="eager"
       fetchPriority="high"
       decoding="sync"
-      className="h-9 w-auto max-w-[160px] object-contain"
+      className="h-9 w-auto max-w-[180px] object-contain"
     />
   );
 
