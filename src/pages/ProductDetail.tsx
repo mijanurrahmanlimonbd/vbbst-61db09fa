@@ -6,6 +6,7 @@ import SEOHead from "@/components/seo/SEOHead";
 import JsonLdSchema from "@/components/seo/JsonLdSchema";
 import ProductCard from "@/components/shared/ProductCard";
 import { Star, Shield, Zap, Headphones, MessageCircle, Send, ArrowLeft, CheckCircle, XCircle } from "lucide-react";
+import SocialShareButtons from "@/components/shared/SocialShareButtons";
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -167,6 +168,18 @@ const ProductDetail = () => {
               </div>
 
               <p className="text-xs text-muted-foreground text-center mt-4">Verified Account • Delivered Same Day</p>
+
+              {/* Social Share */}
+              <div className="mt-8 pt-6 border-t border-border">
+                <SocialShareButtons
+                  url={`/product/${product.slug}`}
+                  title={product.title}
+                  description={product.meta_description || product.short_description}
+                  image={product.image_url}
+                  contentType="product"
+                  contentId={product.id}
+                />
+              </div>
             </div>
           </div>
 
