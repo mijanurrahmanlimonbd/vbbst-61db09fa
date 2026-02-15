@@ -126,3 +126,42 @@ All colors MUST be HSL.
   outline-offset: 2px;
   border-radius: 2px;
 }
+
+/* Hero animations */
+@keyframes hero-fade-left {
+  from { opacity: 0; transform: translateX(-40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes hero-fade-right {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes hero-fade-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes border-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-hero-fade-left {
+  animation: hero-fade-left 0.7s ease-out both;
+}
+.animate-hero-fade-right {
+  animation: hero-fade-right 0.7s ease-out both;
+}
+.animate-hero-fade-up {
+  animation: hero-fade-up 0.7s ease-out both;
+}
+.animate-border-rotate {
+  animation: border-rotate 4s linear infinite;
+}
+
+/* Neon button wrapper */
+.neon-btn-wrap {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 2px;
+}

@@ -39,7 +39,6 @@ const Index = () => {
         faqs={homeFaqs}
       />
       <HeroSection />
-      <StatsBar />
       <FeaturesSection />
       <ProductsSection />
       <BenefitsGrid type="bm" />
