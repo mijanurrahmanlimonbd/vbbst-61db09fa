@@ -7,6 +7,7 @@ import MobileBottomNav from "./MobileBottomNav";
 import NewsletterPopup from "@/components/newsletter/NewsletterPopup";
 import TrackingScripts from "@/components/tracking/TrackingScripts";
 import FloatingEditBar from "@/components/editor/FloatingEditBar";
+import OrderThankYouPopup from "@/components/layout/OrderThankYouPopup";
 import { useEditMode } from "@/contexts/EditModeContext";
 
 const EDITABLE_SELECTORS = "h1, h2, h3, h4, p, span, li";
@@ -126,6 +127,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       <WhatsAppButton />
       <NewsletterPopup />
       <TrackingScripts />
+      <OrderThankYouPopup />
       {slug && <FloatingEditBar slug={slug} />}
     </div>
   );
