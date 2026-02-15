@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import SEOHealthWidget from "@/components/admin/SEOHealthWidget";
+import SEOAnalyticsDashboard from "@/components/admin/SEOAnalyticsDashboard";
 
 interface SEOModule {
   id: string;
@@ -229,11 +230,19 @@ const AdminSEO = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-secondary/50">
           <TabsTrigger value="modules">Modules</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
           <TabsTrigger value="titles">Titles & Meta</TabsTrigger>
           <TabsTrigger value="social">Social Meta</TabsTrigger>
           <TabsTrigger value="search-console">Search Console</TabsTrigger>
           <TabsTrigger value="health">Health Report</TabsTrigger>
         </TabsList>
+
+        {/* ────────── ANALYTICS TAB ────────── */}
+        <TabsContent value="analytics">
+          <div className="mt-4">
+            <SEOAnalyticsDashboard />
+          </div>
+        </TabsContent>
 
         {/* ────────── MODULES TAB ────────── */}
         <TabsContent value="modules">
@@ -465,6 +474,35 @@ const AdminSEO = () => {
                 <p className="text-[11px] text-muted-foreground">
                   Go to <span className="font-medium text-foreground">Google Search Console → Settings → Ownership verification → HTML tag</span> and copy the full meta tag.
                 </p>
+              </div>
+            </div>
+
+            {/* Google API JSON Key */}
+            <div className="border-t border-border pt-6">
+              <h3 className="text-base font-semibold text-foreground mb-1 flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-[hsl(45,93%,47%)]" /> Google Search Console API (Advanced)
+              </h3>
+              <p className="text-xs text-muted-foreground mb-4">
+                Upload a Google Service Account JSON key to fetch impressions, clicks, and keyword data automatically. Data refreshes every 24 hours to keep server resources low.
+              </p>
+              <div className="flex items-start gap-2 p-4 bg-[hsl(45,93%,47%)]/5 rounded-lg border border-[hsl(45,93%,47%)]/15">
+                <Info className="w-4 h-4 text-[hsl(45,93%,47%)] shrink-0 mt-0.5" />
+                <div className="text-[11px] text-muted-foreground space-y-1">
+                  <p className="font-medium text-foreground">How to get a JSON key:</p>
+                  <ol className="list-decimal list-inside space-y-0.5">
+                    <li>Go to <span className="font-medium text-foreground">Google Cloud Console → APIs & Services → Credentials</span></li>
+                    <li>Create a Service Account and download the JSON key file</li>
+                    <li>Enable the <span className="font-medium text-foreground">Google Search Console API</span> in API Library</li>
+                    <li>Add the service account email as a user in Google Search Console</li>
+                  </ol>
+                  <p className="mt-2">Once connected, the Analytics tab will automatically populate with real data from your search performance.</p>
+                </div>
+              </div>
+              <div className="mt-3 flex items-center gap-3">
+                <Badge variant="outline" className="text-xs text-muted-foreground gap-1">
+                  <XCircle className="w-3 h-3" /> Not Connected
+                </Badge>
+                <span className="text-[11px] text-muted-foreground">Refresh interval: every 24 hours</span>
               </div>
             </div>
 
