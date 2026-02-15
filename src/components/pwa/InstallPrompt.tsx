@@ -71,7 +71,7 @@ const InstallPrompt = () => {
           <Download className="w-5 h-5 text-primary-foreground" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-foreground">Install VBB STORE</p>
+          <p className="text-sm font-semibold text-foreground">Install Verified BM services</p>
           <p className="text-xs text-muted-foreground mt-0.5">Add to your home screen for a faster, app-like experience.</p>
           <div className="flex gap-2 mt-3">
             <button
