@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-const PRODUCTION_DOMAINS = ["vbbstore.com", "www.vbbstore.com"];
+const PRODUCTION_DOMAINS = ["verifiedbmservices.com", "www.verifiedbmservices.com"];
 
 const isProduction = () => {
   const hostname = window.location.hostname;

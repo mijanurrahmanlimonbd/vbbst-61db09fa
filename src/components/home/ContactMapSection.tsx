@@ -6,7 +6,7 @@ const ContactMapSection = () => (
       <p className="text-sm font-semibold tracking-widest uppercase text-primary text-center">Find Us</p>
       <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mt-2">Get in Touch Anytime</h2>
       <p className="text-muted-foreground text-center mt-4 max-w-2xl mx-auto">
-        VBB STORE operates as a global digital business from Madergonj, Pirgonj, Rangpur, Bangladesh. Reach us through any of the channels below — we're available 24/7.
+        Verified BM services operates as a global digital business from Madergonj, Pirgonj, Rangpur, Bangladesh. Reach us through any of the channels below — we're available 24/7.
       </p>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10">
@@ -14,7 +14,7 @@ const ContactMapSection = () => (
           <h3 className="font-bold text-foreground flex items-center gap-2 mb-4">
             <MapPin className="w-5 h-5 text-primary" /> Store Address
           </h3>
-          <p className="text-muted-foreground mb-6">VBB STORE, Madergonj, Pirgonj, Rangpur, Bangladesh - 5470</p>
+          <p className="text-muted-foreground mb-6">Verified BM services, Madergonj, Pirgonj, Rangpur, Bangladesh - 5470</p>
 
           <div className="space-y-4">
             {[
@@ -48,7 +48,7 @@ const ContactMapSection = () => (
             allowFullScreen
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            title="VBB Store Location"
+            title="Verified BM services Location"
           />
         </div>
       </div>

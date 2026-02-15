@@ -55,10 +55,10 @@ const FAQ = () => {
 
   return (
     <Layout>
-      <SEOHead title="FAQ - Frequently Asked Questions" description="Find answers to common questions about VBB STORE's products, payments, delivery, and support." />
+       <SEOHead title="FAQ - Frequently Asked Questions" description="Find answers to common questions about Verified BM services' products, payments, delivery, and support." />
       <JsonLdSchema
         pageTitle="FAQ - Frequently Asked Questions"
-        pageDescription="Find answers to common questions about VBB STORE."
+        pageDescription="Find answers to common questions about Verified BM services."
         faqs={filtered.map((f) => ({ question: f.question, answer: f.answer }))}
         breadcrumbs={[{ name: "Home", url: "/" }, { name: "FAQ", url: "/faq" }]}
       />

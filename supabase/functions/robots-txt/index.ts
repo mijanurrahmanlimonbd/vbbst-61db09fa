@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 const DEFAULT_ROBOTS = `# =============================================
-# robots.txt — VBB STORE
+# robots.txt — Verified BM services
 # =============================================
 
 User-agent: Googlebot
@@ -33,7 +33,7 @@ Disallow: /checkout
 Disallow: /api/
 
 # Sitemap
-Sitemap: https://vbbstore.com/sitemap.xml`;
+Sitemap: https://verifiedbmservices.com/sitemap.xml`;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {

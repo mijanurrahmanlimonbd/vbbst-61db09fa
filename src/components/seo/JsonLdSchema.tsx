@@ -136,7 +136,7 @@ const JsonLdSchema = ({
           "https://schema.org/MobileWebPlatform",
         ],
       },
-      name: "Search VBB STORE",
+      name: "Search Verified BM services",
       "query-input": {
         "@type": "PropertyValueSpecification",
         valueRequired: true,

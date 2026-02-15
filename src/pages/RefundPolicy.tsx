@@ -8,7 +8,7 @@ const sections: PolicySection[] = [
     icon: <DollarSign className="w-4 h-4" />,
     content: (
       <>
-        <p>At VBB STORE, we prioritize customer satisfaction. Due to the digital nature of our products, we operate a <strong>replacement-first policy</strong> rather than direct monetary refunds.</p>
+        <p>At Verified BM services, we prioritize customer satisfaction. Due to the digital nature of our products, we operate a <strong>replacement-first policy</strong> rather than direct monetary refunds.</p>
         <InfoBox><DollarSign className="w-5 h-5 text-primary shrink-0 mt-0.5" /><span>All eligible products come with a 7-day free replacement guarantee. If a product stops working within this period through no fault of your own, we will replace it at no additional cost.</span></InfoBox>
       </>
     ),
@@ -122,8 +122,8 @@ const RefundPolicy = () => (
     lastUpdated="February 15, 2026"
     sections={sections}
     breadcrumb="Refund Policy"
-    seoTitle="Refund Policy - VBB STORE"
-    seoDescription="VBB STORE's refund and replacement policy. Learn about our 7-day guarantee, eligible replacement criteria, and how to request a refund."
+     seoTitle="Refund Policy - Verified BM services"
+    seoDescription="Verified BM services' refund and replacement policy. Learn about our 7-day guarantee, eligible replacement criteria, and how to request a refund."
   />
 );
 

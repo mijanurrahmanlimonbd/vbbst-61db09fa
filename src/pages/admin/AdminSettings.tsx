@@ -45,7 +45,7 @@ const emptyMethod = (): Partial<PaymentMethod> => ({
 
 const AdminSettings = () => {
   // General
-  const [siteTitle, setSiteTitle] = useState("VBB STORE");
+  const [siteTitle, setSiteTitle] = useState("Verified BM services");
   const [siteDescription, setSiteDescription] = useState("Your trusted source for verified Facebook Business Managers");
   const [contactEmail, setContactEmail] = useState("info@verifiedbmbuy.com");
   const [whatsapp, setWhatsapp] = useState("+1 234 567 890");
@@ -53,7 +53,7 @@ const AdminSettings = () => {
 
   // Profile
   const [displayName, setDisplayName] = useState("Admin");
-  const [profileEmail, setProfileEmail] = useState("admin@vbbstore.com");
+  const [profileEmail, setProfileEmail] = useState("admin@verifiedbmservices.com");
   const [bio, setBio] = useState("");
 
   // Security

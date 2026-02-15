@@ -44,7 +44,7 @@ const ProductDetail = () => {
     <Layout>
       <SEOHead
         title={product.meta_title || `${product.title} - Buy Online`}
-        description={product.meta_description || product.description || product.short_description || `Buy ${product.title} from VBB STORE. Instant delivery and 7-day guarantee.`}
+        description={product.meta_description || product.description || product.short_description || `Buy ${product.title} from Verified BM services. Instant delivery and 7-day guarantee.`}
         ogImage={product.image_url || undefined}
         ogType="product"
       />

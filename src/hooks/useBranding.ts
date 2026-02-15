@@ -32,7 +32,7 @@ export const useBranding = () => {
     footer_logo: "",
     favicon: "",
     invoice_logo: "",
-    site_title: "VBB STORE",
+    site_title: "Verified BM services",
   });
   const [loading, setLoading] = useState(true);
 
@@ -51,7 +51,7 @@ export const useBranding = () => {
           footer_logo: ensurePublicUrl(map.footer_logo || ""),
           favicon: ensurePublicUrl(map.favicon || ""),
           invoice_logo: ensurePublicUrl(map.invoice_logo || ""),
-          site_title: map.site_title || "VBB STORE",
+          site_title: map.site_title || "Verified BM services",
         });
       }
       setLoading(false);

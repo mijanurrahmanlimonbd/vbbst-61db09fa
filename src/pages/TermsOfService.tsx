@@ -8,7 +8,7 @@ const sections: PolicySection[] = [
     icon: <FileText className="w-4 h-4" />,
     content: (
       <>
-        <p>By accessing and using VBB STORE ("we", "us", "our"), you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you must not use our website or services.</p>
+        <p>By accessing and using Verified BM services ("we", "us", "our"), you agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you must not use our website or services.</p>
         <p>These terms apply to all visitors, users, and others who access or use our services, including the purchase of verified Business Manager accounts, WhatsApp Business API accounts, and related digital advertising products.</p>
       </>
     ),
@@ -30,7 +30,7 @@ const sections: PolicySection[] = [
     icon: <Globe className="w-4 h-4" />,
     content: (
       <>
-        <p>VBB STORE provides verified digital advertising accounts, including but not limited to:</p>
+        <p>Verified BM services provides verified digital advertising accounts, including but not limited to:</p>
         <ul>
           <li>Verified Facebook Business Managers (BM 1, BM 3, BM 5, BM 10)</li>
           <li>WhatsApp Business API accounts</li>
@@ -98,7 +98,7 @@ const sections: PolicySection[] = [
     icon: <AlertTriangle className="w-4 h-4" />,
     content: (
       <>
-        <p>VBB STORE shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use our services. Our total liability for any claim arising from these terms shall not exceed the amount paid by you for the specific product in question.</p>
+        <p>Verified BM services shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use our services. Our total liability for any claim arising from these terms shall not exceed the amount paid by you for the specific product in question.</p>
         <p>We are not responsible for actions taken by Meta, Google, TikTok, or any third-party platform against accounts after delivery.</p>
       </>
     ),
@@ -128,8 +128,8 @@ const TermsOfService = () => (
     lastUpdated="February 15, 2026"
     sections={sections}
     breadcrumb="Terms of Service"
-    seoTitle="Terms of Service - VBB STORE"
-    seoDescription="Read VBB STORE's Terms of Service covering purchases, usage policies, payment terms, and liability for verified digital advertising accounts."
+     seoTitle="Terms of Service - Verified BM services"
+    seoDescription="Read Verified BM services' Terms of Service covering purchases, usage policies, payment terms, and liability for verified digital advertising accounts."
   />
 );
 

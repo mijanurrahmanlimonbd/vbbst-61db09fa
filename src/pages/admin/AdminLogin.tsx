@@ -79,7 +79,7 @@ const AdminLogin = () => {
               {isSignUp ? "Create Account" : "Admin Login"}
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {isSignUp ? "Create a new admin account" : `Sign in to your ${branding.site_title || "VBB Store"} admin panel`}
+              {isSignUp ? "Create a new admin account" : `Sign in to your ${branding.site_title || "Verified BM services"} admin panel`}
             </p>
           </div>
 
@@ -90,7 +90,7 @@ const AdminLogin = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@vbbstore.com"
+                placeholder="admin@verifiedbmservices.com"
                 autoComplete="email"
               />
             </div>

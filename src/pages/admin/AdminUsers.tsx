@@ -142,7 +142,7 @@ const AdminUsers = () => {
         is_active: p.is_active ?? true,
         last_login: p.last_login,
         created_at: p.created_at,
-        email: emailMap.get(p.id) || `user-${p.id.slice(0, 8)}@vbbstore.com`,
+        email: emailMap.get(p.id) || `user-${p.id.slice(0, 8)}@verifiedbmservices.com`,
         role: roleMap.get(p.id) || "author",
         provider,
       };
