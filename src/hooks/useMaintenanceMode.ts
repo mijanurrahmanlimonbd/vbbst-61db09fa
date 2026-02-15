@@ -11,7 +11,7 @@ export const useMaintenanceMode = () => {
         .from("site_settings")
         .select("value")
         .eq("key", "maintenance_mode")
-        .single();
+        .maybeSingle();
       setIsMaintenanceMode(data?.value === "true");
       setLoading(false);
     };
