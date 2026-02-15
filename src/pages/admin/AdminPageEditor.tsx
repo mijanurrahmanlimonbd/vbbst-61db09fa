@@ -11,7 +11,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Save, Loader2, Eye, EyeOff, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Eye, EyeOff, Plus, Trash2, Upload, X, Image as ImageIcon } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -32,6 +33,8 @@ interface PageData {
   meta_title: string | null;
   meta_description: string | null;
   components: Record<string, boolean>;
+  hero_image: string | null;
+  hero_overlay: number;
 }
 
 // Default content schema templates per page type
@@ -169,7 +172,9 @@ const AdminPageEditor = () => {
   const [pageData, setPageData] = useState<PageData>({
     title: "", slug: "", content: null, status: "draft",
     meta_title: null, meta_description: null, components: {},
+    hero_image: null, hero_overlay: 50,
   });
+  const [heroUploading, setHeroUploading] = useState(false);
   const [fields, setFields] = useState<ContentField[]>([]);
   const [customFields, setCustomFields] = useState<ContentField[]>([]);
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -201,6 +206,8 @@ const AdminPageEditor = () => {
         meta_title: data.meta_title,
         meta_description: data.meta_description,
         components: (data.components as Record<string, boolean>) || {},
+        hero_image: data.hero_image || null,
+        hero_overlay: data.hero_overlay ?? 50,
       });
 
       // Parse content JSON into fields
@@ -299,6 +306,8 @@ const AdminPageEditor = () => {
         meta_title: pageData.meta_title || null,
         meta_description: pageData.meta_description || null,
         components: pageData.components || {},
+        hero_image: pageData.hero_image || null,
+        hero_overlay: pageData.hero_overlay ?? 50,
       };
 
       if (pageData.id) {
@@ -439,6 +448,7 @@ const AdminPageEditor = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList>
               <TabsTrigger value="content">Content Fields</TabsTrigger>
+              <TabsTrigger value="hero">Hero Image</TabsTrigger>
               <TabsTrigger value="seo">SEO</TabsTrigger>
               <TabsTrigger value="components">Components</TabsTrigger>
             </TabsList>
@@ -467,6 +477,98 @@ const AdminPageEditor = () => {
                 <Button variant="outline" size="sm" onClick={addCustomField} className="gap-1.5">
                   <Plus className="w-3.5 h-3.5" /> Add Custom Field
                 </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="hero" className="mt-4">
+              <div className="bg-background rounded-xl border border-border p-5 space-y-5">
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground">Page Hero Background</h3>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Upload a unique hero background image for this page. If empty, the global hero image (or primary color) will be used.
+                  </p>
+                </div>
+
+                {pageData.hero_image ? (
+                  <div className="space-y-3">
+                    <div className="relative rounded-xl overflow-hidden border border-border" style={{ minHeight: 200 }}>
+                      <img src={pageData.hero_image} alt="Hero background" className="w-full h-48 object-cover" />
+                      <div
+                        className="absolute inset-0 flex items-center justify-center"
+                        style={{ backgroundColor: `rgba(0,0,0,${pageData.hero_overlay / 100})` }}
+                      >
+                        <span className="text-primary-foreground text-xl font-bold">{pageData.title || "Preview Title"}</span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <label className="cursor-pointer">
+                        <Button variant="outline" size="sm" className="gap-1 pointer-events-none">
+                          <Upload className="w-3.5 h-3.5" /> Replace Image
+                        </Button>
+                        <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          if (file.size > 10 * 1024 * 1024) { toast.error("File must be under 10MB."); return; }
+                          setHeroUploading(true);
+                          try {
+                            const ext = file.name.split(".").pop();
+                            const path = `page-hero-${pageData.slug || "page"}-${Date.now()}.${ext}`;
+                            const { error } = await supabase.storage.from("media").upload(path, file, { upsert: true });
+                            if (error) throw error;
+                            const { data: urlData } = supabase.storage.from("media").getPublicUrl(path);
+                            setPageData(p => ({ ...p, hero_image: urlData.publicUrl }));
+                            toast.success("Image uploaded! Click Save to apply.");
+                          } catch { toast.error("Failed to upload image."); }
+                          finally { setHeroUploading(false); }
+                        }} disabled={heroUploading} />
+                      </label>
+                      <Button variant="outline" size="sm" className="gap-1" onClick={() => setPageData(p => ({ ...p, hero_image: null }))}>
+                        <X className="w-3.5 h-3.5" /> Remove
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-8 cursor-pointer hover:border-primary/50 transition-colors">
+                    {heroUploading ? (
+                      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                    ) : (
+                      <>
+                        <ImageIcon className="w-8 h-8 text-muted-foreground mb-2" />
+                        <span className="text-sm text-muted-foreground">Click to upload hero background image</span>
+                        <span className="text-xs text-muted-foreground mt-1">JPG, PNG or WebP, max 10MB</span>
+                      </>
+                    )}
+                    <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 10 * 1024 * 1024) { toast.error("File must be under 10MB."); return; }
+                      setHeroUploading(true);
+                      try {
+                        const ext = file.name.split(".").pop();
+                        const path = `page-hero-${pageData.slug || "page"}-${Date.now()}.${ext}`;
+                        const { error } = await supabase.storage.from("media").upload(path, file, { upsert: true });
+                        if (error) throw error;
+                        const { data: urlData } = supabase.storage.from("media").getPublicUrl(path);
+                        setPageData(p => ({ ...p, hero_image: urlData.publicUrl }));
+                        toast.success("Image uploaded! Click Save to apply.");
+                      } catch { toast.error("Failed to upload image."); }
+                      finally { setHeroUploading(false); }
+                    }} disabled={heroUploading} />
+                  </label>
+                )}
+
+                <div className="border-t border-border pt-5">
+                  <Label className="text-sm font-medium text-foreground">Dark Overlay Opacity: {pageData.hero_overlay}%</Label>
+                  <p className="text-xs text-muted-foreground mb-3">Adjust the dark overlay to ensure the page title is readable.</p>
+                  <Slider
+                    value={[pageData.hero_overlay]}
+                    onValueChange={(v) => setPageData(p => ({ ...p, hero_overlay: v[0] }))}
+                    min={0}
+                    max={100}
+                    step={1}
+                    className="max-w-md"
+                  />
+                </div>
               </div>
             </TabsContent>
 

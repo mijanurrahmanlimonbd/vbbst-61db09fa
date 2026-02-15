@@ -7,6 +7,7 @@ import JsonLdSchema from "@/components/seo/JsonLdSchema";
 import PageHeader from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePageHeroBySlug } from "@/hooks/usePageHeroBySlug";
 
 export interface PolicySection {
   id: string;
@@ -24,6 +25,7 @@ interface PolicyPageLayoutProps {
   breadcrumb: string;
   seoTitle?: string;
   seoDescription?: string;
+  slug?: string;
 }
 
 const PolicyPageLayout = ({
@@ -35,10 +37,12 @@ const PolicyPageLayout = ({
   breadcrumb,
   seoTitle,
   seoDescription,
+  slug,
 }: PolicyPageLayoutProps) => {
   const [activeSection, setActiveSection] = useState(sections[0]?.id || "");
   const isMobile = useIsMobile();
   const [tocOpen, setTocOpen] = useState(false);
+  const { heroImage, heroOverlay } = usePageHeroBySlug(slug || breadcrumb.toLowerCase().replace(/[^a-z0-9]+/g, "-"));
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -82,6 +86,8 @@ const PolicyPageLayout = ({
         title={title}
         subtitle={subtitle}
         description={description}
+        heroImage={heroImage}
+        heroOverlay={heroOverlay}
       />
 
       {/* Meta bar */}
