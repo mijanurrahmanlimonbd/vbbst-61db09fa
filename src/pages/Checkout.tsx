@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, Upload, CheckCircle, Copy, AlertCircle } from "lucide-react";
+import { triggerOrderThankYou } from "@/components/layout/OrderThankYouPopup";
 
 interface CartItem {
   id: string;
@@ -155,6 +156,9 @@ const Checkout = () => {
       }
 
       setStep("payment");
+      if (selectedMethod?.type === "api") {
+        triggerOrderThankYou();
+      }
     } catch (err: any) {
       toast.error("Failed to create order. Please try again.");
       console.error(err);
@@ -190,6 +194,7 @@ const Checkout = () => {
         .eq("id", orderId);
       if (updateErr) throw updateErr;
       setStep("done");
+      triggerOrderThankYou();
       toast.success("Proof uploaded successfully!");
     } catch (err: any) {
       toast.error("Failed to upload proof. Please try again.");
