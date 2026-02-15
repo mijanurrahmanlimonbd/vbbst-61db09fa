@@ -5,8 +5,13 @@ import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
 import JsonLdSchema from "@/components/seo/JsonLdSchema";
 import ProductCard from "@/components/shared/ProductCard";
-import { Star, Shield, Zap, Headphones, MessageCircle, Send, ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 import SocialShareButtons from "@/components/shared/SocialShareButtons";
+import {
+  Star, Shield, Zap, Headphones, MessageCircle, Send,
+  ChevronRight, Home, CheckCircle, XCircle, Lock, Truck,
+  RefreshCw, Clock, Globe, Award, Users, FileText, ShieldCheck,
+  Wallet, Bitcoin, ArrowRight, ChevronDown
+} from "lucide-react";
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -15,19 +20,28 @@ const ProductDetail = () => {
   const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState("");
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [faqs, setFaqs] = useState<any[]>([]);
+  const [openFaq, setOpenFaq] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       const { data } = await supabase.from("products").select("*").eq("slug", slug).single();
       setProduct(data);
       if (data) {
         setActiveImage(data.image_url || "");
-        const { data: rel } = await supabase.from("products").select("*").eq("category", data.category).neq("id", data.id).limit(3);
-        setRelated(rel || []);
+        const [relRes, testRes, faqRes] = await Promise.all([
+          supabase.from("products").select("*").eq("category", data.category).neq("id", data.id).limit(4),
+          supabase.from("testimonials").select("*").eq("status", "approved").order("sort_order").limit(6),
+          supabase.from("faqs").select("*").order("sort_order").limit(8),
+        ]);
+        setRelated(relRes.data || []);
+        setTestimonials(testRes.data || []);
+        setFaqs(faqRes.data || []);
       }
       setLoading(false);
     };
-    if (slug) fetch();
+    if (slug) fetchData();
   }, [slug]);
 
   if (loading) return <Layout><div className="py-24 text-center text-muted-foreground">Loading...</div></Layout>;
@@ -36,7 +50,7 @@ const ProductDetail = () => {
   const discount = product.sale_price && product.price > 0
     ? Math.round(((product.price - product.sale_price) / product.price) * 100)
     : null;
-
+  const finalPrice = product.sale_price || product.price;
   const allImages = [product.image_url, ...(product.gallery_images || [])].filter(Boolean);
   const inStock = product.stock_status === "in_stock";
 
@@ -60,18 +74,31 @@ const ProductDetail = () => {
         ]}
       />
 
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Link to="/shop" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary mb-8">
-            <ArrowLeft className="w-4 h-4" /> Back to Shop
-          </Link>
+      {/* Breadcrumbs */}
+      <div className="bg-muted/30 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Link to="/" className="flex items-center gap-1 hover:text-foreground transition-colors">
+              <Home className="w-4 h-4" /> Home
+            </Link>
+            <ChevronRight className="w-3 h-3" />
+            <Link to="/shop" className="hover:text-foreground transition-colors">Shop</Link>
+            <ChevronRight className="w-3 h-3" />
+            <span className="text-foreground font-medium truncate max-w-[300px]">{product.title}</span>
+          </nav>
+        </div>
+      </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Image Gallery */}
+      {/* Main Product Section */}
+      <section className="py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+
+            {/* Left: Image + Trust Badges */}
             <div>
-              <div className="aspect-square bg-secondary rounded-xl overflow-hidden border border-border">
+              <div className="aspect-square bg-secondary rounded-2xl overflow-hidden border border-border">
                 {activeImage ? (
-                  <img src={activeImage} alt={product.title} className="w-full h-full object-cover" loading="lazy" />
+                  <img src={activeImage} alt={product.title} className="w-full h-full object-cover" loading="eager" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground">{product.category}</div>
                 )}
@@ -89,72 +116,79 @@ const ProductDetail = () => {
                   ))}
                 </div>
               )}
+
+              {/* Trust Badges Below Image */}
+              <div className="grid grid-cols-3 gap-3 mt-6">
+                <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4">
+                  <Lock className="w-6 h-6 text-primary" />
+                  <span className="text-xs font-medium text-muted-foreground text-center">Secure Payment</span>
+                </div>
+                <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4">
+                  <Truck className="w-6 h-6 text-primary" />
+                  <span className="text-xs font-medium text-muted-foreground text-center">Instant Delivery</span>
+                </div>
+                <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4">
+                  <RefreshCw className="w-6 h-6 text-primary" />
+                  <span className="text-xs font-medium text-muted-foreground text-center">7-Day Guarantee</span>
+                </div>
+              </div>
             </div>
 
-            {/* Product Details */}
+            {/* Right: Product Info */}
             <div>
-              <span className="text-sm font-medium text-primary">{product.category}</span>
-              {(product.badge || (product.sale_price && "Sale")) && (
-                <span className="ml-3 text-xs font-bold px-3 py-1 rounded bg-primary text-primary-foreground">
-                  {product.badge || "Sale"}
-                </span>
-              )}
-              <h1 className="text-3xl font-bold text-foreground mt-2">{product.title}</h1>
-              {product.sku && (
-                <p className="text-xs text-muted-foreground mt-1 font-mono">SKU: {product.sku}</p>
-              )}
+              <span className="text-xs font-bold tracking-widest uppercase text-primary border-b-2 border-primary pb-1">{product.category}</span>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground mt-4 leading-tight">{product.title}</h1>
 
-              <div className="flex items-center gap-2 mt-4">
-                <Star className="w-5 h-5 fill-[hsl(45,93%,47%)] text-[hsl(45,93%,47%)]" />
-                <span className="font-medium text-foreground">{product.rating || 5.0}</span>
+              {/* Rating + Stock */}
+              <div className="flex items-center gap-4 mt-3 flex-wrap">
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-[hsl(45,93%,47%)] text-[hsl(45,93%,47%)]" />
+                  ))}
+                  <span className="font-semibold text-foreground ml-1">{product.rating || 5.0}</span>
+                  <span className="text-muted-foreground text-sm">(128 Reviews)</span>
+                </div>
+                {inStock ? (
+                  <span className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1 rounded-full bg-[hsl(142,70%,45%)]/10 text-[hsl(142,70%,45%)]">
+                    <span className="w-2 h-2 rounded-full bg-[hsl(142,70%,45%)]" /> In Stock
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1 rounded-full bg-destructive/10 text-destructive">
+                    <XCircle className="w-3 h-3" /> Out of Stock
+                  </span>
+                )}
               </div>
 
-              <div className="mt-6">
+              {/* Price Card */}
+              <div className="mt-6 rounded-xl border border-border bg-muted/30 p-5">
                 {product.sale_price ? (
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-lg text-muted-foreground line-through">${product.price}</span>
-                    <span className="text-3xl font-bold text-foreground">${product.sale_price}</span>
-                    <span className="text-sm text-[hsl(142,70%,45%)]">Save ${(product.price - product.sale_price).toFixed(2)} ({discount}%)</span>
+                  <div>
+                    <div className="flex items-baseline gap-3">
+                      <span className="text-lg text-muted-foreground line-through">${product.price}</span>
+                      <span className="text-sm font-medium text-[hsl(142,70%,45%)]">Save ${(product.price - product.sale_price).toFixed(2)} ({discount}%)</span>
+                    </div>
+                    <span className="text-4xl font-extrabold text-foreground">${product.sale_price}</span>
                   </div>
                 ) : (
-                  <span className="text-3xl font-bold text-foreground">${product.price} USD</span>
+                  <span className="text-4xl font-extrabold text-foreground">${product.price}</span>
                 )}
               </div>
 
-              {/* Stock Status */}
-              <div className="mt-4">
-                {inStock ? (
-                  <span className="inline-flex items-center gap-1.5 text-sm text-[hsl(142,70%,45%)] font-medium">
-                    <CheckCircle className="w-4 h-4" /> In Stock
-                    {product.stock_quantity > 0 && <span className="text-muted-foreground">({product.stock_quantity} available)</span>}
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 text-sm text-destructive font-medium">
-                    <XCircle className="w-4 h-4" /> Out of Stock
-                  </span>
-                )}
-              </div>
-
-              {product.description && (
-                <p className="text-muted-foreground mt-6">{product.description}</p>
-              )}
-              {product.short_description && !product.description && (
-                <p className="text-muted-foreground mt-6">{product.short_description}</p>
+              {/* Description */}
+              {(product.description || product.short_description) && (
+                <p className="text-muted-foreground mt-5 leading-relaxed">
+                  {product.description || product.short_description}
+                </p>
               )}
 
-              <div className="flex items-center gap-6 mt-6 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1"><Shield className="w-4 h-4 text-[hsl(142,70%,45%)]" /> 100% Safe</span>
-                <span className="flex items-center gap-1"><Zap className="w-4 h-4 text-primary" /> Instant Delivery</span>
-                <span className="flex items-center gap-1"><Headphones className="w-4 h-4 text-primary" /> 24/7 Support</span>
-              </div>
-
-              <div className="flex flex-col gap-3 mt-8">
+              {/* Action Buttons */}
+              <div className="flex flex-col gap-3 mt-6">
                 <button
                   onClick={() => inStock && navigate("/checkout", { state: { items: [{ id: product.id, title: product.title, price: product.price, sale_price: product.sale_price, quantity: 1, image_url: product.image_url }] } })}
                   className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-[hsl(25,95%,55%)] text-white text-lg font-bold hover:bg-[hsl(25,95%,48%)] transition-colors disabled:opacity-50"
                   disabled={!inStock}
                 >
-                  {inStock ? `Buy Now — $${(product.sale_price || product.price).toFixed(2)}` : "Sold Out"} {inStock && <span>→</span>}
+                  {inStock ? `Buy Now — $${finalPrice.toFixed(2)}` : "Sold Out"} {inStock && <ArrowRight className="w-5 h-5" />}
                 </button>
                 <div className="grid grid-cols-2 gap-3">
                   <a href="https://wa.me/8801302669333" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 rounded-xl bg-[hsl(142,70%,45%)] text-white font-semibold hover:bg-[hsl(142,70%,40%)] transition-colors">
@@ -166,30 +200,260 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              <p className="text-xs text-muted-foreground text-center mt-4">Verified Account • Delivered Same Day</p>
-
-              {/* Social Share */}
-              <div className="mt-8 pt-6 border-t border-border">
-                <SocialShareButtons
-                  url={`/product/${product.slug}`}
-                  title={product.title}
-                  description={product.meta_description || product.short_description}
-                  image={product.image_url}
-                  contentType="product"
-                  contentId={product.id}
-                />
+              {/* Trust Info List */}
+              <div className="mt-6 rounded-xl border border-border bg-card p-5 space-y-3">
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <Zap className="w-5 h-5 text-primary shrink-0" />
+                  <span>Instant delivery — usually within 1-4 hours</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <RefreshCw className="w-5 h-5 text-primary shrink-0" />
+                  <span>7-day replacement guarantee included</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <FileText className="w-5 h-5 text-primary shrink-0" />
+                  <span>Setup guide & compliance documentation</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <Lock className="w-5 h-5 text-primary shrink-0" />
+                  <span>SSL encrypted, secure credential handover</span>
+                </div>
               </div>
             </div>
           </div>
+        </div>
+      </section>
 
-          {related.length > 0 && (
-            <div className="mt-16">
-              <h2 className="text-2xl font-bold text-foreground mb-8">Related Products</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {related.map((p) => <ProductCard key={p.id} product={p} />)}
+      {/* What You Get - Features Section */}
+      <section className="py-16 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">What You Get</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Product Features & Inclusions</h2>
+          <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">Everything included with your purchase — no hidden fees, no surprises.</p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-10">
+            {[
+              "Real Documents Verified BM",
+              "WhatsApp API & Apps Ready",
+              "Real company documents & HTTPS verified",
+              "Phone Number Verified",
+              "Invite link on your account",
+              "7 Days Replacement",
+            ].map((feature, i) => (
+              <div key={i} className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
+                <CheckCircle className="w-5 h-5 text-[hsl(142,70%,45%)] shrink-0" />
+                <span className="text-sm font-medium text-foreground">{feature}</span>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Specifications */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Specifications</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Product Details</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+            {[
+              { title: "Account Type", items: ["Verified Business Manager", "Full Admin Access", "Meta Verified Status", "Ready-to-use immediately"] },
+              { title: "Security & Compliance", items: ["Anti-ban guide included", "Warm-up strategy provided", "SSL encrypted delivery", "Clean account history"] },
+              { title: "Delivery & Support", items: ["Same-day delivery (1–4 hrs)", "Setup assistance included", "7-day replacement guarantee", "Priority customer support"] },
+            ].map((spec, i) => (
+              <div key={i} className="rounded-xl border border-border bg-card p-6">
+                <h3 className="font-bold text-foreground mb-4">{spec.title}</h3>
+                <ul className="space-y-2.5">
+                  {spec.items.map((item, j) => (
+                    <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Payment Section */}
+      <section className="py-16 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Payment</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">How to Make Payment</h2>
+          <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">We accept cryptocurrency payments for secure, fast, and worldwide transactions.</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+            {[
+              { step: 1, title: "Choose Your Product", desc: "Select the product you want and click 'Buy Now' or contact us via WhatsApp / Telegram." },
+              { step: 2, title: "Send Crypto Payment", desc: "Pay using USDT (TRC20), Bitcoin, or Ethereum to the wallet address provided at checkout." },
+              { step: 3, title: "Confirm & Receive", desc: "Share your payment screenshot via WhatsApp or Telegram. We'll verify and deliver within 1-4 hours." },
+            ].map((s) => (
+              <div key={s.step} className="rounded-xl border border-border bg-card p-6 text-center">
+                <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg mx-auto">{s.step}</div>
+                <h3 className="font-bold text-foreground mt-4">{s.title}</h3>
+                <p className="text-sm text-muted-foreground mt-2">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-3 mt-8">
+            {["USDT (TRC20)", "Bitcoin (BTC)", "Ethereum (ETH)", "Other Crypto"].map((method) => (
+              <span key={method} className="px-4 py-2 rounded-full bg-card border border-border text-sm font-medium text-foreground">{method}</span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Delivery Process */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Delivery</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">How We Deliver Your Account</h2>
+          <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">A fully transparent, secure process from purchase to access.</p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
+            {[
+              { step: 1, title: "Payment Verified", desc: "Our team confirms your crypto payment within minutes.", icon: Wallet },
+              { step: 2, title: "Account Prepared", desc: "We prepare your verified account with all necessary configurations.", icon: ShieldCheck },
+              { step: 3, title: "Credentials Sent", desc: "Login credentials are sent via encrypted message on WhatsApp or Telegram.", icon: Send },
+              { step: 4, title: "Setup Support", desc: "Our team guides you through login, setup, and best practices.", icon: Headphones },
+            ].map((s) => (
+              <div key={s.step} className="rounded-xl border border-border bg-card p-6 text-center">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                  <s.icon className="w-6 h-6 text-primary" />
+                </div>
+                <div className="text-xs font-bold text-primary mt-3">Step {s.step}</div>
+                <h3 className="font-bold text-foreground mt-1">{s.title}</h3>
+                <p className="text-sm text-muted-foreground mt-2">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Us */}
+      <section className="py-16 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Why VBB Store</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Why Customers Choose Us</h2>
+          <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">Trusted by 1,000+ advertisers worldwide for verified Meta accounts.</p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+            {[
+              { icon: Award, title: "Years of Experience", desc: "We've been serving advertisers for years with consistently high-quality verified Business Managers." },
+              { icon: RefreshCw, title: "7-Day Guarantee", desc: "Every purchase is covered by our replacement guarantee. If there's an issue, we replace it — no questions asked." },
+              { icon: Zap, title: "Instant Delivery", desc: "Receive your account credentials within 1-4 hours after payment confirmation." },
+              { icon: Headphones, title: "24/7 Support", desc: "Our support team is available around the clock via WhatsApp, Telegram, and Email." },
+              { icon: Globe, title: "Global Service", desc: "We deliver worldwide with no geographic restrictions. Advertisers from any country can purchase with confidence." },
+              { icon: Shield, title: "Replacement Policy", desc: "Accounts come with a full compliance and warm-up guide to minimize risk — plus a free replacement if needed." },
+            ].map((item, i) => (
+              <div key={i} className="rounded-xl border border-border bg-card p-6">
+                <item.icon className="w-8 h-8 text-primary" />
+                <h3 className="font-bold text-foreground mt-3">{item.title}</h3>
+                <p className="text-sm text-muted-foreground mt-2">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      {testimonials.length > 0 && (
+        <section className="py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Testimonials</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">What Our Customers Say</h2>
+            <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">Real reviews from verified buyers who trust VBB Store.</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+              {testimonials.map((t) => (
+                <div key={t.id} className="rounded-xl border border-border bg-card p-6">
+                  <div className="flex gap-0.5 mb-3">
+                    {[...Array(t.rating || 5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-[hsl(45,93%,47%)] text-[hsl(45,93%,47%)]" />
+                    ))}
+                  </div>
+                  <p className="text-sm text-muted-foreground italic">"{t.testimonial_text}"</p>
+                  <div className="mt-4 flex items-center gap-3">
+                    {t.avatar_url ? (
+                      <img src={t.avatar_url} alt={t.client_name} className="w-10 h-10 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                        {t.client_name?.charAt(0)}
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{t.client_name}</p>
+                      {t.job_title && <p className="text-xs text-muted-foreground">{t.job_title}</p>}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
+        </section>
+      )}
+
+      {/* FAQ */}
+      {faqs.length > 0 && (
+        <section className="py-16 bg-muted/30">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">FAQ</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Frequently Asked Questions</h2>
+            <p className="text-muted-foreground text-center mt-3">Common questions about {product.title}.</p>
+
+            <div className="mt-10 space-y-3">
+              {faqs.map((faq) => (
+                <div key={faq.id} className="rounded-xl border border-border bg-card overflow-hidden">
+                  <button
+                    onClick={() => setOpenFaq(openFaq === faq.id ? null : faq.id)}
+                    className="w-full flex items-center justify-between p-4 text-left"
+                  >
+                    <span className="font-medium text-foreground pr-4">{faq.question}</span>
+                    <ChevronDown className={`w-5 h-5 text-muted-foreground shrink-0 transition-transform ${openFaq === faq.id ? "rotate-180" : ""}`} />
+                  </button>
+                  {openFaq === faq.id && (
+                    <div className="px-4 pb-4 text-sm text-muted-foreground leading-relaxed">
+                      {faq.answer}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Related Products */}
+      {related.length > 0 && (
+        <section className="py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-foreground">Related Products</h2>
+              <Link to="/shop" className="text-primary font-medium text-sm hover:underline">View All</Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {related.map((p) => <ProductCard key={p.id} product={p} />)}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Social Share */}
+      <section className="pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="border-t border-border pt-6">
+            <SocialShareButtons
+              url={`/product/${product.slug}`}
+              title={product.title}
+              description={product.meta_description || product.short_description}
+              image={product.image_url}
+              contentType="product"
+              contentId={product.id}
+            />
+          </div>
         </div>
       </section>
     </Layout>
