@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, Search, Package, Edit, Image as ImageIcon, X, Check, PlusCircle, MinusCircle } from "lucide-react";
+import { Plus, Trash2, Search, Package, Edit, Image as ImageIcon, X, Check, PlusCircle, MinusCircle, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,15 @@ const CATEGORIES = ["Verified BM", "WhatsApp API", "Facebook Accounts", "TikTok 
 interface ProductAttribute {
   key: string;
   value: string;
+}
+
+interface SpecGroup {
+  title: string;
+  items: string[];
+}
+
+interface TrustPoint {
+  text: string;
 }
 
 interface Product {
@@ -79,6 +88,8 @@ const AdminProducts = () => {
   const [mediaTarget, setMediaTarget] = useState<"main" | "gallery">("main");
   const [skuError, setSkuError] = useState("");
   const [attributes, setAttributes] = useState<ProductAttribute[]>([]);
+  const [specGroups, setSpecGroups] = useState<SpecGroup[]>([]);
+  const [trustPoints, setTrustPoints] = useState<TrustPoint[]>([]);
 
   // Inline editing
   const [inlineEditId, setInlineEditId] = useState<string | null>(null);
@@ -94,12 +105,17 @@ const AdminProducts = () => {
 
   useEffect(() => { fetchProducts(); }, []);
 
-  const openNew = () => { setEditProduct(emptyProduct()); setSkuError(""); setAttributes([]); setEditorOpen(true); };
+  const openNew = () => { setEditProduct(emptyProduct()); setSkuError(""); setAttributes([]); setSpecGroups([]); setTrustPoints([]); setEditorOpen(true); };
   const openEdit = (p: Product) => {
     setEditProduct({ ...p, gallery_images: p.gallery_images || [] });
     setSkuError("");
     const attrs = p.attributes || {};
-    setAttributes(Object.entries(attrs).map(([key, value]) => ({ key, value: String(value) })));
+    const flatAttrs = Object.entries(attrs)
+      .filter(([key]) => !key.startsWith("_"))
+      .map(([key, value]) => ({ key, value: String(value) }));
+    setAttributes(flatAttrs);
+    setSpecGroups((attrs as any)._specs || []);
+    setTrustPoints(((attrs as any)._trust_points || []).map((t: string) => ({ text: t })));
     setEditorOpen(true);
   };
 
@@ -138,7 +154,11 @@ const AdminProducts = () => {
       stock_status: editProduct.stock_status || "in_stock",
       meta_title: editProduct.meta_title || null,
       meta_description: editProduct.meta_description || null,
-      attributes: attributes.reduce((acc, a) => { if (a.key.trim()) acc[a.key.trim()] = a.value; return acc; }, {} as Record<string, string>),
+      attributes: {
+        ...attributes.reduce((acc, a) => { if (a.key.trim()) acc[a.key.trim()] = a.value; return acc; }, {} as Record<string, string>),
+        _specs: specGroups.filter(g => g.title.trim() && g.items.some(i => i.trim())),
+        _trust_points: trustPoints.map(t => t.text).filter(Boolean),
+      },
     };
 
     if (editProduct.id) {
@@ -451,46 +471,130 @@ const AdminProducts = () => {
               </label>
             </TabsContent>
 
-            <TabsContent value="attributes" className="space-y-4 pt-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label className="text-base font-semibold">Product Attributes</Label>
-                  <p className="text-xs text-muted-foreground mt-0.5">Add custom key-value pairs like "Country: USA", "Spend Limit: $500/day"</p>
+            <TabsContent value="attributes" className="space-y-6 pt-4">
+              {/* Feature Attributes (key-value) */}
+              <div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base font-semibold">Feature Attributes</Label>
+                    <p className="text-xs text-muted-foreground mt-0.5">Key-value pairs shown in "What You Get" grid</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => setAttributes((prev) => [...prev, { key: "", value: "" }])} className="gap-1.5">
+                    <PlusCircle className="w-4 h-4" /> Add
+                  </Button>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => setAttributes((prev) => [...prev, { key: "", value: "" }])} className="gap-1.5">
-                  <PlusCircle className="w-4 h-4" /> Add
-                </Button>
+                {attributes.length === 0 ? (
+                  <div className="py-4 text-center text-muted-foreground text-sm border border-dashed border-border rounded-lg mt-2">
+                    No attributes yet.
+                  </div>
+                ) : (
+                  <div className="space-y-2 mt-2">
+                    {attributes.map((attr, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <Input value={attr.key} onChange={(e) => setAttributes((prev) => prev.map((a, j) => j === i ? { ...a, key: e.target.value } : a))} placeholder="Key (e.g. Country)" className="flex-1" />
+                        <Input value={attr.value} onChange={(e) => setAttributes((prev) => prev.map((a, j) => j === i ? { ...a, value: e.target.value } : a))} placeholder="Value (e.g. USA)" className="flex-1" />
+                        <button onClick={() => setAttributes((prev) => prev.filter((_, j) => j !== i))} className="p-2 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0">
+                          <MinusCircle className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              {attributes.length === 0 ? (
-                <div className="py-8 text-center text-muted-foreground text-sm border border-dashed border-border rounded-lg">
-                  No attributes yet. Click "Add" to create one.
+
+              <hr className="border-border" />
+
+              {/* Specification Groups (3-column Product Details) */}
+              <div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base font-semibold">Specification Groups</Label>
+                    <p className="text-xs text-muted-foreground mt-0.5">3-column "Product Details" section (e.g. Account Type, Security, Delivery)</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => setSpecGroups((prev) => [...prev, { title: "", items: [""] }])} className="gap-1.5">
+                    <PlusCircle className="w-4 h-4" /> Add Group
+                  </Button>
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  {attributes.map((attr, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <Input
-                        value={attr.key}
-                        onChange={(e) => setAttributes((prev) => prev.map((a, j) => j === i ? { ...a, key: e.target.value } : a))}
-                        placeholder="Key (e.g. Country)"
-                        className="flex-1"
-                      />
-                      <Input
-                        value={attr.value}
-                        onChange={(e) => setAttributes((prev) => prev.map((a, j) => j === i ? { ...a, value: e.target.value } : a))}
-                        placeholder="Value (e.g. USA)"
-                        className="flex-1"
-                      />
-                      <button
-                        onClick={() => setAttributes((prev) => prev.filter((_, j) => j !== i))}
-                        className="p-2 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0"
-                      >
-                        <MinusCircle className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
+                {specGroups.length === 0 ? (
+                  <div className="py-4 text-center text-muted-foreground text-sm border border-dashed border-border rounded-lg mt-2">
+                    No spec groups. Defaults will be used.
+                  </div>
+                ) : (
+                  <div className="space-y-4 mt-2">
+                    {specGroups.map((group, gi) => (
+                      <div key={gi} className="rounded-lg border border-border p-4 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={group.title}
+                            onChange={(e) => setSpecGroups((prev) => prev.map((g, j) => j === gi ? { ...g, title: e.target.value } : g))}
+                            placeholder="Group title (e.g. Account Type)"
+                            className="flex-1 font-semibold"
+                          />
+                          <button onClick={() => setSpecGroups((prev) => prev.filter((_, j) => j !== gi))} className="p-2 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0">
+                            <MinusCircle className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <div className="space-y-1.5 pl-2">
+                          {group.items.map((item, ii) => (
+                            <div key={ii} className="flex items-center gap-2">
+                              <CheckCircle className="w-4 h-4 text-[hsl(142,70%,45%)] shrink-0" />
+                              <Input
+                                value={item}
+                                onChange={(e) => setSpecGroups((prev) => prev.map((g, j) => j === gi ? { ...g, items: g.items.map((it, k) => k === ii ? e.target.value : it) } : g))}
+                                placeholder="Spec item (e.g. Verified Business Manager)"
+                                className="flex-1 h-8 text-sm"
+                              />
+                              <button onClick={() => setSpecGroups((prev) => prev.map((g, j) => j === gi ? { ...g, items: g.items.filter((_, k) => k !== ii) } : g))} className="p-1 rounded text-muted-foreground hover:text-destructive transition-colors shrink-0">
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                          <Button variant="ghost" size="sm" onClick={() => setSpecGroups((prev) => prev.map((g, j) => j === gi ? { ...g, items: [...g.items, ""] } : g))} className="text-xs gap-1 h-7 mt-1">
+                            <PlusCircle className="w-3 h-3" /> Add Item
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <hr className="border-border" />
+
+              {/* Trust Points (Delivery Info checklist) */}
+              <div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-base font-semibold">Trust Points</Label>
+                    <p className="text-xs text-muted-foreground mt-0.5">Checklist shown in the buy box (e.g. "Instant delivery — within 1-4 hours")</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => setTrustPoints((prev) => [...prev, { text: "" }])} className="gap-1.5">
+                    <PlusCircle className="w-4 h-4" /> Add
+                  </Button>
                 </div>
-              )}
+                {trustPoints.length === 0 ? (
+                  <div className="py-4 text-center text-muted-foreground text-sm border border-dashed border-border rounded-lg mt-2">
+                    No trust points. Defaults will be used.
+                  </div>
+                ) : (
+                  <div className="space-y-2 mt-2">
+                    {trustPoints.map((tp, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-primary shrink-0" />
+                        <Input
+                          value={tp.text}
+                          onChange={(e) => setTrustPoints((prev) => prev.map((t, j) => j === i ? { text: e.target.value } : t))}
+                          placeholder="e.g. Instant delivery — usually within 1-4 hours"
+                          className="flex-1"
+                        />
+                        <button onClick={() => setTrustPoints((prev) => prev.filter((_, j) => j !== i))} className="p-2 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0">
+                          <MinusCircle className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </TabsContent>
 
             <TabsContent value="images" className="space-y-4 pt-4">
