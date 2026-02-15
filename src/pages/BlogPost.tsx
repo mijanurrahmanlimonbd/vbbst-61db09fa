@@ -7,6 +7,7 @@ import SEOHead from "@/components/seo/SEOHead";
 import JsonLdSchema from "@/components/seo/JsonLdSchema";
 import CommentSection from "@/components/blog/CommentSection";
 import { ArrowLeft, Clock } from "lucide-react";
+import SocialShareButtons from "@/components/shared/SocialShareButtons";
 
 const BlogPost = () => {
   const { slug } = useParams();
@@ -69,6 +70,18 @@ const BlogPost = () => {
             className="prose prose-lg max-w-none text-foreground"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content || post.excerpt || "") }}
           />
+
+          {/* Social Share */}
+          <div className="mt-10 pt-6 border-t border-border">
+            <SocialShareButtons
+              url={`/blog/${post.slug}`}
+              title={post.title}
+              description={post.meta_description || post.excerpt}
+              image={post.featured_image}
+              contentType="blog"
+              contentId={post.id}
+            />
+          </div>
           
           <CommentSection postId={post.id} />
         </div>
