@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import DOMPurify from "dompurify";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
 import { ArrowLeft, Clock } from "lucide-react";
@@ -47,9 +48,12 @@ const BlogPost = () => {
       <section className="py-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {post.featured_image && (
-            <img src={post.featured_image} alt={post.title} className="w-full rounded-xl mb-8" />
+            <img src={post.featured_image} alt={post.title} className="w-full rounded-xl mb-8" loading="lazy" />
           )}
-          <div className="prose prose-lg max-w-none text-foreground" dangerouslySetInnerHTML={{ __html: post.content || post.excerpt || "" }} />
+          <div
+            className="prose prose-lg max-w-none text-foreground"
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content || post.excerpt || "") }}
+          />
         </div>
       </section>
     </Layout>
