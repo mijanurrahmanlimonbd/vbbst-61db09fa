@@ -26,7 +26,7 @@ const MobileBottomNav = () => {
       <ChatMenu open={chatOpen} onClose={() => setChatOpen(false)} position="mobile" />
 
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50 flex lg:hidden h-[60px] bg-background border-t border-border shadow-[0_-2px_10px_rgba(0,0,0,0.06)]"
+        className="fixed bottom-0 left-0 right-0 z-50 flex justify-between lg:hidden h-[60px] bg-background border-t border-border shadow-[0_-2px_10px_rgba(0,0,0,0.06)] px-4"
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         <Link
