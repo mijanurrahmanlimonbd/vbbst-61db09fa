@@ -6,6 +6,7 @@ const STORAGE_KEY = "vbb_order_completed";
 
 export const triggerOrderThankYou = () => {
   localStorage.setItem(STORAGE_KEY, "true");
+  sessionStorage.setItem("newsletter_show_after_order", "true");
   window.dispatchEvent(new Event("order-completed"));
 };
 

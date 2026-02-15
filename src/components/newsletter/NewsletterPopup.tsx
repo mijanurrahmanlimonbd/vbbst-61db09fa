@@ -6,14 +6,13 @@ const NewsletterPopup = () => {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    // Don't show if already dismissed this session
+    // Only show when triggered after a successful order
+    const shouldShow = sessionStorage.getItem("newsletter_show_after_order");
+    if (!shouldShow) return;
     if (sessionStorage.getItem("newsletter_dismissed")) return;
 
-    const timer = setTimeout(() => {
-      setShow(true);
-    }, 30000); // 30 seconds
-
-    return () => clearTimeout(timer);
+    sessionStorage.removeItem("newsletter_show_after_order");
+    setShow(true);
   }, []);
 
   const dismiss = () => {
