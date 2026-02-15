@@ -88,7 +88,7 @@ const NewsletterForm = ({ variant = "footer" }: { variant?: "footer" | "modal" }
           placeholder="Enter your email"
           required
           className={isFooter
-            ? "bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50 focus-visible:ring-primary"
+            ? "bg-background border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
             : ""
           }
         />
