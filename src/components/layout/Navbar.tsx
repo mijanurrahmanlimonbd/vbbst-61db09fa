@@ -77,7 +77,7 @@ const Navbar = () => {
   const logoElement = (
     <img
       src={headerLogo}
-      alt={branding.site_title || "Verified BM services"}
+      alt={branding.site_title || "Verified BM services official logo"}
       width={180}
       height={38}
       loading="eager"
