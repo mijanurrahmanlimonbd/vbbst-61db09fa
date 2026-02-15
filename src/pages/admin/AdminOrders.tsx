@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Search, Eye, CheckCircle, XCircle, Clock, Package, Image as ImageIcon } from "lucide-react";
+import { Search, Eye, CheckCircle, XCircle, Package, Image as ImageIcon } from "lucide-react";
 import { format } from "date-fns";
 
 interface Order {
@@ -41,11 +41,12 @@ interface OrderItem {
   product_id: string;
 }
 
+// Uniform status pipeline
 const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; className?: string }> = {
-  pending: { label: "Pending", variant: "outline" },
-  pending_verification: { label: "Awaiting Verification", variant: "secondary", className: "bg-[hsl(45,93%,47%)]/15 text-[hsl(45,80%,35%)] border-[hsl(45,93%,47%)]/30" },
-  paid: { label: "Paid", variant: "default", className: "bg-[hsl(142,70%,45%)]/15 text-[hsl(142,60%,35%)] border-[hsl(142,70%,45%)]/30" },
-  timed_out: { label: "Timed Out", variant: "destructive" },
+  created: { label: "Created", variant: "outline" },
+  processing: { label: "Processing", variant: "secondary", className: "bg-[hsl(45,93%,47%)]/15 text-[hsl(45,80%,35%)] border-[hsl(45,93%,47%)]/30" },
+  completed: { label: "Completed", variant: "default", className: "bg-[hsl(142,70%,45%)]/15 text-[hsl(142,60%,35%)] border-[hsl(142,70%,45%)]/30" },
+  failed: { label: "Failed", variant: "destructive" },
   cancelled: { label: "Cancelled", variant: "destructive" },
 };
 
@@ -80,40 +81,52 @@ const AdminOrders = () => {
     setOrderItems((data || []) as OrderItem[]);
   };
 
+  const reduceStock = async (items: OrderItem[]) => {
+    for (const item of items) {
+      const { data: product } = await supabase
+        .from("products")
+        .select("stock_quantity")
+        .eq("id", item.product_id)
+        .single();
+      if (product) {
+        const newQty = Math.max(0, product.stock_quantity - item.quantity);
+        await supabase
+          .from("products")
+          .update({ stock_quantity: newQty, stock_status: newQty === 0 ? "out_of_stock" : "in_stock" })
+          .eq("id", item.product_id);
+      }
+    }
+  };
+
+  const restoreStock = async (items: OrderItem[]) => {
+    for (const item of items) {
+      const { data: product } = await supabase
+        .from("products")
+        .select("stock_quantity")
+        .eq("id", item.product_id)
+        .single();
+      if (product) {
+        const newQty = product.stock_quantity + item.quantity;
+        await supabase
+          .from("products")
+          .update({ stock_quantity: newQty, stock_status: "in_stock" })
+          .eq("id", item.product_id);
+      }
+    }
+  };
+
   const approvePayment = async () => {
     if (!selectedOrder) return;
     setSaving(true);
     const { error } = await supabase
       .from("orders")
-      .update({
-        status: "paid",
-        paid_at: new Date().toISOString(),
-        admin_notes: adminNotes || null,
-      })
+      .update({ status: "completed", paid_at: new Date().toISOString(), admin_notes: adminNotes || null })
       .eq("id", selectedOrder.id);
 
     if (error) {
       toast.error("Failed to approve payment.");
     } else {
-      // Reduce stock for each order item
-      for (const item of orderItems) {
-        await supabase.rpc("get_setting", { setting_key: "dummy" }).then(() => {}); // no-op
-        const { data: product } = await supabase
-          .from("products")
-          .select("stock_quantity")
-          .eq("id", item.product_id)
-          .single();
-        if (product) {
-          const newQty = Math.max(0, product.stock_quantity - item.quantity);
-          await supabase
-            .from("products")
-            .update({
-              stock_quantity: newQty,
-              stock_status: newQty === 0 ? "out_of_stock" : "in_stock",
-            })
-            .eq("id", item.product_id);
-        }
-      }
+      await reduceStock(orderItems);
       toast.success("Payment approved and stock updated!");
       setSelectedOrder(null);
       fetchOrders();
@@ -124,12 +137,38 @@ const AdminOrders = () => {
   const cancelOrder = async () => {
     if (!selectedOrder) return;
     setSaving(true);
+    const wasCompleted = selectedOrder.status === "completed";
     const { error } = await supabase
       .from("orders")
       .update({ status: "cancelled", admin_notes: adminNotes || null })
       .eq("id", selectedOrder.id);
-    if (error) toast.error("Failed to cancel order.");
-    else { toast.success("Order cancelled."); setSelectedOrder(null); fetchOrders(); }
+    if (error) {
+      toast.error("Failed to cancel order.");
+    } else {
+      if (wasCompleted) await restoreStock(orderItems);
+      toast.success("Order cancelled." + (wasCompleted ? " Stock restored." : ""));
+      setSelectedOrder(null);
+      fetchOrders();
+    }
+    setSaving(false);
+  };
+
+  const markFailed = async () => {
+    if (!selectedOrder) return;
+    setSaving(true);
+    const wasCompleted = selectedOrder.status === "completed";
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: "failed", admin_notes: adminNotes || null })
+      .eq("id", selectedOrder.id);
+    if (error) {
+      toast.error("Failed to update order.");
+    } else {
+      if (wasCompleted) await restoreStock(orderItems);
+      toast.success("Order marked as failed." + (wasCompleted ? " Stock restored." : ""));
+      setSelectedOrder(null);
+      fetchOrders();
+    }
     setSaving(false);
   };
 
@@ -153,11 +192,7 @@ const AdminOrders = () => {
 
   const getStatusBadge = (status: string) => {
     const cfg = statusConfig[status] || { label: status, variant: "outline" as const };
-    return (
-      <Badge variant={cfg.variant} className={cfg.className}>
-        {cfg.label}
-      </Badge>
-    );
+    return <Badge variant={cfg.variant} className={cfg.className}>{cfg.label}</Badge>;
   };
 
   return (
@@ -173,10 +208,10 @@ const AdminOrders = () => {
           <SelectTrigger className="w-48"><SelectValue placeholder="All Statuses" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="pending_verification">Awaiting Verification</SelectItem>
-            <SelectItem value="paid">Paid</SelectItem>
-            <SelectItem value="timed_out">Timed Out</SelectItem>
+            <SelectItem value="created">Created</SelectItem>
+            <SelectItem value="processing">Processing</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="failed">Failed</SelectItem>
             <SelectItem value="cancelled">Cancelled</SelectItem>
           </SelectContent>
         </Select>
@@ -204,10 +239,7 @@ const AdminOrders = () => {
             </TableHeader>
             <TableBody>
               {filtered.map((order) => (
-                <TableRow
-                  key={order.id}
-                  className={order.status === "pending_verification" ? "bg-[hsl(45,93%,47%)]/5" : ""}
-                >
+                <TableRow key={order.id} className={order.status === "processing" ? "bg-[hsl(45,93%,47%)]/5" : ""}>
                   <TableCell>
                     <div>
                       <span className="font-mono text-xs text-muted-foreground">{order.id.slice(0, 8)}…</span>
@@ -238,9 +270,7 @@ const AdminOrders = () => {
       {/* Order Detail Dialog */}
       <Dialog open={!!selectedOrder} onOpenChange={(o) => !o && setSelectedOrder(null)}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Order Details</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>Order Details</DialogTitle></DialogHeader>
           {selectedOrder && (
             <div className="space-y-6 pt-2">
               <div className="grid grid-cols-2 gap-4 text-sm">
@@ -271,7 +301,6 @@ const AdminOrders = () => {
                 </div>
               </div>
 
-              {/* Order Items */}
               <div>
                 <h4 className="text-sm font-semibold text-foreground mb-2">Items</h4>
                 <div className="bg-secondary/30 rounded-lg p-3 space-y-2">
@@ -284,57 +313,41 @@ const AdminOrders = () => {
                 </div>
               </div>
 
-              {/* Proof Section */}
               {selectedOrder.proof_image_url && (
                 <div>
                   <h4 className="text-sm font-semibold text-foreground mb-2">Payment Proof</h4>
                   <div className="flex items-center gap-3">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-2"
-                      onClick={() => {
-                        setProofUrl(selectedOrder.proof_image_url!);
-                        setProofOpen(true);
-                      }}
-                    >
+                    <Button variant="outline" size="sm" className="gap-2" onClick={() => { setProofUrl(selectedOrder.proof_image_url!); setProofOpen(true); }}>
                       <ImageIcon className="w-4 h-4" /> View Proof
                     </Button>
                     {selectedOrder.proof_uploaded_at && (
-                      <span className="text-xs text-muted-foreground">
-                        Uploaded {format(new Date(selectedOrder.proof_uploaded_at), "PPp")}
-                      </span>
+                      <span className="text-xs text-muted-foreground">Uploaded {format(new Date(selectedOrder.proof_uploaded_at), "PPp")}</span>
                     )}
                   </div>
                 </div>
               )}
 
-              {/* Admin Notes */}
               <div>
                 <h4 className="text-sm font-semibold text-foreground mb-2">Admin Notes</h4>
-                <Textarea
-                  value={adminNotes}
-                  onChange={(e) => setAdminNotes(e.target.value)}
-                  placeholder="Internal notes about this order…"
-                  rows={3}
-                />
-                <Button variant="outline" size="sm" onClick={saveNotes} className="mt-2">
-                  Save Notes
-                </Button>
+                <Textarea value={adminNotes} onChange={(e) => setAdminNotes(e.target.value)} placeholder="Internal notes…" rows={3} />
+                <Button variant="outline" size="sm" onClick={saveNotes} className="mt-2">Save Notes</Button>
               </div>
 
-              {/* Actions */}
-              <div className="flex gap-3 pt-4 border-t border-border">
-                {(selectedOrder.status === "pending_verification" || selectedOrder.status === "pending") && (
+              {/* Status Pipeline Actions */}
+              <div className="flex flex-wrap gap-3 pt-4 border-t border-border">
+                {(selectedOrder.status === "created" || selectedOrder.status === "processing") && (
                   <Button onClick={approvePayment} disabled={saving} className="gap-2 bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)] text-white">
-                    <CheckCircle className="w-4 h-4" />
-                    Approve Payment
+                    <CheckCircle className="w-4 h-4" /> Mark Completed
                   </Button>
                 )}
-                {selectedOrder.status !== "paid" && selectedOrder.status !== "cancelled" && (
+                {selectedOrder.status !== "completed" && selectedOrder.status !== "failed" && selectedOrder.status !== "cancelled" && (
+                  <Button variant="outline" onClick={markFailed} disabled={saving} className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/5">
+                    <XCircle className="w-4 h-4" /> Mark Failed
+                  </Button>
+                )}
+                {selectedOrder.status !== "cancelled" && (
                   <Button variant="destructive" onClick={cancelOrder} disabled={saving} className="gap-2">
-                    <XCircle className="w-4 h-4" />
-                    Cancel Order
+                    <XCircle className="w-4 h-4" /> Cancel Order
                   </Button>
                 )}
               </div>
@@ -343,7 +356,6 @@ const AdminOrders = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Proof Image Modal */}
       <Dialog open={proofOpen} onOpenChange={setProofOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader><DialogTitle>Payment Proof</DialogTitle></DialogHeader>

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Upload, CheckCircle, Copy, QrCode } from "lucide-react";
+import { ArrowLeft, Loader2, Upload, CheckCircle, Copy, QrCode, AlertCircle } from "lucide-react";
 
 interface CartItem {
   id: string;
@@ -18,7 +18,20 @@ interface CartItem {
   image_url: string | null;
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+interface PaymentMethod {
+  id: string;
+  name: string;
+  slug: string;
+  type: "manual" | "api" | "placeholder";
+  is_active: boolean;
+  icon: string | null;
+  description: string | null;
+  instructions: string | null;
+  custom_note: string | null;
+  config: any;
+}
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/jpg"];
 
 const Checkout = () => {
@@ -29,16 +42,42 @@ const Checkout = () => {
   const [step, setStep] = useState<"info" | "payment" | "done">("info");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [method, setMethod] = useState<"cryptomus" | "binance" | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [methodsLoading, setMethodsLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [proofUploaded, setProofUploaded] = useState(false);
   const [cryptomusUrl, setCryptomusUrl] = useState<string | null>(null);
+  const [binancePayId, setBinancePayId] = useState("895693102");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const total = items.reduce((sum, i) => sum + (i.sale_price || i.price) * i.quantity, 0);
+
+  // Load active payment methods from DB
+  useEffect(() => {
+    const load = async () => {
+      setMethodsLoading(true);
+      const { data } = await supabase
+        .from("payment_methods")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true });
+      setPaymentMethods((data || []) as PaymentMethod[]);
+
+      // Load Binance Pay ID from settings
+      const { data: setting } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "binance_pay_id")
+        .maybeSingle();
+      if (setting?.value) setBinancePayId(setting.value);
+
+      setMethodsLoading(false);
+    };
+    load();
+  }, []);
 
   if (items.length === 0) {
     return (
@@ -58,29 +97,31 @@ const Checkout = () => {
       toast.error("Please enter your name and email.");
       return;
     }
-    if (!method) {
+    if (!selectedMethod) {
       toast.error("Please select a payment method.");
+      return;
+    }
+    if (selectedMethod.type === "placeholder") {
+      toast.error("This payment method is not available yet.");
       return;
     }
 
     setLoading(true);
     try {
-      // Create order
       const { data: order, error: orderErr } = await supabase
         .from("orders")
         .insert({
           customer_name: name.trim(),
           customer_email: email.trim(),
-          payment_method: method,
+          payment_method: selectedMethod.slug,
           total_amount: total,
-          status: method === "binance" ? "pending_verification" : "pending",
+          status: "created",
         })
         .select("id")
         .single();
 
       if (orderErr || !order) throw orderErr;
 
-      // Create order items
       const orderItems = items.map((i) => ({
         order_id: order.id,
         product_id: i.id,
@@ -94,8 +135,7 @@ const Checkout = () => {
 
       setOrderId(order.id);
 
-      if (method === "cryptomus") {
-        // Call Cryptomus edge function
+      if (selectedMethod.type === "api" && selectedMethod.slug === "cryptomus") {
         try {
           const { data: fnData, error: fnErr } = await supabase.functions.invoke("create-cryptomus-invoice", {
             body: { order_id: order.id, amount: total, currency: "USD" },
@@ -103,11 +143,13 @@ const Checkout = () => {
           if (fnErr) throw fnErr;
           if (fnData?.url) {
             setCryptomusUrl(fnData.url);
+            // Update status to processing
+            await supabase.from("orders").update({ status: "processing" }).eq("id", order.id);
           } else if (fnData?.error) {
-            toast.error(fnData.error || "Cryptomus not configured. Please use Binance Pay.");
+            toast.error(fnData.error);
           }
         } catch {
-          toast.error("Cryptomus is not configured yet. Please use Binance Pay instead.");
+          toast.error("Cryptomus is not configured yet. Please contact support.");
         }
       }
 
@@ -123,15 +165,8 @@ const Checkout = () => {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    if (!ACCEPTED_TYPES.includes(file.type)) {
-      toast.error("Only JPG and PNG images are allowed.");
-      return;
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error("File size must be under 5MB.");
-      return;
-    }
+    if (!ACCEPTED_TYPES.includes(file.type)) { toast.error("Only JPG and PNG images are allowed."); return; }
+    if (file.size > MAX_FILE_SIZE) { toast.error("File size must be under 5MB."); return; }
     setProofFile(file);
   };
 
@@ -141,24 +176,18 @@ const Checkout = () => {
     try {
       const ext = proofFile.name.split(".").pop();
       const path = `${orderId}/proof.${ext}`;
-
       const { error: upErr } = await supabase.storage.from("payment-proofs").upload(path, proofFile, { upsert: true });
       if (upErr) throw upErr;
-
       const { data: urlData } = supabase.storage.from("payment-proofs").getPublicUrl(path);
-
       const { error: updateErr } = await supabase
         .from("orders")
         .update({
           proof_image_url: urlData.publicUrl,
           proof_uploaded_at: new Date().toISOString(),
-          status: "pending_verification",
+          status: "processing",
         })
         .eq("id", orderId);
-
       if (updateErr) throw updateErr;
-
-      setProofUploaded(true);
       setStep("done");
       toast.success("Proof uploaded successfully!");
     } catch (err: any) {
@@ -169,7 +198,7 @@ const Checkout = () => {
     }
   };
 
-  const binanceId = "895693102"; // Default - can be overridden from settings
+  const isManualMethod = selectedMethod?.type === "manual";
 
   return (
     <Layout>
@@ -207,7 +236,6 @@ const Checkout = () => {
 
           {step === "info" && (
             <div className="space-y-6">
-              {/* Customer Info */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-foreground">Customer Info</h3>
                 <div>
@@ -220,43 +248,65 @@ const Checkout = () => {
                 </div>
               </div>
 
-              {/* Payment Method */}
+              {/* Dynamic Payment Methods */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-foreground">Select Payment Method</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <button
-                    onClick={() => setMethod("cryptomus")}
-                    className={`p-4 rounded-xl border-2 text-left transition-colors ${
-                      method === "cryptomus"
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <div className="text-lg font-semibold text-foreground mb-1">🔒 Cryptomus</div>
-                    <p className="text-xs text-muted-foreground">Automatic crypto payment. Supports BTC, ETH, USDT & more.</p>
-                  </button>
-                  <button
-                    onClick={() => setMethod("binance")}
-                    className={`p-4 rounded-xl border-2 text-left transition-colors ${
-                      method === "binance"
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <div className="text-lg font-semibold text-foreground mb-1">💳 Binance Pay</div>
-                    <p className="text-xs text-muted-foreground">Manual transfer. Send payment & upload screenshot proof.</p>
-                  </button>
-                </div>
+                {methodsLoading ? (
+                  <div className="text-center py-6 text-muted-foreground">Loading payment methods…</div>
+                ) : paymentMethods.length === 0 ? (
+                  <div className="text-center py-6 text-muted-foreground">No payment methods available. Please contact support.</div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {paymentMethods.map((pm) => (
+                      <button
+                        key={pm.id}
+                        onClick={() => setSelectedMethod(pm)}
+                        className={`p-4 rounded-xl border-2 text-left transition-colors ${
+                          selectedMethod?.id === pm.id
+                            ? "border-primary bg-primary/5"
+                            : "border-border hover:border-primary/50"
+                        } ${pm.type === "placeholder" ? "opacity-70" : ""}`}
+                      >
+                        <div className="text-lg font-semibold text-foreground mb-1">
+                          {pm.icon} {pm.name}
+                        </div>
+                        <p className="text-xs text-muted-foreground">{pm.description}</p>
+                        {pm.custom_note && (
+                          <p className="text-xs text-primary font-medium mt-2">{pm.custom_note}</p>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              <Button onClick={createOrder} disabled={loading} className="w-full gap-2" size="lg">
+              {/* Placeholder warning */}
+              {selectedMethod?.type === "placeholder" && (
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-secondary/50 border border-border">
+                  <AlertCircle className="w-5 h-5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Coming Soon</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {selectedMethod.instructions || "This payment method is coming soon. Please contact support or choose another option."}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <Button
+                onClick={createOrder}
+                disabled={loading || !selectedMethod || selectedMethod.type === "placeholder"}
+                className="w-full gap-2"
+                size="lg"
+              >
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 Place Order
               </Button>
             </div>
           )}
 
-          {step === "payment" && method === "cryptomus" && (
+          {/* API payment (Cryptomus) */}
+          {step === "payment" && selectedMethod?.type === "api" && (
             <div className="text-center space-y-6">
               <CheckCircle className="w-12 h-12 text-primary mx-auto" />
               <h3 className="text-xl font-bold text-foreground">Order Created!</h3>
@@ -265,48 +315,56 @@ const Checkout = () => {
                   <p className="text-muted-foreground">Click below to complete your crypto payment.</p>
                   <Button asChild size="lg" className="w-full">
                     <a href={cryptomusUrl} target="_blank" rel="noopener noreferrer">
-                      Pay with Cryptomus
+                      Pay with {selectedMethod.name}
                     </a>
                   </Button>
                   <p className="text-xs text-muted-foreground">Your order will be automatically confirmed once payment is received, even if you close this page.</p>
                 </>
               ) : (
                 <p className="text-muted-foreground">
-                  Cryptomus is not configured yet. Please contact us via WhatsApp or Telegram to complete your payment.
+                  {selectedMethod.name} is not configured yet. Please contact us via WhatsApp or Telegram to complete your payment.
                 </p>
               )}
             </div>
           )}
 
-          {step === "payment" && method === "binance" && (
+          {/* Manual payment (Binance Pay, etc.) */}
+          {step === "payment" && isManualMethod && (
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-foreground">Send Payment via Binance</h3>
-              <div className="bg-secondary/30 rounded-xl border border-border p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Binance Pay ID</p>
-                    <p className="text-xl font-bold font-mono text-foreground">{binanceId}</p>
+              <h3 className="text-lg font-semibold text-foreground">Send Payment via {selectedMethod!.name}</h3>
+
+              {/* Instructions / Binance specific */}
+              {selectedMethod!.slug === "binance" ? (
+                <div className="bg-secondary/30 rounded-xl border border-border p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Binance Pay ID</p>
+                      <p className="text-xl font-bold font-mono text-foreground">{binancePayId}</p>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(binancePayId); toast.success("Copied!"); }} className="gap-1">
+                      <Copy className="w-3.5 h-3.5" /> Copy
+                    </Button>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      navigator.clipboard.writeText(binanceId);
-                      toast.success("Copied!");
-                    }}
-                    className="gap-1"
-                  >
-                    <Copy className="w-3.5 h-3.5" /> Copy
-                  </Button>
+                  <div className="text-center py-4">
+                    <QrCode className="w-24 h-24 text-muted-foreground mx-auto" />
+                    <p className="text-xs text-muted-foreground mt-2">Scan with Binance app</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-foreground font-semibold">Amount: ${total.toFixed(2)} USD</p>
+                  </div>
                 </div>
-                <div className="text-center py-4">
-                  <QrCode className="w-24 h-24 text-muted-foreground mx-auto" />
-                  <p className="text-xs text-muted-foreground mt-2">Scan with Binance app</p>
+              ) : selectedMethod!.instructions ? (
+                <div className="bg-secondary/30 rounded-xl border border-border p-6">
+                  <div dangerouslySetInnerHTML={{ __html: selectedMethod!.instructions }} className="text-sm text-foreground prose prose-sm" />
+                  <div className="text-center mt-4">
+                    <p className="text-sm text-foreground font-semibold">Amount: ${total.toFixed(2)} USD</p>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <p className="text-sm text-foreground font-semibold">Amount: ${total.toFixed(2)} USD</p>
-                </div>
-              </div>
+              ) : null}
+
+              {selectedMethod!.custom_note && (
+                <p className="text-sm text-primary font-medium text-center">{selectedMethod!.custom_note}</p>
+              )}
 
               {/* Upload Proof */}
               <div className="space-y-3">
@@ -320,9 +378,7 @@ const Checkout = () => {
                     <div className="space-y-2">
                       <CheckCircle className="w-8 h-8 text-primary mx-auto" />
                       <p className="text-sm text-foreground font-medium">{proofFile.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {(proofFile.size / 1024 / 1024).toFixed(2)} MB
-                      </p>
+                      <p className="text-xs text-muted-foreground">{(proofFile.size / 1024 / 1024).toFixed(2)} MB</p>
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -331,13 +387,7 @@ const Checkout = () => {
                     </div>
                   )}
                 </div>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept=".jpg,.jpeg,.png"
-                  className="hidden"
-                  onChange={handleFileSelect}
-                />
+                <input ref={fileRef} type="file" accept=".jpg,.jpeg,.png" className="hidden" onChange={handleFileSelect} />
                 <Button onClick={uploadProof} disabled={!proofFile || uploading} className="w-full gap-2" size="lg">
                   {uploading && <Loader2 className="w-4 h-4 animate-spin" />}
                   Submit Payment Proof
@@ -353,9 +403,7 @@ const Checkout = () => {
               <p className="text-muted-foreground max-w-md mx-auto">
                 Our team is verifying your transaction. You will receive an update within 24 hours.
               </p>
-              <Button variant="outline" onClick={() => navigate("/shop")}>
-                Back to Shop
-              </Button>
+              <Button variant="outline" onClick={() => navigate("/shop")}>Back to Shop</Button>
             </div>
           )}
         </div>

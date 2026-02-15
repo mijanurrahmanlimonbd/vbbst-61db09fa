@@ -20,12 +20,11 @@ Deno.serve(async (req) => {
 
     const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
 
-    // Find pending_verification orders with no proof uploaded, older than 30 min
     const { data: timedOut, error } = await supabase
       .from("orders")
-      .update({ status: "timed_out" })
+      .update({ status: "failed" })
       .eq("payment_method", "binance")
-      .in("status", ["pending", "pending_verification"])
+      .in("status", ["created", "processing"])
       .is("proof_image_url", null)
       .lt("created_at", thirtyMinAgo)
       .select("id");

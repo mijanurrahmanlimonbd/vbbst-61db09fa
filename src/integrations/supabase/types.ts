@@ -305,6 +305,54 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_methods: {
+        Row: {
+          config: Json | null
+          created_at: string
+          custom_note: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          instructions: string | null
+          is_active: boolean
+          name: string
+          slug: string
+          sort_order: number | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string
+          custom_note?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          name: string
+          slug: string
+          sort_order?: number | null
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string
+          custom_note?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          name?: string
+          slug?: string
+          sort_order?: number | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           badge: string | null
