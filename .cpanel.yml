@@ -1,5 +1,5 @@
 ---
 deployment:
   tasks:
-    - echo "Deployment complete - files already in public_html"
-
+    - export DEPLOYPATH=/home/verifie1/public_html/
+    - /bin/cp -R dist/* $DEPLOYPATH
