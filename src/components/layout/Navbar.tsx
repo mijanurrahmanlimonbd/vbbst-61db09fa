@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ShoppingCart, User, Menu, X, Search, LogOut } from "lucide-react";
 import { useBranding } from "@/hooks/useBranding";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext";
 import AuthModal from "@/components/auth/AuthModal";
 import {
   DropdownMenu,
@@ -29,6 +30,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { branding } = useBranding();
   const { user, profile, signOut } = useAuth();
+  const { openCart, totalItems } = useCart();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,8 +80,13 @@ const Navbar = () => {
               <button onClick={() => setSearchOpen(!searchOpen)} className="text-foreground hover:text-primary transition-colors">
                 <Search className="w-5 h-5" />
               </button>
-              <button className="text-foreground hover:text-primary transition-colors">
+              <button onClick={openCart} className="relative text-foreground hover:text-primary transition-colors">
                 <ShoppingCart className="w-5 h-5" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {totalItems > 9 ? "9+" : totalItems}
+                  </span>
+                )}
               </button>
 
               {/* User button */}
