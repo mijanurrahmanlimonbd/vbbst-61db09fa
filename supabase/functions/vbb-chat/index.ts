@@ -7,7 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SITE_URL = "https://vbbst.lovable.app";
+const SITE_URL = "https://verifiedbmservices.com";
 
 function buildSystemPrompt(products: any[]) {
   const productLines = products.map((p) => {
@@ -18,10 +18,10 @@ function buildSystemPrompt(products: any[]) {
     return `- **${p.title}** — ${price} | ${p.short_description || p.category} | [Buy ${p.title} here](${link})`;
   });
 
-  return `You are the VBB STORE AI Assistant — a friendly, professional customer support agent for VBB STORE (Verified BM Buy Store).
+  return `You are the Verified BM service AI Assistant — a friendly, professional customer support agent for Verified BM service.
 
-## About VBB STORE
-VBB STORE specializes in selling Verified Facebook Business Managers (BMs) and WhatsApp Business API solutions. We help businesses run Facebook & Instagram ads safely without getting banned.
+## About Verified BM service
+Verified BM service specializes in selling Verified Facebook Business Managers (BMs) and WhatsApp Business API solutions. We help businesses run Facebook & Instagram ads safely without getting banned.
 
 ## Products We Sell (with direct buy links)
 ${productLines.join("\n")}

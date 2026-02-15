@@ -12,8 +12,8 @@ const Footer = () => {
     <img src={branding.header_logo} alt={branding.site_title} className="h-8 max-w-[160px] object-contain" loading="lazy" />
   ) : (
     <div className="flex items-center gap-2">
-      <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-bold text-sm">VS</div>
-      <span className="text-lg font-bold text-foreground">VBB <span className="text-primary">STORE</span></span>
+      <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-bold text-sm">V</div>
+      <span className="text-lg font-bold text-foreground">Verified BM <span className="text-primary">service</span></span>
     </div>
   );
 
@@ -21,7 +21,7 @@ const Footer = () => {
     { to: "/", label: "Homepage", icon: <Home className="w-4 h-4" /> },
     { to: "/shop", label: "All Products", icon: <ShoppingBag className="w-4 h-4" /> },
     { to: "/blog", label: "Latest Articles", icon: <FileText className="w-4 h-4" /> },
-    { to: "/about", label: "About VBB STORE", icon: <Users className="w-4 h-4" /> },
+    { to: "/about", label: "About Us", icon: <Users className="w-4 h-4" /> },
     { to: "/contact", label: "Support & Contact", icon: <Headphones className="w-4 h-4" /> },
   ];
 
@@ -125,7 +125,7 @@ const Footer = () => {
       {/* Copyright */}
       <div className="border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} {branding.site_title || "VBB STORE"}. All rights reserved. | Verified BM &amp; WhatsApp API Provider
+          © {new Date().getFullYear()} {branding.site_title || "Verified BM service"}. All rights reserved. | Verified BM &amp; WhatsApp API Provider
         </div>
       </div>
     </footer>
