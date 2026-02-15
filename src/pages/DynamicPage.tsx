@@ -133,7 +133,7 @@ const DynamicPage = () => {
       {page.components.testimonials && <TestimonialsSection />}
       {page.components.faqs && <FAQsSection />}
 
-      <FloatingEditBar slug={page.slug} />
+      
     </Layout>
   );
 };
