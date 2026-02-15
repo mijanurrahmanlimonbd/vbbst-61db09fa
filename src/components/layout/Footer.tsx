@@ -1,8 +1,22 @@
 import { Link } from "react-router-dom";
 import { Facebook, Instagram, Youtube, Send, MessageCircle } from "lucide-react";
 import NewsletterForm from "@/components/newsletter/NewsletterForm";
+import { useBranding } from "@/hooks/useBranding";
 
 const Footer = () => {
+  const { branding } = useBranding();
+
+  const logoElement = branding.footer_logo ? (
+    <img src={branding.footer_logo} alt={branding.site_title} className="h-8 max-w-[160px] object-contain" />
+  ) : branding.header_logo ? (
+    <img src={branding.header_logo} alt={branding.site_title} className="h-8 max-w-[160px] object-contain brightness-0 invert" />
+  ) : (
+    <div className="flex items-center gap-2">
+      <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-bold text-sm">VS</div>
+      <span className="text-lg font-bold">VBB <span className="text-primary">STORE</span></span>
+    </div>
+  );
+
   return (
     <footer className="bg-foreground text-primary-foreground">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -19,9 +33,8 @@ const Footer = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-bold text-sm">VS</div>
-              <span className="text-lg font-bold">VBB <span className="text-primary">STORE</span></span>
+            <div className="mb-4">
+              {logoElement}
             </div>
             <p className="text-sm text-primary-foreground/70 mb-4">
               Your trusted source for verified Facebook Business Managers, WhatsApp API accounts, and premium digital advertising products.
@@ -69,7 +82,7 @@ const Footer = () => {
         </div>
 
         <div className="mt-12 pt-8 border-t border-primary-foreground/10 text-center text-sm text-primary-foreground/50">
-          © {new Date().getFullYear()} VBB STORE. All rights reserved.
+          © {new Date().getFullYear()} {branding.site_title || "VBB STORE"}. All rights reserved.
         </div>
       </div>
     </footer>

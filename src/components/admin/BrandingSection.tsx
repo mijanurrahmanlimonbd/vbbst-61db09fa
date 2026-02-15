@@ -1,0 +1,224 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Loader2, Upload, X, Image as ImageIcon } from "lucide-react";
+import { toast } from "sonner";
+
+const BRANDING_FIELDS = [
+  { key: "header_logo", label: "Header Logo", desc: "Main navigation bar logo (PNG/SVG, max 2MB)", accept: ".png,.svg,.webp" },
+  { key: "footer_logo", label: "Footer Logo", desc: "Footer version — often white/monochrome (PNG/SVG, max 2MB)", accept: ".png,.svg,.webp" },
+  { key: "favicon", label: "Favicon", desc: "Browser tab icon (PNG/ICO, 32×32 or 64×64 recommended, max 500KB)", accept: ".png,.ico,.svg" },
+  { key: "invoice_logo", label: "Invoice Logo", desc: "High-resolution version for PDF invoices (PNG, max 2MB)", accept: ".png,.jpg,.jpeg" },
+];
+
+const BrandingSection = () => {
+  const [logos, setLogos] = useState<Record<string, string>>({});
+  const [uploading, setUploading] = useState<Record<string, boolean>>({});
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase
+        .from("site_settings")
+        .select("key, value")
+        .in("key", BRANDING_FIELDS.map((f) => f.key));
+      if (data) {
+        const map: Record<string, string> = {};
+        data.forEach((r) => { map[r.key] = r.value; });
+        setLogos(map);
+      }
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  const handleUpload = async (key: string, file: File) => {
+    const maxSize = key === "favicon" ? 500 * 1024 : 2 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error(`File too large. Max ${key === "favicon" ? "500KB" : "2MB"}.`);
+      return;
+    }
+
+    setUploading((p) => ({ ...p, [key]: true }));
+    try {
+      // Compress if it's a large image (not SVG/ICO)
+      let uploadFile: File | Blob = file;
+      if (file.type.startsWith("image/") && !file.type.includes("svg") && !file.name.endsWith(".ico") && file.size > 200 * 1024) {
+        uploadFile = await compressImage(file, key === "favicon" ? 128 : 800);
+      }
+
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const path = `${key}.${ext}`;
+
+      // Delete old file if exists
+      await supabase.storage.from("branding").remove([path]);
+
+      const { error: upErr } = await supabase.storage.from("branding").upload(path, uploadFile, {
+        upsert: true,
+        contentType: file.type,
+      });
+      if (upErr) throw upErr;
+
+      const { data: urlData } = supabase.storage.from("branding").getPublicUrl(path);
+      // Add cache-busting param
+      const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+      setLogos((p) => ({ ...p, [key]: publicUrl }));
+      toast.success("Uploaded! Click 'Save Branding' to apply.");
+    } catch (e: any) {
+      toast.error(e.message || "Upload failed.");
+    } finally {
+      setUploading((p) => ({ ...p, [key]: false }));
+    }
+  };
+
+  const removeLogo = (key: string) => {
+    setLogos((p) => {
+      const next = { ...p };
+      delete next[key];
+      return next;
+    });
+  };
+
+  const saveBranding = async () => {
+    setSaving(true);
+    try {
+      for (const field of BRANDING_FIELDS) {
+        const value = logos[field.key] || "";
+        const { data: existing } = await supabase
+          .from("site_settings")
+          .select("key")
+          .eq("key", field.key)
+          .single();
+
+        if (existing) {
+          await supabase.from("site_settings").update({ value, updated_at: new Date().toISOString() }).eq("key", field.key);
+        } else if (value) {
+          await supabase.from("site_settings").insert({ key: field.key, value });
+        }
+      }
+      toast.success("Branding settings saved!");
+    } catch {
+      toast.error("Failed to save branding.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return <div className="text-center py-8 text-muted-foreground">Loading…</div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-base font-semibold text-foreground mb-1">Logo & Branding</h3>
+        <p className="text-xs text-muted-foreground">Manage your site-wide visual assets. Logos will appear in the header, footer, favicon, and invoices.</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {BRANDING_FIELDS.map((field) => (
+          <div key={field.key} className="border border-border rounded-xl p-4 space-y-3">
+            <div>
+              <label className="text-sm font-medium text-foreground">{field.label}</label>
+              <p className="text-xs text-muted-foreground">{field.desc}</p>
+            </div>
+
+            {logos[field.key] ? (
+              <div className="flex items-start gap-4">
+                <div className={`border border-border rounded-lg p-2 ${field.key === "footer_logo" ? "bg-foreground" : "bg-white"}`}>
+                  <img
+                    src={logos[field.key]}
+                    alt={field.label}
+                    className="max-w-[160px] max-h-[80px] object-contain"
+                  />
+                </div>
+                <div className="space-y-2 flex-1">
+                  <p className="text-xs text-muted-foreground break-all line-clamp-2">{logos[field.key]}</p>
+                  <div className="flex gap-2">
+                    <label className="cursor-pointer">
+                      <Button variant="outline" size="sm" className="gap-1 pointer-events-none">
+                        <Upload className="w-3.5 h-3.5" /> Replace
+                      </Button>
+                      <input
+                        type="file"
+                        accept={field.accept}
+                        className="hidden"
+                        disabled={uploading[field.key]}
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleUpload(field.key, f);
+                        }}
+                      />
+                    </label>
+                    <Button variant="outline" size="sm" onClick={() => removeLogo(field.key)} className="gap-1">
+                      <X className="w-3.5 h-3.5" /> Remove
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-6 cursor-pointer hover:border-primary/50 transition-colors">
+                {uploading[field.key] ? (
+                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                ) : (
+                  <>
+                    <ImageIcon className="w-8 h-8 text-muted-foreground/50 mb-2" />
+                    <span className="text-sm text-muted-foreground">Click to upload</span>
+                    <span className="text-xs text-muted-foreground/70 mt-1">{field.accept.replace(/\./g, "").toUpperCase()}</span>
+                  </>
+                )}
+                <input
+                  type="file"
+                  accept={field.accept}
+                  className="hidden"
+                  disabled={uploading[field.key]}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleUpload(field.key, f);
+                  }}
+                />
+              </label>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <Button onClick={saveBranding} disabled={saving} className="gap-2">
+        {saving && <Loader2 className="w-4 h-4 animate-spin" />} Save Branding
+      </Button>
+    </div>
+  );
+};
+
+/** Compress image using canvas */
+const compressImage = (file: File, maxDim: number): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        const ratio = Math.min(maxDim / width, maxDim / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error("Compression failed"));
+        },
+        file.type.includes("png") ? "image/png" : "image/jpeg",
+        0.85
+      );
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+};
+
+export default BrandingSection;
