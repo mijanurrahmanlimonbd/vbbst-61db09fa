@@ -11,6 +11,21 @@ export interface BrandingSettings {
 
 const BRANDING_KEYS = ["header_logo", "footer_logo", "favicon", "invoice_logo", "site_title"];
 
+/** Ensure a branding URL uses the public endpoint and has cache-busting */
+const ensurePublicUrl = (url: string): string => {
+  if (!url) return "";
+  // Strip any existing query params for clean cache-bust
+  const base = url.split("?")[0];
+  // If it's a relative storage path (e.g. "header_logo.png"), build the full public URL
+  if (!base.startsWith("http")) {
+    const { data } = supabase.storage.from("branding").getPublicUrl(base);
+    return `${data.publicUrl}?v=${Date.now()}`;
+  }
+  // Ensure /public/ is in the path for Supabase storage URLs
+  const fixed = base.includes("/object/public/") ? base : base.replace("/object/", "/object/public/");
+  return `${fixed}?v=${Date.now()}`;
+};
+
 export const useBranding = () => {
   const [branding, setBranding] = useState<BrandingSettings>({
     header_logo: "",
@@ -31,14 +46,13 @@ export const useBranding = () => {
       if (data) {
         const map: Record<string, string> = {};
         data.forEach((r) => { map[r.key] = r.value; });
-        setBranding((prev) => ({
-          ...prev,
-          header_logo: map.header_logo || "",
-          footer_logo: map.footer_logo || "",
-          favicon: map.favicon || "",
-          invoice_logo: map.invoice_logo || "",
+        setBranding({
+          header_logo: ensurePublicUrl(map.header_logo || ""),
+          footer_logo: ensurePublicUrl(map.footer_logo || ""),
+          favicon: ensurePublicUrl(map.favicon || ""),
+          invoice_logo: ensurePublicUrl(map.invoice_logo || ""),
           site_title: map.site_title || "VBB STORE",
-        }));
+        });
       }
       setLoading(false);
     };
