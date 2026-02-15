@@ -2,45 +2,32 @@ import { useState } from "react";
 import { MessageCircle, Send, Mail, Facebook } from "lucide-react";
 import vbbLogo from "@/assets/vbb-logo.png";
 
-const AnimatedLogo = () => {
-  const [loaded, setLoaded] = useState(false);
-
-  return (
-    <div className="flex-shrink-0 flex items-center justify-center">
-      <div
-        className={`relative w-64 h-64 md:w-80 md:h-80 rounded-2xl flex items-center justify-center border border-border shadow-lg bg-secondary overflow-hidden transition-all duration-700 ease-out ${
-          loaded ? "opacity-100 scale-100" : "opacity-0 scale-[0.8]"
-        } hover:brightness-110 hover:scale-[1.03] animate-float`}
-      >
-        <img
-          src={vbbLogo}
-          alt="VBB STORE - Verified Business Manager Provider"
-          className="w-4/5 h-4/5 object-contain"
-          onLoad={() => setLoaded(true)}
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = "none";
-          }}
-          fetchPriority="high"
-        />
-        {!loaded && (
-          <div className="absolute text-center">
-            <div className="w-24 h-24 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-primary-foreground text-3xl font-bold">VS</span>
-            </div>
-            <span className="text-2xl font-bold text-foreground">VBB STORE</span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
 const HeroSection = () => {
+  const [logoLoaded, setLogoLoaded] = useState(false);
+
   return (
     <section className="py-16 md:py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-center gap-12">
-          <AnimatedLogo />
+          <div className="flex-shrink-0">
+            <div className="w-56 h-56 md:w-72 md:h-72 rounded-2xl flex items-center justify-center bg-secondary shadow-md overflow-hidden">
+              <img
+                src={vbbLogo}
+                alt="VBB STORE - Verified Business Manager Provider"
+                className={`w-4/5 h-4/5 object-contain transition-opacity duration-500 ${logoLoaded ? "opacity-100" : "opacity-0"}`}
+                onLoad={() => setLogoLoaded(true)}
+                fetchPriority="high"
+              />
+              {!logoLoaded && (
+                <div className="absolute text-center">
+                  <div className="w-20 h-20 bg-primary rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <span className="text-primary-foreground text-2xl font-bold">VS</span>
+                  </div>
+                  <span className="text-xl font-bold text-foreground">VBB STORE</span>
+                </div>
+              )}
+            </div>
+          </div>
 
           <div className="flex-1 text-center md:text-left">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-secondary text-sm text-foreground mb-6">
