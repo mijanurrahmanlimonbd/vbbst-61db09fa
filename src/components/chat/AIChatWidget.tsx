@@ -294,7 +294,7 @@ const AIChatWidget = () => {
                   value={visitorName}
                   onChange={(e) => setVisitorName(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && startSession()}
-                  className="text-sm"
+                  className="text-sm border-primary/30 focus-visible:ring-primary"
                 />
                 <Input
                   placeholder="Email (optional)"
@@ -302,7 +302,7 @@ const AIChatWidget = () => {
                   value={visitorEmail}
                   onChange={(e) => setVisitorEmail(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && startSession()}
-                  className="text-sm"
+                  className="text-sm border-primary/30 focus-visible:ring-primary"
                 />
                 <Button onClick={startSession} disabled={!visitorName.trim()} className="w-full">
                   Start Chat
@@ -337,13 +337,13 @@ const AIChatWidget = () => {
                   </div>
                 )}
                 {messages.map((m, i) => {
-                  // Extract product links for "View Product" buttons
+                  // Extract product links for "Buy Now" buttons
                   const productLinks: { label: string; href: string }[] = [];
                   if (m.role !== "user") {
-                    const linkRegex = /\[([^\]]*)\]\((https?:\/\/[^)]*\/shop\/[^)]+)\)/g;
+                    const linkRegex = /\[([^\]]*(?:Buy|buy|BM|WhatsApp|API)[^\]]*)\]\((https?:\/\/[^)]*\/shop\/[^)]+)\)/g;
                     let match;
                     while ((match = linkRegex.exec(m.content)) !== null) {
-                      productLinks.push({ label: match[1], href: match[2] });
+                      productLinks.push({ label: match[1].replace(/^Buy\s+/i, "").replace(/\s+here$/i, ""), href: match[2] });
                     }
                   }
 
@@ -354,7 +354,7 @@ const AIChatWidget = () => {
                     <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                       <div className="max-w-[85%] space-y-1.5">
                         <div
-                          className={`px-3 py-1.5 rounded-2xl text-sm whitespace-pre-wrap ${
+                          className={`px-3 py-1.5 rounded-2xl text-sm ${
                             m.role === "user"
                               ? "bg-primary text-primary-foreground rounded-br-md"
                               : m.role === "admin"
@@ -368,42 +368,48 @@ const AIChatWidget = () => {
                           {m.role === "user" ? (
                             m.content
                           ) : (
-                            <ReactMarkdown
-                              components={{
-                                a: ({ href, children }) => {
-                                  const external = isExternal(href || "");
-                                  return (
-                                    <a
-                                      href={href}
-                                      target={external ? "_blank" : "_self"}
-                                      rel={external ? "noopener noreferrer" : undefined}
-                                      className="underline font-medium text-primary hover:text-primary/80"
-                                    >
-                                      {children}
-                                    </a>
-                                  );
-                                },
-                                p: ({ children }) => <span className="block mb-1 last:mb-0">{children}</span>,
-                                strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
-                                ul: ({ children }) => <ul className="list-disc pl-4 my-1 space-y-0.5">{children}</ul>,
-                                li: ({ children }) => <li className="text-sm">{children}</li>,
-                              }}
-                            >
-                              {m.content}
-                            </ReactMarkdown>
+                            <div className="chat-markdown">
+                              <ReactMarkdown
+                                components={{
+                                  a: ({ href, children }) => {
+                                    const external = isExternal(href || "");
+                                    const isShopLink = (href || "").includes("/shop/");
+                                    return (
+                                      <a
+                                        href={href}
+                                        target={external ? "_blank" : "_self"}
+                                        rel={external ? "noopener noreferrer" : undefined}
+                                        className={`underline decoration-1 hover:decoration-2 font-medium transition-all ${
+                                          isShopLink
+                                            ? "text-[hsl(211,100%,50%)] hover:text-[hsl(211,100%,40%)]"
+                                            : "text-[hsl(211,100%,50%)] hover:text-[hsl(211,100%,40%)]"
+                                        }`}
+                                      >
+                                        {children}
+                                      </a>
+                                    );
+                                  },
+                                  p: ({ children }) => <span className="block mb-1 last:mb-0">{children}</span>,
+                                  strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                                  ul: ({ children }) => <ul className="list-disc pl-4 my-1 space-y-0.5">{children}</ul>,
+                                  li: ({ children }) => <li className="text-sm">{children}</li>,
+                                }}
+                              >
+                                {m.content}
+                              </ReactMarkdown>
+                            </div>
                           )}
                         </div>
-                        {/* Quick Action Product Buttons */}
+                        {/* Buy Now Product Buttons */}
                         {productLinks.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 pl-1">
                             {productLinks.map((link, idx) => (
                               <a
                                 key={idx}
                                 href={link.href}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors shadow-sm"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors shadow-sm"
                               >
-                                <ExternalLink className="w-3 h-3" />
-                                View Product
+                                🛒 Buy Now
                               </a>
                             ))}
                           </div>
