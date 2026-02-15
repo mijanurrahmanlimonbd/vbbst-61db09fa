@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, Pencil, ArrowLeft, Search } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, Search, FileText, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -47,6 +47,15 @@ interface BlogPost {
   status: string;
 }
 
+const mockPosts: BlogPost[] = [
+  { id: "mock-1", title: "How to Get a Verified Business Manager in 2026", slug: "get-verified-bm-2026", content: "Complete guide to obtaining a verified BM…", excerpt: "Step-by-step guide for advertisers.", featured_image: null, category: "Verified BM", read_time: "8 min read", published_at: "2026-02-10T12:00:00Z", created_at: "2026-02-10T12:00:00Z", author: "Sarah Johnson", status: "published" },
+  { id: "mock-2", title: "WhatsApp API: Everything You Need to Know", slug: "whatsapp-api-guide", content: "The WhatsApp Business API allows…", excerpt: "A deep dive into WhatsApp API features.", featured_image: null, category: "WhatsApp API", read_time: "12 min read", published_at: "2026-02-08T09:00:00Z", created_at: "2026-02-08T09:00:00Z", author: "Mike Chen", status: "published" },
+  { id: "mock-3", title: "5 Common Reasons BMs Get Restricted", slug: "bm-restriction-reasons", content: "Business Managers can be restricted for…", excerpt: "Avoid these mistakes to keep your BM safe.", featured_image: null, category: "Tips & Guides", read_time: "6 min read", published_at: null, created_at: "2026-02-05T14:30:00Z", author: "Admin", status: "draft" },
+  { id: "mock-4", title: "Scaling Facebook Ads with Verified BMs", slug: "scaling-ads-verified-bm", content: "Verified Business Managers unlock higher…", excerpt: "Learn how verified BMs boost your ad performance.", featured_image: null, category: "Verified BM", read_time: "10 min read", published_at: "2026-01-28T11:00:00Z", created_at: "2026-01-28T11:00:00Z", author: "Sarah Johnson", status: "published" },
+  { id: "mock-5", title: "TikTok Ads vs Facebook Ads: 2026 Comparison", slug: "tiktok-vs-facebook-2026", content: "Both platforms offer unique advantages…", excerpt: "Which platform delivers better ROI?", featured_image: null, category: "Guides", read_time: "15 min read", published_at: "2026-01-20T08:00:00Z", created_at: "2026-01-20T08:00:00Z", author: "Mike Chen", status: "published" },
+  { id: "mock-6", title: "Setting Up WhatsApp API for E-Commerce", slug: "whatsapp-ecommerce-setup", content: "E-commerce businesses can leverage…", excerpt: "Integrate WhatsApp into your online store.", featured_image: null, category: "WhatsApp API", read_time: "9 min read", published_at: null, created_at: "2026-01-15T16:00:00Z", author: "Admin", status: "draft" },
+];
+
 const emptyPost: Omit<BlogPost, "id" | "created_at"> = {
   title: "",
   slug: "",
@@ -60,10 +69,16 @@ const emptyPost: Omit<BlogPost, "id" | "created_at"> = {
   status: "draft",
 };
 
+type SortField = "title" | "author" | "status" | "created_at";
+type SortDir = "asc" | "desc";
+
 const AdminPosts = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortField, setSortField] = useState<SortField>("created_at");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<Partial<BlogPost> | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -75,7 +90,12 @@ const AdminPosts = () => {
       .from("blog_posts")
       .select("*")
       .order("created_at", { ascending: false });
-    if (!error && data) setPosts(data as unknown as BlogPost[]);
+    if (!error && data && data.length > 0) {
+      setPosts(data as unknown as BlogPost[]);
+    } else {
+      // Use mock data as fallback for testing
+      setPosts(mockPosts);
+    }
     setLoading(false);
   };
 
@@ -113,7 +133,7 @@ const AdminPosts = () => {
       published_at: editingPost.status === "published" ? new Date().toISOString() : null,
     };
 
-    if (editingPost.id) {
+    if (editingPost.id && !editingPost.id.startsWith("mock-")) {
       const { error } = await supabase
         .from("blog_posts")
         .update(payload)
@@ -134,6 +154,12 @@ const AdminPosts = () => {
 
   const handleDelete = async () => {
     if (!deleteId) return;
+    if (deleteId.startsWith("mock-")) {
+      setPosts((prev) => prev.filter((p) => p.id !== deleteId));
+      toast.success("Post deleted.");
+      setDeleteId(null);
+      return;
+    }
     const { error } = await supabase.from("blog_posts").delete().eq("id", deleteId);
     if (error) toast.error("Failed to delete post.");
     else toast.success("Post deleted.");
@@ -141,9 +167,19 @@ const AdminPosts = () => {
     fetchPosts();
   };
 
-  const filteredPosts = posts.filter((p) =>
-    p.title.toLowerCase().includes(search.toLowerCase())
-  );
+  const toggleSort = (field: SortField) => {
+    if (sortField === field) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else { setSortField(field); setSortDir("asc"); }
+  };
+
+  const filteredPosts = posts
+    .filter((p) => p.title.toLowerCase().includes(search.toLowerCase()))
+    .filter((p) => statusFilter === "all" || p.status === statusFilter)
+    .sort((a, b) => {
+      const aVal = (a[sortField] || "").toString().toLowerCase();
+      const bVal = (b[sortField] || "").toString().toLowerCase();
+      return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    });
 
   const updateField = (field: string, value: string | null) => {
     setEditingPost((prev) => (prev ? { ...prev, [field]: value } : prev));
@@ -288,15 +324,27 @@ const AdminPosts = () => {
         </Button>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search posts…"
-          className="pl-9"
-        />
+      {/* Search & Filter */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search posts…"
+            className="pl-9"
+          />
+        </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-36">
+            <SelectValue placeholder="All Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="published">Published</SelectItem>
+            <SelectItem value="draft">Draft</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Table */}
@@ -304,15 +352,45 @@ const AdminPosts = () => {
         {loading ? (
           <div className="p-12 text-center text-muted-foreground">Loading…</div>
         ) : filteredPosts.length === 0 ? (
-          <div className="p-12 text-center text-muted-foreground">No posts found.</div>
+          <div className="p-16 text-center">
+            <FileText className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground mb-1">No posts found</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {search || statusFilter !== "all"
+                ? "Try adjusting your search or filter."
+                : "Get started by creating your first blog post."}
+            </p>
+            {!search && statusFilter === "all" && (
+              <Button onClick={openNewPost} className="gap-2">
+                <Plus className="w-4 h-4" />
+                Create First Post
+              </Button>
+            )}
+          </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead className="hidden sm:table-cell">Author</TableHead>
-                <TableHead className="hidden md:table-cell">Status</TableHead>
-                <TableHead className="hidden md:table-cell">Date</TableHead>
+                <TableHead>
+                  <button onClick={() => toggleSort("title")} className="flex items-center gap-1 hover:text-foreground transition-colors">
+                    Title <ArrowUpDown className="w-3 h-3" />
+                  </button>
+                </TableHead>
+                <TableHead className="hidden sm:table-cell">
+                  <button onClick={() => toggleSort("author")} className="flex items-center gap-1 hover:text-foreground transition-colors">
+                    Author <ArrowUpDown className="w-3 h-3" />
+                  </button>
+                </TableHead>
+                <TableHead className="hidden md:table-cell">
+                  <button onClick={() => toggleSort("status")} className="flex items-center gap-1 hover:text-foreground transition-colors">
+                    Status <ArrowUpDown className="w-3 h-3" />
+                  </button>
+                </TableHead>
+                <TableHead className="hidden md:table-cell">
+                  <button onClick={() => toggleSort("created_at")} className="flex items-center gap-1 hover:text-foreground transition-colors">
+                    Date <ArrowUpDown className="w-3 h-3" />
+                  </button>
+                </TableHead>
                 <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
