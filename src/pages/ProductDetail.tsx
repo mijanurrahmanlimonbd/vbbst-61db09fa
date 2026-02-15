@@ -224,30 +224,25 @@ const ProductDetail = () => {
         </div>
       </section>
 
-      {/* What You Get - Features Section */}
-      <section className="py-16 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">What You Get</p>
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Product Features & Inclusions</h2>
-          <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">Everything included with your purchase — no hidden fees, no surprises.</p>
+      {/* What You Get - Features/Attributes Section */}
+      {product.attributes && Object.keys(product.attributes).length > 0 && (
+        <section className="py-16 bg-muted/30">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">What You Get</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Product Features & Inclusions</h2>
+            <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">Everything included with your purchase — no hidden fees, no surprises.</p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-10">
-            {[
-              "Real Documents Verified BM",
-              "WhatsApp API & Apps Ready",
-              "Real company documents & HTTPS verified",
-              "Phone Number Verified",
-              "Invite link on your account",
-              "7 Days Replacement",
-            ].map((feature, i) => (
-              <div key={i} className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
-                <CheckCircle className="w-5 h-5 text-[hsl(142,70%,45%)] shrink-0" />
-                <span className="text-sm font-medium text-foreground">{feature}</span>
-              </div>
-            ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-10">
+              {Object.entries(product.attributes).map(([key, value]: [string, any], i: number) => (
+                <div key={i} className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
+                  <CheckCircle className="w-5 h-5 text-[hsl(142,70%,45%)] shrink-0" />
+                  <span className="text-sm font-medium text-foreground">{value ? `${key}: ${value}` : key}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Specifications */}
       <section className="py-16">

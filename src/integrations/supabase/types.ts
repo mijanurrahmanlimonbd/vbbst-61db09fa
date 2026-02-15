@@ -561,6 +561,7 @@ export type Database = {
       }
       products: {
         Row: {
+          attributes: Json | null
           badge: string | null
           category: string
           created_at: string
@@ -583,6 +584,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          attributes?: Json | null
           badge?: string | null
           category?: string
           created_at?: string
@@ -605,6 +607,7 @@ export type Database = {
           title: string
         }
         Update: {
+          attributes?: Json | null
           badge?: string | null
           category?: string
           created_at?: string
