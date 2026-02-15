@@ -26,6 +26,8 @@ import AdminSubscribers from "./pages/admin/AdminSubscribers";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminLogin from "./pages/admin/AdminLogin";
+import AdminOrders from "./pages/admin/AdminOrders";
+import Checkout from "./pages/Checkout";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +48,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/product/:slug" element={<ProductDetail />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/checkout" element={<Checkout />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
@@ -55,6 +58,7 @@ const App = () => (
               <Route path="pages" element={<AdminPages />} />
               <Route path="media" element={<AdminMedia />} />
               <Route path="products" element={<AdminProducts />} />
+              <Route path="orders" element={<AdminOrders />} />
               <Route path="comments" element={<AdminComments />} />
               <Route path="subscribers" element={<AdminSubscribers />} />
               <Route path="settings" element={<AdminSettings />} />
