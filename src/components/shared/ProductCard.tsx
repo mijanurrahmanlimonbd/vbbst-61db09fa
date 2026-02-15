@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Star, Shield, Zap, Headphones, MessageCircle, Send, Check } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
 import { Badge } from "@/components/ui/badge";
 
 interface Product {
@@ -17,6 +18,8 @@ interface Product {
 }
 
 const ProductCard = ({ product }: { product: Product }) => {
+  const { addItem, closeCart } = useCart();
+  const navigate = useNavigate();
   const discount = product.sale_price && product.price > 0
     ? Math.round(((product.price - product.sale_price) / product.price) * 100)
     : null;
@@ -131,12 +134,17 @@ const ProductCard = ({ product }: { product: Product }) => {
           >
             <Send className="w-4 h-4" /> Buy on Telegram
           </a>
-          <Link
-            to={`/product/${product.slug}`}
+          <button
+            onClick={() => {
+              if (!inStock) { navigate(`/product/${product.slug}`); return; }
+              addItem({ id: product.id, title: product.title, price: product.price, sale_price: product.sale_price, image_url: product.image_url, slug: product.slug });
+              closeCart();
+              navigate("/checkout");
+            }}
             className="flex items-center justify-center w-full py-2.5 rounded-lg bg-[hsl(25,95%,55%)] text-white text-sm font-semibold hover:bg-[hsl(25,95%,48%)] transition-colors"
           >
             {inStock ? "Buy Now" : "View"}
-          </Link>
+          </button>
         </div>
 
         {/* Bottom Verification */}
