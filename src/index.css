@@ -110,3 +110,19 @@ All colors MUST be HSL.
 }
 .tiptap strong { font-weight: 700; }
 .tiptap em { font-style: italic; }
+
+/* Global Edit Mode visual feedback */
+[contenteditable="true"] {
+  cursor: text;
+  transition: outline 0.15s ease;
+}
+[contenteditable="true"]:hover {
+  outline: 2px dashed hsl(217 91% 60%);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+[contenteditable="true"]:focus {
+  outline: 2px solid hsl(217 91% 60%);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
