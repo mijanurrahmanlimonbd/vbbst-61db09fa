@@ -26,6 +26,7 @@ import {
   ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import MediaLibraryModal from "@/components/admin/MediaLibraryModal";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -75,6 +76,7 @@ const AdminPostEditor = () => {
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"saved" | "unsaved" | "saving">("saved");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mediaLibraryOpen, setMediaLibraryOpen] = useState(false);
   const [loading, setLoading] = useState(!isNew);
   const autosaveTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const hasChanges = useRef(false);
@@ -455,13 +457,18 @@ const AdminPostEditor = () => {
                     </Button>
                   </div>
                 ) : (
-                  <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
-                    <Upload className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
-                    <p className="text-xs text-muted-foreground mb-2">
-                      Drag & drop or paste URL
-                    </p>
+                  <div className="space-y-2">
+                    <div
+                      className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                      onClick={() => setMediaLibraryOpen(true)}
+                    >
+                      <ImageIcon className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+                      <p className="text-xs text-muted-foreground">
+                        Click to browse Media Library
+                      </p>
+                    </div>
                     <Input
-                      placeholder="https://…"
+                      placeholder="Or paste image URL…"
                       value={featuredImage}
                       onChange={(e) => { setFeaturedImage(e.target.value); markUnsaved(); }}
                       className="text-xs h-8"
@@ -505,6 +512,16 @@ const AdminPostEditor = () => {
           </div>
         </div>
       </div>
+
+      {/* Media Library Modal */}
+      <MediaLibraryModal
+        open={mediaLibraryOpen}
+        onOpenChange={setMediaLibraryOpen}
+        onSelect={(file) => {
+          setFeaturedImage(file.url);
+          markUnsaved();
+        }}
+      />
     </div>
   );
 };

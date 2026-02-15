@@ -86,6 +86,48 @@ export type Database = {
         }
         Relationships: []
       }
+      media_files: {
+        Row: {
+          alt_text: string | null
+          caption: string | null
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number
+          height: number | null
+          id: string
+          mime_type: string
+          url: string
+          width: number | null
+        }
+        Insert: {
+          alt_text?: string | null
+          caption?: string | null
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size?: number
+          height?: number | null
+          id?: string
+          mime_type?: string
+          url: string
+          width?: number | null
+        }
+        Update: {
+          alt_text?: string | null
+          caption?: string | null
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          height?: number | null
+          id?: string
+          mime_type?: string
+          url?: string
+          width?: number | null
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           badge: string | null
