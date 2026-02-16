@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { FileText, Mail, MessageSquare, Image, Clock, ArrowRight, Save } from "lucide-react";
 import SEOHealthWidget from "@/components/admin/SEOHealthWidget";
+import SalesAnalyticsWidget from "@/components/admin/SalesAnalyticsWidget";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -250,6 +251,9 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
+      {/* Sales & Analytics */}
+      <SalesAnalyticsWidget />
+
       {/* SEO Health Report */}
       <SEOHealthWidget />
     </div>
