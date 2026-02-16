@@ -28,26 +28,23 @@ const NewsletterForm = ({ variant = "footer" }: { variant?: "footer" | "modal" }
 
     setSubmitting(true);
 
-    // Duplicate check
-    const { data: existing } = await supabase
+    // Use upsert to handle duplicates without needing SELECT access
+    const { error, status } = await supabase
       .from("newsletter_subscribers")
-      .select("id, status")
-      .eq("email", result.data)
-      .maybeSingle();
+      .upsert(
+        { email: result.data, status: "subscribed" },
+        { onConflict: "email" }
+      );
 
-    if (existing) {
-      if (existing.status === "unsubscribed") {
-        await supabase.from("newsletter_subscribers").update({ status: "subscribed" }).eq("id", existing.id);
-        setSuccess(true);
-        toast.success("Welcome back! You've been re-subscribed.");
-      } else {
+    if (error) {
+      if (error.code === "23505") {
         toast.info("You are already on the list!");
+      } else {
+        toast.error("Something went wrong. Please try again.");
       }
-      setSubmitting(false);
-      return;
+    } else {
+      setSuccess(true);
     }
-
-    const { error } = await supabase.from("newsletter_subscribers").insert({ email: result.data });
     if (error) {
       toast.error("Something went wrong. Please try again.");
     } else {
