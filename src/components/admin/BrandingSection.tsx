@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { convertToWebP } from "@/lib/imageUtils";
+import { convertToWebP, toBrandedUrl } from "@/lib/imageUtils";
 import { Button } from "@/components/ui/button";
 import { Loader2, Upload, X, Image as ImageIcon, FolderOpen } from "lucide-react";
 import { toast } from "sonner";
@@ -158,7 +158,7 @@ const BrandingSection = () => {
                   />
                 </div>
                 <div className="space-y-2 flex-1">
-                  <p className="text-xs text-muted-foreground break-all line-clamp-2">{logos[field.key]}</p>
+                  <p className="text-xs text-muted-foreground break-all line-clamp-2">{toBrandedUrl(logos[field.key])}</p>
                   <div className="flex gap-2">
                     <label className="cursor-pointer">
                       <Button variant="outline" size="sm" className="gap-1 pointer-events-none">
