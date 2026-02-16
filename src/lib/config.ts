@@ -6,16 +6,16 @@
 
 export const SITE_NAME = "Verified BM services";
 
+/** Production domain — always used for canonical URLs, OG tags, invoices, etc. */
+const PRODUCTION_URL = "https://verifiedbmservices.com";
+
 /**
- * Returns the base URL of the site.
- * - In the browser: uses window.location.origin (works on any domain).
- * - During SSR/build: falls back to VITE_SITE_URL env var or a sensible default.
+ * Returns the canonical site URL.
+ * Always returns the production domain so that SEO tags, invoices, and
+ * sitemaps never reference preview/staging URLs.
  */
 export const getSiteUrl = (): string => {
-  if (typeof window !== "undefined") {
-    return window.location.origin;
-  }
-  return import.meta.env.VITE_SITE_URL || "https://verifiedbmservices.com";
+  return PRODUCTION_URL;
 };
 
 export const DEFAULT_DESCRIPTION =
