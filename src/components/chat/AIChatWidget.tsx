@@ -378,11 +378,32 @@ const AIChatWidget = () => {
                 {messages.map((m, i) => {
                   // Extract product links for "Buy Now" buttons
                   const productLinks: { label: string; href: string }[] = [];
+                  // Extract WhatsApp/Telegram links for contact buttons
+                  const contactLinks: { label: string; href: string; type: "whatsapp" | "telegram" }[] = [];
                   if (m.role !== "user") {
                     const linkRegex = /\[([^\]]*(?:Buy|buy|BM|WhatsApp|API)[^\]]*)\]\((https?:\/\/[^)]*\/shop\/[^)]+)\)/g;
                     let match;
                     while ((match = linkRegex.exec(m.content)) !== null) {
                       productLinks.push({ label: match[1].replace(/^Buy\s+/i, "").replace(/\s+here$/i, ""), href: match[2] });
+                    }
+                    // Match WhatsApp links
+                    const waRegex = /\[([^\]]*)\]\((https?:\/\/wa\.me\/[^)]+)\)/g;
+                    while ((match = waRegex.exec(m.content)) !== null) {
+                      contactLinks.push({ label: "WhatsApp", href: match[2], type: "whatsapp" });
+                    }
+                    // Also match bare wa.me URLs
+                    if (contactLinks.filter(c => c.type === "whatsapp").length === 0) {
+                      const bareWa = m.content.match(/https?:\/\/wa\.me\/\S+/);
+                      if (bareWa) contactLinks.push({ label: "WhatsApp", href: bareWa[0], type: "whatsapp" });
+                    }
+                    // Match Telegram links
+                    const tgRegex = /\[([^\]]*)\]\((https?:\/\/t\.me\/[^)]+)\)/g;
+                    while ((match = tgRegex.exec(m.content)) !== null) {
+                      contactLinks.push({ label: "Telegram", href: match[2], type: "telegram" });
+                    }
+                    if (contactLinks.filter(c => c.type === "telegram").length === 0) {
+                      const bareTg = m.content.match(/https?:\/\/t\.me\/\S+/);
+                      if (bareTg) contactLinks.push({ label: "Telegram", href: bareTg[0], type: "telegram" });
                     }
                   }
 
@@ -444,6 +465,31 @@ const AIChatWidget = () => {
                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors shadow-sm"
                               >
                                 🛒 Buy Now
+                              </a>
+                             ))}
+                          </div>
+                        )}
+                        {/* WhatsApp / Telegram contact buttons */}
+                        {contactLinks.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 pl-1">
+                            {contactLinks.map((link, idx) => (
+                              <a
+                                key={idx}
+                                href={link.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white text-xs font-semibold transition-colors shadow-sm ${
+                                  link.type === "whatsapp"
+                                    ? "bg-[hsl(142,70%,45%)] hover:bg-[hsl(142,70%,40%)]"
+                                    : "bg-[hsl(200,100%,45%)] hover:bg-[hsl(200,100%,40%)]"
+                                }`}
+                              >
+                                {link.type === "whatsapp" ? (
+                                  <MessageCircle className="w-3.5 h-3.5" />
+                                ) : (
+                                  <Send className="w-3.5 h-3.5" />
+                                )}
+                                {link.label}
                               </a>
                             ))}
                           </div>
