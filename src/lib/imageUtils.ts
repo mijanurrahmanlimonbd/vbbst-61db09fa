@@ -9,6 +9,9 @@ const BRANDED_MEDIA_PATH = `${BRANDED_DOMAIN}/media/`;
  */
 export const toBrandedUrl = (url: string): string => {
   if (!url) return url;
+  // Only apply branded URLs on the production domain
+  const isProduction = typeof window !== "undefined" && window.location.hostname === "verifiedbmservices.com";
+  if (!isProduction) return url;
   if (url.startsWith(SUPABASE_STORAGE_BASE)) {
     const path = url.substring(SUPABASE_STORAGE_BASE.length).split("?")[0];
     return `${BRANDED_MEDIA_PATH}${path}`;
