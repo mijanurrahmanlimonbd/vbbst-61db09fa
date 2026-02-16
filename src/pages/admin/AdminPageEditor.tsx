@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ArrowLeft, Save, Loader2, Eye, EyeOff, Plus, Trash2, Upload, X, Image as ImageIcon } from "lucide-react";
+import AdvancedSEOSidebar from "@/components/admin/AdvancedSEOSidebar";
 import { Slider } from "@/components/ui/slider";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -573,29 +574,23 @@ const AdminPageEditor = () => {
             </TabsContent>
 
             <TabsContent value="seo" className="mt-4">
-              <div className="bg-background rounded-xl border border-border p-5 space-y-4">
-                <div>
-                  <Label>Meta Title</Label>
-                  <Input
-                    value={pageData.meta_title ?? ""}
-                    onChange={(e) => setPageData({ ...pageData, meta_title: e.target.value })}
-                    placeholder="SEO title (under 60 chars)"
-                    className="mt-1.5"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">{(pageData.meta_title || "").length}/60 characters</p>
-                </div>
-                <div>
-                  <Label>Meta Description</Label>
-                  <textarea
-                    value={pageData.meta_description ?? ""}
-                    onChange={(e) => setPageData({ ...pageData, meta_description: e.target.value })}
-                    placeholder="SEO description (under 160 chars)"
-                    rows={3}
-                    className="mt-1.5 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">{(pageData.meta_description || "").length}/160 characters</p>
-                </div>
-              </div>
+              <AdvancedSEOSidebar
+                data={{
+                  focusKeyword: "",
+                  metaTitle: pageData.meta_title || "",
+                  metaDescription: pageData.meta_description || "",
+                  slug: pageData.slug,
+                  content: buildContentJson(),
+                  postTitle: pageData.title,
+                  urlPrefix: "/",
+                }}
+                focusKeyword=""
+                metaTitle={pageData.meta_title || ""}
+                metaDescription={pageData.meta_description || ""}
+                onFocusKeywordChange={() => {}}
+                onMetaTitleChange={(v) => setPageData({ ...pageData, meta_title: v })}
+                onMetaDescriptionChange={(v) => setPageData({ ...pageData, meta_description: v })}
+              />
             </TabsContent>
 
             <TabsContent value="components" className="mt-4">
