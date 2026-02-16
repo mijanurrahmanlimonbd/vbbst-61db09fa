@@ -23,6 +23,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import MediaLibraryModal from "@/components/admin/MediaLibraryModal";
 import { toast } from "sonner";
+import AdvancedSEOSidebar from "@/components/admin/AdvancedSEOSidebar";
 
 const CATEGORIES = ["Verified BM", "WhatsApp API", "Facebook Accounts", "TikTok Ads", "Agency Accounts"];
 
@@ -60,6 +61,7 @@ interface Product {
   stock_status: string;
   meta_title: string | null;
   meta_description: string | null;
+  focus_keyword: string | null;
   created_at: string;
   attributes?: Record<string, string> | null;
 }
@@ -71,7 +73,7 @@ const emptyProduct = (): Partial<Product> => ({
   title: "", slug: "", sku: "", description: "", short_description: "", price: 0,
   sale_price: null, category: "Verified BM", badge: null, image_url: "",
   gallery_images: [], rating: 5, sort_order: 0, is_featured: false,
-  stock_quantity: 0, stock_status: "in_stock", meta_title: "", meta_description: "",
+  stock_quantity: 0, stock_status: "in_stock", meta_title: "", meta_description: "", focus_keyword: "",
 });
 
 const AdminProducts = () => {
@@ -156,6 +158,7 @@ const AdminProducts = () => {
       stock_status: editProduct.stock_status || "in_stock",
       meta_title: editProduct.meta_title || null,
       meta_description: editProduct.meta_description || null,
+      focus_keyword: editProduct.focus_keyword || null,
       attributes: {
         ...attributes.reduce((acc, a) => { if (a.key.trim()) acc[a.key.trim()] = a.value; return acc; }, {} as Record<string, string>),
         _specs: specGroups.filter(g => g.title.trim() && g.items.some(i => i.trim())),
@@ -670,35 +673,23 @@ const AdminProducts = () => {
             </TabsContent>
 
             <TabsContent value="seo" className="space-y-4 pt-4">
-              <div>
-                <Label>Meta Title</Label>
-                <Input
-                  value={editProduct.meta_title || ""}
-                  onChange={(e) => setEditProduct({ ...editProduct, meta_title: e.target.value })}
-                  placeholder={`${editProduct.title || "Product"} - Buy Online`}
-                  className="mt-1.5"
-                  maxLength={60}
-                />
-                <p className="text-xs text-muted-foreground mt-1">{(editProduct.meta_title || "").length}/60 characters</p>
-              </div>
-              <div>
-                <Label>Meta Description</Label>
-                <Textarea
-                  value={editProduct.meta_description || ""}
-                  onChange={(e) => setEditProduct({ ...editProduct, meta_description: e.target.value })}
-                  placeholder={`Buy ${editProduct.title || "this product"} from Verified BM services. Instant delivery and 7-day guarantee.`}
-                  rows={3}
-                  className="mt-1.5"
-                  maxLength={160}
-                />
-                <p className="text-xs text-muted-foreground mt-1">{(editProduct.meta_description || "").length}/160 characters</p>
-              </div>
-              <div className="bg-accent/50 rounded-lg p-4">
-                <p className="text-xs font-medium text-muted-foreground mb-1">Search Preview</p>
-                <p className="text-sm text-primary font-medium truncate">{editProduct.meta_title || `${editProduct.title || "Product"} - Buy Online`}</p>
-                <p className="text-xs text-[hsl(142,70%,45%)]">verifiedbmservices.com/product/{editProduct.slug || "..."}</p>
-                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{editProduct.meta_description || `Buy ${editProduct.title || "this product"} from Verified BM services.`}</p>
-              </div>
+              <AdvancedSEOSidebar
+                data={{
+                  focusKeyword: editProduct.focus_keyword || "",
+                  metaTitle: editProduct.meta_title || "",
+                  metaDescription: editProduct.meta_description || "",
+                  slug: editProduct.slug || "",
+                  content: editProduct.description || "",
+                  postTitle: editProduct.title || "",
+                  urlPrefix: "/product/",
+                }}
+                focusKeyword={editProduct.focus_keyword || ""}
+                metaTitle={editProduct.meta_title || ""}
+                metaDescription={editProduct.meta_description || ""}
+                onFocusKeywordChange={(v) => setEditProduct({ ...editProduct, focus_keyword: v })}
+                onMetaTitleChange={(v) => setEditProduct({ ...editProduct, meta_title: v })}
+                onMetaDescriptionChange={(v) => setEditProduct({ ...editProduct, meta_description: v })}
+              />
             </TabsContent>
           </Tabs>
 

@@ -572,6 +572,7 @@ export type Database = {
           category: string
           created_at: string
           description: string | null
+          focus_keyword: string | null
           gallery_images: string[] | null
           id: string
           image_url: string | null
@@ -595,6 +596,7 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string | null
+          focus_keyword?: string | null
           gallery_images?: string[] | null
           id?: string
           image_url?: string | null
@@ -618,6 +620,7 @@ export type Database = {
           category?: string
           created_at?: string
           description?: string | null
+          focus_keyword?: string | null
           gallery_images?: string[] | null
           id?: string
           image_url?: string | null

@@ -29,7 +29,7 @@ import {
 import { Button } from "@/components/ui/button";
 import MediaLibraryModal from "@/components/admin/MediaLibraryModal";
 import SEOSettingsPanel from "@/components/admin/SEOSettingsPanel";
-import SEOScoreWidget from "@/components/admin/SEOScoreWidget";
+import AdvancedSEOSidebar from "@/components/admin/AdvancedSEOSidebar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -523,8 +523,8 @@ const AdminPostEditor = () => {
                 </div>
               </div>
 
-              {/* SEO Score Widget */}
-              <SEOScoreWidget
+              {/* Advanced SEO Sidebar */}
+              <AdvancedSEOSidebar
                 data={{
                   focusKeyword,
                   metaTitle,
@@ -532,10 +532,17 @@ const AdminPostEditor = () => {
                   slug,
                   content: editor?.getHTML() || "",
                   postTitle: title,
+                  urlPrefix: "/blog/",
                 }}
+                focusKeyword={focusKeyword}
+                metaTitle={metaTitle}
+                metaDescription={metaDescription}
+                onFocusKeywordChange={(v) => { setFocusKeyword(v); markUnsaved(); }}
+                onMetaTitleChange={(v) => { setMetaTitle(v); markUnsaved(); }}
+                onMetaDescriptionChange={(v) => { setMetaDescription(v); markUnsaved(); }}
               />
 
-              {/* SEO Settings */}
+              {/* SEO Settings (Advanced) */}
               <SEOSettingsPanel
                 metaTitle={metaTitle}
                 metaDescription={metaDescription}
