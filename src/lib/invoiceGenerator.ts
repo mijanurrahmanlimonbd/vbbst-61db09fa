@@ -62,7 +62,7 @@ export const generateInvoicePDF = async (
   const pageWidth = doc.internal.pageSize.getWidth();
 
   // Colors
-  const primaryColor: [number, number, number] = [37, 99, 235]; // blue-600
+  const primaryColor: [number, number, number] = [0, 122, 255]; // brand blue #007AFF
   const darkColor: [number, number, number] = [15, 23, 42];
   const mutedColor: [number, number, number] = [100, 116, 139];
   const lineColor: [number, number, number] = [226, 232, 240];
@@ -264,8 +264,8 @@ export const generateInvoicePDF = async (
 
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(...mutedColor);
-  doc.text("https://verifiedbmservices.com", pageWidth / 2, footerY + 14, { align: "center" });
+  doc.setTextColor(...primaryColor);
+  doc.textWithLink("https://verifiedbmservices.com", pageWidth / 2 - doc.getTextWidth("https://verifiedbmservices.com") / 2, footerY + 14, { url: "https://verifiedbmservices.com" });
   doc.text(`${settings.site_title} · ${settings.address}`, pageWidth / 2, footerY + 19, { align: "center" });
 
   // ──── Save ────
