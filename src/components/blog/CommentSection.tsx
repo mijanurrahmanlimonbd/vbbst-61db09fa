@@ -39,12 +39,11 @@ const CommentSection = ({ postId }: { postId: string }) => {
 
   const fetchComments = async () => {
     const { data } = await supabase
-      .from("comments")
+      .from("comments_public" as any)
       .select("id, author_name, content, created_at, parent_id")
       .eq("post_id", postId)
-      .eq("status", "approved")
       .order("created_at", { ascending: true });
-    if (data) setComments(data as Comment[]);
+    if (data) setComments(data as unknown as Comment[]);
     setLoading(false);
   };
 
