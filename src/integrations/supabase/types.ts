@@ -287,6 +287,7 @@ export type Database = {
           id: string
           mime_type: string
           url: string
+          url_slug: string | null
           width: number | null
         }
         Insert: {
@@ -301,6 +302,7 @@ export type Database = {
           id?: string
           mime_type?: string
           url: string
+          url_slug?: string | null
           width?: number | null
         }
         Update: {
@@ -315,6 +317,7 @@ export type Database = {
           id?: string
           mime_type?: string
           url?: string
+          url_slug?: string | null
           width?: number | null
         }
         Relationships: []
