@@ -122,7 +122,9 @@ const RichTextField = ({ value, onChange, placeholder }: { value: string; onChan
 };
 
 // Live Preview component
-const LivePreview = ({ fields, title }: { fields: ContentField[]; title: string }) => {
+const LivePreview = ({ fields, title, heroImage, heroOverlay }: { fields: ContentField[]; title: string; heroImage?: string | null; heroOverlay?: number }) => {
+  const hasContent = fields.some((f) => f.value?.trim());
+
   return (
     <div className="bg-background border border-border rounded-xl overflow-hidden">
       <div className="bg-muted/50 px-4 py-2 border-b border-border flex items-center gap-2">
@@ -131,31 +133,51 @@ const LivePreview = ({ fields, title }: { fields: ContentField[]; title: string 
           <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
           <div className="w-3 h-3 rounded-full bg-green-500/50" />
         </div>
-        <span className="text-xs text-muted-foreground ml-2">Preview — {title}</span>
+        <span className="text-xs text-muted-foreground ml-2">Preview — {title || "Untitled"}</span>
       </div>
-      <div className="p-6 max-h-[600px] overflow-y-auto space-y-6">
+
+      {/* Hero Section */}
+      {heroImage && (
+        <div className="relative h-32 overflow-hidden">
+          <img src={heroImage} alt="Hero" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: `rgba(0,0,0,${(heroOverlay ?? 50) / 100})` }}>
+            <h1 className="text-white text-xl font-bold">{title}</h1>
+          </div>
+        </div>
+      )}
+
+      <div className="p-6 max-h-[500px] overflow-y-auto space-y-4">
+        {!hasContent && (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <Eye className="w-8 h-8 text-muted-foreground/30 mb-3" />
+            <p className="text-sm text-muted-foreground">Start adding content in the fields to see a live preview here.</p>
+          </div>
+        )}
         {fields.map((field) => {
-          if (!field.value) return null;
-          if (field.type === "text" && field.key.includes("title")) {
-            return <h2 key={field.key} className="text-2xl font-bold text-foreground">{field.value}</h2>;
+          if (!field.value?.trim()) return null;
+          if (field.type === "richtext") {
+            return <div key={field.key} className="prose prose-sm max-w-none text-foreground" dangerouslySetInnerHTML={{ __html: field.value }} />;
           }
-          if (field.type === "text" && field.key.includes("cta")) {
+          if (field.key.includes("title") || field.key.includes("heading")) {
+            return <h2 key={field.key} className="text-xl font-bold text-foreground">{field.value}</h2>;
+          }
+          if (field.key.includes("subtitle")) {
+            return <h3 key={field.key} className="text-lg font-semibold text-muted-foreground">{field.value}</h3>;
+          }
+          if (field.key.includes("cta")) {
             return (
               <div key={field.key}>
-                <span className="inline-block px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium text-sm">{field.value}</span>
+                <span className="inline-block px-5 py-2 rounded-lg bg-primary text-primary-foreground font-medium text-sm">{field.value}</span>
               </div>
             );
           }
-          if (field.type === "text") {
-            return <p key={field.key} className="text-muted-foreground">{field.value}</p>;
+          if (field.key.includes("email")) {
+            return <p key={field.key} className="text-sm text-primary">{field.value}</p>;
           }
           if (field.type === "textarea") {
-            return <p key={field.key} className="text-muted-foreground whitespace-pre-line">{field.value}</p>;
+            return <p key={field.key} className="text-sm text-muted-foreground whitespace-pre-line">{field.value}</p>;
           }
-          if (field.type === "richtext") {
-            return <div key={field.key} className="prose prose-sm max-w-none text-muted-foreground" dangerouslySetInnerHTML={{ __html: field.value }} />;
-          }
-          return null;
+          return <p key={field.key} className="text-sm text-foreground">{field.value}</p>;
         })}
       </div>
     </div>
@@ -167,7 +189,7 @@ const AdminPageEditor = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(!!id);
   const [saving, setSaving] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
   const [activeTab, setActiveTab] = useState("content");
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [pageData, setPageData] = useState<PageData>({
@@ -627,7 +649,7 @@ const AdminPageEditor = () => {
         {/* Live Preview */}
         {showPreview && (
           <div className="sticky top-24">
-            <LivePreview fields={[...fields, ...customFields]} title={pageData.title || "Untitled"} />
+            <LivePreview fields={[...fields, ...customFields]} title={pageData.title || "Untitled"} heroImage={pageData.hero_image} heroOverlay={pageData.hero_overlay} />
           </div>
         )}
       </div>
