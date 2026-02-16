@@ -39,7 +39,7 @@ const COLORS = [
 const SalesAnalyticsWidget = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [range, setRange] = useState<7 | 30 | 90>(30);
+  const [range, setRange] = useState<1 | 7 | 30 | 90 | 365>(30);
 
   useEffect(() => {
     const load = async () => {
@@ -148,10 +148,12 @@ const SalesAnalyticsWidget = () => {
     },
   ];
 
-  const rangeOptions: { label: string; value: 7 | 30 | 90 }[] = [
+  const rangeOptions: { label: string; value: 1 | 7 | 30 | 90 | 365 }[] = [
+    { label: "Today", value: 1 },
     { label: "7 days", value: 7 },
     { label: "30 days", value: 30 },
     { label: "90 days", value: 90 },
+    { label: "Yearly", value: 365 },
   ];
 
   return (
