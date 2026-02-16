@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import DOMPurify from "dompurify";
@@ -30,13 +30,26 @@ function extractFaqs(html: string): { question: string; answer: string }[] {
   return faqs;
 }
 
+/** Slugify text for heading IDs */
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
+}
+
 /** Add IDs to heading tags for anchor linking */
 function addHeadingIds(html: string): string {
   let counter = 0;
-  return html.replace(/<(h[23])([^>]*)>/gi, (match, tag, attrs) => {
+  return html.replace(/<(h[23])([^>]*)>([\s\S]*?)<\/\1>/gi, (match, tag, attrs, content) => {
     if (attrs.includes("id=")) return match;
     counter++;
-    return `<${tag}${attrs} id="heading-${counter}">`;
+    // Create slug from text content (strip HTML tags)
+    const textContent = content.replace(/<[^>]*>/g, "").trim();
+    const slug = slugify(textContent) || `heading-${counter}`;
+    return `<${tag}${attrs} id="${slug}">${content}</${tag}>`;
   });
 }
 
@@ -44,6 +57,7 @@ const BlogPost = () => {
   const { slug } = useParams();
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -57,9 +71,50 @@ const BlogPost = () => {
   const sanitizedContent = useMemo(() => {
     if (!post) return "";
     const raw = post.content || post.excerpt || "";
-    const withIds = addHeadingIds(raw);
-    return DOMPurify.sanitize(withIds, { ADD_ATTR: ['id'] });
+    return DOMPurify.sanitize(raw);
   }, [post]);
+
+  // Add slugified IDs to headings and fix in-content TOC links after DOM render
+  const applyHeadingIds = useCallback(() => {
+    const container = contentRef.current;
+    if (!container) return;
+
+    // 1. Add slugified IDs to all headings
+    const headings = container.querySelectorAll("h2, h3");
+    const headingMap: { index: number; id: string; text: string }[] = [];
+    headings.forEach((el, i) => {
+      const text = (el.textContent || "").trim();
+      const id = slugify(text) || `heading-${i}`;
+      el.id = id;
+      headingMap.push({ index: i, id, text });
+    });
+
+    // 2. Fix all internal hash links to point to actual heading IDs + add smooth scroll
+    const hashLinks = container.querySelectorAll('a[href^="#"]');
+    hashLinks.forEach((link) => {
+      const linkText = (link.textContent || "").trim();
+      const match = headingMap.find(
+        (h) => h.text.toLowerCase() === linkText.toLowerCase()
+      );
+      if (match) {
+        link.setAttribute("href", `#${match.id}`);
+      }
+      link.addEventListener("click", (e) => {
+        const href = link.getAttribute("href");
+        if (href?.startsWith("#")) {
+          e.preventDefault();
+          const target = document.getElementById(href.slice(1));
+          target?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!sanitizedContent) return;
+    const timer = setTimeout(applyHeadingIds, 50);
+    return () => clearTimeout(timer);
+  }, [sanitizedContent, applyHeadingIds]);
 
   const faqs = useMemo(() => {
     if (!post?.content) return [];
@@ -166,6 +221,7 @@ const BlogPost = () => {
 
               {/* Blog body */}
               <div
+                ref={contentRef}
                 className="blog-content-area prose prose-lg max-w-none text-foreground"
                 style={{ fontSize: "18px", lineHeight: 1.6 }}
                 dangerouslySetInnerHTML={{ __html: sanitizedContent }}
