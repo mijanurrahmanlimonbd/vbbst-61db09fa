@@ -205,7 +205,7 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
     toast.success(`${ids.length} file(s) deleted.`);
   };
 
-  const updateFileField = async (id: string, field: "alt_text" | "caption", value: string) => {
+  const updateFileField = async (id: string, field: "alt_text" | "caption" | "url", value: string) => {
     await supabase.from("media_files").update({ [field]: value }).eq("id", id);
     setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, [field]: value } : f)));
   };
@@ -432,6 +432,17 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
               <span className="text-muted-foreground">Size</span>
               <span className="text-foreground">{formatFileSize(selectedFile.file_size)}</span>
             </div>
+          </div>
+
+          {/* File URL (editable) */}
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">File URL</label>
+            <Input
+              value={toBrandedUrl(selectedFile.url)}
+              onChange={(e) => updateFileField(selectedFile.id, "url", e.target.value)}
+              className="text-xs h-8 font-mono"
+            />
+            <p className="text-[10px] text-muted-foreground mt-1">Edit to override the branded path. Changes are saved automatically.</p>
           </div>
 
           {/* Editable Fields */}
