@@ -591,6 +591,7 @@ const AdminPageEditor = () => {
                 onFocusKeywordChange={setFocusKeyword}
                 onMetaTitleChange={(v) => setPageData({ ...pageData, meta_title: v })}
                 onMetaDescriptionChange={(v) => setPageData({ ...pageData, meta_description: v })}
+                onSlugChange={(v) => setPageData({ ...pageData, slug: v })}
               />
             </TabsContent>
 

@@ -540,6 +540,7 @@ const AdminPostEditor = () => {
                 onFocusKeywordChange={(v) => { setFocusKeyword(v); markUnsaved(); }}
                 onMetaTitleChange={(v) => { setMetaTitle(v); markUnsaved(); }}
                 onMetaDescriptionChange={(v) => { setMetaDescription(v); markUnsaved(); }}
+                onSlugChange={(v) => { setSlug(v); setSlugManual(true); markUnsaved(); }}
               />
 
               {/* SEO Settings (Advanced) */}
