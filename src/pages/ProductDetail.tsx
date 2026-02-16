@@ -55,7 +55,21 @@ const ProductDetail = () => {
   const inStock = product.stock_status === "in_stock";
   const attrs = product.attributes && typeof product.attributes === "object" ? product.attributes : {};
   const attrEntries = Object.entries(attrs).filter(([key]) => !key.startsWith("_"));
-  const hasAttributes = attrEntries.length > 0;
+
+  // Fallback feature attributes when none are set in admin
+  const defaultFeatures: [string, string][] = [
+    ["Verified Business Manager", "Fully verified by Meta with real documentation"],
+    ["Full Admin Access", "Complete control over all BM settings and assets"],
+    ["Ad Account Ready", "Pre-configured for immediate ad campaign launch"],
+    ["Anti-Ban Guide", "Includes warm-up strategy and compliance best practices"],
+    ["Same-Day Delivery", "Account credentials delivered within 1–4 hours"],
+    ["7-Day Replacement", "Free replacement guarantee if any issues arise"],
+    ["Secure Handover", "SSL encrypted, private credential transfer"],
+    ["24/7 Priority Support", "Round-the-clock assistance via WhatsApp & Telegram"],
+    ["Clean Account History", "No prior violations or policy strikes"],
+  ];
+
+  const displayFeatures: [string, any][] = attrEntries.length > 0 ? attrEntries as [string, any][] : defaultFeatures;
 
   // Dynamic spec groups from admin or fallback defaults
   const specGroups: { title: string; items: string[] }[] = (attrs as any)._specs?.length > 0
@@ -263,31 +277,29 @@ const ProductDetail = () => {
       </section>
 
       {/* ─── 2. DYNAMIC ATTRIBUTES GRID ─── */}
-      {hasAttributes && (
-        <section className="py-14 bg-muted/30">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">What You Get</p>
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Product Features & Inclusions</h2>
-            <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">
-              Everything included with your purchase — no hidden fees, no surprises.
-            </p>
+      <section className="py-14 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">What You Get</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Product Features & Inclusions</h2>
+          <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">
+            Everything included with your purchase — no hidden fees, no surprises.
+          </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-10">
-              {attrEntries.map(([key, value]: [string, any], i: number) => (
-                <div key={i} className="flex items-start gap-3.5 rounded-xl border border-border bg-card p-4 hover:shadow-md transition-shadow">
-                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                    <CheckCircle className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">{key}</p>
-                    {value && <p className="text-xs text-muted-foreground mt-0.5">{value}</p>}
-                  </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-10">
+            {displayFeatures.map(([key, value]: [string, any], i: number) => (
+              <div key={i} className="flex items-start gap-3.5 rounded-xl border border-border bg-card p-4 hover:shadow-md transition-shadow">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <CheckCircle className="w-5 h-5 text-primary" />
                 </div>
-              ))}
-            </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{key}</p>
+                  {value && <p className="text-xs text-muted-foreground mt-0.5">{value}</p>}
+                </div>
+              </div>
+            ))}
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* ─── 3A. PRODUCT DETAILS (Specifications) ─── */}
       <section className="py-14">
