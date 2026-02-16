@@ -78,11 +78,13 @@ export const generateInvoicePDF = async (
   if (settings.invoice_logo) {
     try {
       const img = await loadImage(settings.invoice_logo);
-      // Draw logo in white header area (max 40x20)
+      // Flatten transparency onto the blue header background
+      const flatDataUrl = flattenOnBackground(img, primaryColor);
+      // Draw logo in header area (max 40x20)
       const ratio = Math.min(40 / img.width, 20 / img.height);
       const w = img.width * ratio;
       const h = img.height * ratio;
-      doc.addImage(img, "PNG", 15, y - 2, w, h);
+      doc.addImage(flatDataUrl, "PNG", 15, y - 2, w, h);
       logoLoaded = true;
     } catch { /* fallback to text */ }
   }
@@ -281,4 +283,24 @@ const loadImage = (url: string): Promise<HTMLImageElement> => {
     img.onerror = reject;
     img.src = url;
   });
+};
+
+/**
+ * Flatten a potentially-transparent image onto a solid background color
+ * so jsPDF (which ignores alpha) doesn't render transparency as black.
+ */
+const flattenOnBackground = (
+  img: HTMLImageElement,
+  bgColor: [number, number, number]
+): string => {
+  const canvas = document.createElement("canvas");
+  canvas.width = img.naturalWidth || img.width;
+  canvas.height = img.naturalHeight || img.height;
+  const ctx = canvas.getContext("2d")!;
+  // Fill with the header background color first
+  ctx.fillStyle = `rgb(${bgColor[0]},${bgColor[1]},${bgColor[2]})`;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Draw logo on top — transparent pixels now show the bg color
+  ctx.drawImage(img, 0, 0);
+  return canvas.toDataURL("image/png");
 };
