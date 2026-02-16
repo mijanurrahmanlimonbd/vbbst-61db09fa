@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { convertToWebP } from "@/lib/imageUtils";
+import { convertToWebP, toBrandedUrl } from "@/lib/imageUtils";
 import {
   Upload,
   Search,
@@ -470,8 +470,8 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
             size="sm"
             className="w-full gap-2"
             onClick={() => {
-              navigator.clipboard.writeText(selectedFile.url);
-              toast.success("URL copied to clipboard!");
+              navigator.clipboard.writeText(toBrandedUrl(selectedFile.url));
+              toast.success("Branded URL copied to clipboard!");
             }}
           >
             <Copy className="w-3.5 h-3.5" />
