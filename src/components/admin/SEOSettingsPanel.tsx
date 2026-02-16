@@ -142,9 +142,7 @@ const SEOSettingsPanel = ({
         <label className="text-sm font-medium text-foreground mb-1.5 block">Meta Description</label>
         <Textarea
           value={metaDescription}
-          onChange={(e) => {
-            if (e.target.value.length <= 160) onMetaDescriptionChange(e.target.value);
-          }}
+          onChange={(e) => onMetaDescriptionChange(e.target.value)}
           placeholder="Write a concise summary for search engines…"
           rows={3}
           className="text-sm"
