@@ -2,6 +2,7 @@ import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 import { SITE_NAME, getSiteUrl, DEFAULT_DESCRIPTION } from "@/lib/config";
 import { useInternationalSEO } from "@/hooks/useInternationalSEO";
+import { toBrandedUrl } from "@/lib/imageUtils";
 
 interface SEOHeadProps {
   title?: string;
@@ -22,7 +23,7 @@ const SEOHead = ({
   const siteUrl = getSiteUrl();
   const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
   const canonicalUrl = `${siteUrl}${location.pathname}`;
-  const resolvedOgImage = ogImage || `https://verifiedbmservices.com/favicon.png`;
+  const resolvedOgImage = toBrandedUrl(ogImage || `https://verifiedbmservices.com/favicon.png`);
   const { geoRegion, geoPlacename, targetLang } = useInternationalSEO();
 
   return (
