@@ -3,6 +3,7 @@ import autoTable from "jspdf-autotable";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { getSiteUrl } from "@/lib/config";
+import { toBrandedUrl } from "@/lib/imageUtils";
 
 interface OrderData {
   id: string;
@@ -73,11 +74,12 @@ export const generateInvoicePDF = async (
   doc.setFillColor(...primaryColor);
   doc.rect(0, 0, pageWidth, 45, "F");
 
-  // Try to load logo image
+  // Try to load logo image — always resolve to branded/production URL
   let logoLoaded = false;
-  if (settings.invoice_logo) {
+  const resolvedLogo = settings.invoice_logo ? toBrandedUrl(settings.invoice_logo) : "";
+  if (resolvedLogo) {
     try {
-      const img = await loadImage(settings.invoice_logo);
+      const img = await loadImage(resolvedLogo);
       // Flatten transparency onto the blue header background
       const flatDataUrl = flattenOnBackground(img, primaryColor);
       // Draw logo in header area (max 80x30)
