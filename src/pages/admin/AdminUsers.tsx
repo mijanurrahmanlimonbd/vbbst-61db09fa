@@ -121,32 +121,21 @@ const AdminUsers = () => {
     }
 
     const { data: roles } = await supabase.from("user_roles").select("user_id, role");
-    const { data: authData } = await supabase.auth.admin?.listUsers?.() || { data: null };
 
     const roleMap = new Map<string, AppRole>();
     (roles || []).forEach((r: any) => roleMap.set(r.user_id, r.role as AppRole));
 
-    // Try to get emails - if admin API not available, use profile id as fallback
-    const emailMap = new Map<string, string>();
-    if (authData?.users) {
-      authData.users.forEach((u: any) => emailMap.set(u.id, u.email || ""));
-    }
-
-    const userRows: UserRow[] = profiles.map((p: any) => {
-      const authUser = authData?.users?.find((u: any) => u.id === p.id);
-      const provider = authUser?.app_metadata?.provider || "email";
-      return {
-        id: p.id,
-        full_name: p.full_name || "Unknown",
-        avatar_url: p.avatar_url,
-        is_active: p.is_active ?? true,
-        last_login: p.last_login,
-        created_at: p.created_at,
-        email: emailMap.get(p.id) || `user-${p.id.slice(0, 8)}@verifiedbmservices.com`,
-        role: roleMap.get(p.id) || "author",
-        provider,
-      };
-    });
+    const userRows: UserRow[] = profiles.map((p: any) => ({
+      id: p.id,
+      full_name: p.full_name || "Unknown",
+      avatar_url: p.avatar_url,
+      is_active: p.is_active ?? true,
+      last_login: p.last_login,
+      created_at: p.created_at,
+      email: p.email || "No email",
+      role: roleMap.get(p.id) || "author",
+      provider: "email",
+    }));
 
     setUsers(userRows);
     setLoading(false);
