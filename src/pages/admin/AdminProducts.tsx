@@ -87,6 +87,7 @@ const AdminProducts = () => {
   const [mediaOpen, setMediaOpen] = useState(false);
   const [mediaTarget, setMediaTarget] = useState<"main" | "gallery">("main");
   const [skuError, setSkuError] = useState("");
+  const [slugManual, setSlugManual] = useState(false);
   const [attributes, setAttributes] = useState<ProductAttribute[]>([]);
   const [specGroups, setSpecGroups] = useState<SpecGroup[]>([]);
   const [trustPoints, setTrustPoints] = useState<TrustPoint[]>([]);
@@ -105,10 +106,11 @@ const AdminProducts = () => {
 
   useEffect(() => { fetchProducts(); }, []);
 
-  const openNew = () => { setEditProduct(emptyProduct()); setSkuError(""); setAttributes([]); setSpecGroups([]); setTrustPoints([]); setEditorOpen(true); };
+  const openNew = () => { setEditProduct(emptyProduct()); setSkuError(""); setSlugManual(false); setAttributes([]); setSpecGroups([]); setTrustPoints([]); setEditorOpen(true); };
   const openEdit = (p: Product) => {
     setEditProduct({ ...p, gallery_images: p.gallery_images || [] });
     setSkuError("");
+    setSlugManual(true);
     const attrs = p.attributes || {};
     const flatAttrs = Object.entries(attrs)
       .filter(([key]) => !key.startsWith("_"))
@@ -383,12 +385,13 @@ const AdminProducts = () => {
             <TabsContent value="basic" className="space-y-4 pt-4">
               <div>
                 <Label>Product Name *</Label>
-                <Input value={editProduct.title || ""} onChange={(e) => setEditProduct({ ...editProduct, title: e.target.value, slug: editProduct.id ? editProduct.slug : generateSlug(e.target.value), meta_title: editProduct.meta_title || `${e.target.value} - Buy Online` })} placeholder="Product title" className="mt-1.5" />
+                <Input value={editProduct.title || ""} onChange={(e) => { const title = e.target.value; const updates: Partial<Product> = { ...editProduct, title }; if (!editProduct.id && !slugManual) updates.slug = generateSlug(title); if (!editProduct.meta_title) updates.meta_title = `${title} - Buy Online`; setEditProduct(updates); }} placeholder="Product title" className="mt-1.5" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>Slug</Label>
-                  <Input value={editProduct.slug || ""} onChange={(e) => setEditProduct({ ...editProduct, slug: e.target.value })} placeholder="product-slug" className="mt-1.5 font-mono text-sm" />
+                  <Label>Slug (URL Path)</Label>
+                  <Input value={editProduct.slug || ""} onChange={(e) => { setEditProduct({ ...editProduct, slug: e.target.value }); setSlugManual(true); }} placeholder="product-slug" className="mt-1.5 font-mono text-sm" />
+                  <p className="text-xs text-muted-foreground mt-1">URL: verifiedbmservices.com/product/<span className="font-semibold">{editProduct.slug || "..."}</span></p>
                 </div>
                 <div>
                   <Label>SKU (Unique ID)</Label>
@@ -617,12 +620,22 @@ const AdminProducts = () => {
                     Choose from Media Library
                   </Button>
                 </div>
+                <div className="mt-2">
+                  <Label className="text-xs text-muted-foreground">Image URL (editable)</Label>
+                  <Input
+                    value={editProduct.image_url || ""}
+                    onChange={(e) => setEditProduct({ ...editProduct, image_url: e.target.value })}
+                    placeholder="https://verifiedbmservices.com/media/image.webp"
+                    className="mt-1 font-mono text-xs"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Paste any URL or pick from Media Library above. Manually entered URLs are preserved.</p>
+                </div>
               </div>
               <div>
                 <Label>Gallery Images</Label>
                 <div className="flex flex-wrap gap-2 mt-1.5">
                   {(editProduct.gallery_images || []).map((url, i) => (
-                    <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border border-border">
+                    <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border border-border group">
                       <img src={url} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
                       <button onClick={() => removeGalleryImage(url)} className="absolute top-0.5 right-0.5 bg-background/80 rounded-full p-0.5">
                         <X className="w-3 h-3 text-destructive" />
@@ -635,6 +648,23 @@ const AdminProducts = () => {
                   >
                     <Plus className="w-5 h-5 text-muted-foreground" />
                   </button>
+                </div>
+                <div className="mt-2">
+                  <Label className="text-xs text-muted-foreground">Add Gallery Image URL</Label>
+                  <div className="flex gap-2 mt-1">
+                    <Input
+                      id="gallery-url-input"
+                      placeholder="https://verifiedbmservices.com/media/gallery-image.webp"
+                      className="flex-1 font-mono text-xs"
+                    />
+                    <Button variant="outline" size="sm" onClick={() => {
+                      const input = document.getElementById("gallery-url-input") as HTMLInputElement;
+                      if (input?.value?.trim()) {
+                        setEditProduct({ ...editProduct, gallery_images: [...(editProduct.gallery_images || []), input.value.trim()] });
+                        input.value = "";
+                      }
+                    }}>Add</Button>
+                  </div>
                 </div>
               </div>
             </TabsContent>
@@ -666,7 +696,7 @@ const AdminProducts = () => {
               <div className="bg-accent/50 rounded-lg p-4">
                 <p className="text-xs font-medium text-muted-foreground mb-1">Search Preview</p>
                 <p className="text-sm text-primary font-medium truncate">{editProduct.meta_title || `${editProduct.title || "Product"} - Buy Online`}</p>
-                <p className="text-xs text-[hsl(142,70%,45%)]">verifiedbmbuy.com/product/{editProduct.slug || "..."}</p>
+                <p className="text-xs text-[hsl(142,70%,45%)]">verifiedbmservices.com/product/{editProduct.slug || "..."}</p>
                 <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{editProduct.meta_description || `Buy ${editProduct.title || "this product"} from Verified BM services.`}</p>
               </div>
             </TabsContent>
