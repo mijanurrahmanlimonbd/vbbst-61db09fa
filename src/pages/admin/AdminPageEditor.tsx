@@ -178,6 +178,7 @@ const AdminPageEditor = () => {
   const [heroUploading, setHeroUploading] = useState(false);
   const [fields, setFields] = useState<ContentField[]>([]);
   const [customFields, setCustomFields] = useState<ContentField[]>([]);
+  const [focusKeyword, setFocusKeyword] = useState("");
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load page data
@@ -576,7 +577,7 @@ const AdminPageEditor = () => {
             <TabsContent value="seo" className="mt-4">
               <AdvancedSEOSidebar
                 data={{
-                  focusKeyword: "",
+                  focusKeyword: focusKeyword,
                   metaTitle: pageData.meta_title || "",
                   metaDescription: pageData.meta_description || "",
                   slug: pageData.slug,
@@ -584,10 +585,10 @@ const AdminPageEditor = () => {
                   postTitle: pageData.title,
                   urlPrefix: "/",
                 }}
-                focusKeyword=""
+                focusKeyword={focusKeyword}
                 metaTitle={pageData.meta_title || ""}
                 metaDescription={pageData.meta_description || ""}
-                onFocusKeywordChange={() => {}}
+                onFocusKeywordChange={setFocusKeyword}
                 onMetaTitleChange={(v) => setPageData({ ...pageData, meta_title: v })}
                 onMetaDescriptionChange={(v) => setPageData({ ...pageData, meta_description: v })}
               />
