@@ -446,7 +446,7 @@ const AdvancedSEOSidebar = ({
         <label className="text-xs font-medium text-foreground mb-1 block">Meta Description</label>
         <Textarea
           value={metaDescription}
-          onChange={(e) => { if (e.target.value.length <= 160) onMetaDescriptionChange(e.target.value); }}
+          onChange={(e) => onMetaDescriptionChange(e.target.value)}
           placeholder="Write a concise summary…"
           rows={2}
           className="text-sm"
