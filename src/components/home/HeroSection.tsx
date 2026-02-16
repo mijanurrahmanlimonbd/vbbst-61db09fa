@@ -62,10 +62,8 @@ const HeroSection = () => {
             >
               <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl md:text-[2.75rem] lg:text-[2.85rem] xl:text-[3.25rem]">
                 Buy Verified BM
+                <span className="mt-3 block">And WhatsApp Business API</span>
               </h1>
-              <span className="mt-3 block text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl md:text-[2.75rem] lg:text-[2.85rem] xl:text-[3.25rem]">
-                And WhatsApp Business API
-              </span>
             </div>
 
             {/* Description */}
