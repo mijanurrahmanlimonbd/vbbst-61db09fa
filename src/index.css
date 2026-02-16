@@ -111,6 +111,26 @@ All colors MUST be HSL.
 .tiptap strong { font-weight: 700; }
 .tiptap em { font-style: italic; }
 
+/* Blog post content styles (fallback for prose) */
+.prose h1 { font-size: 2rem !important; font-weight: 700 !important; margin-top: 1.5rem; margin-bottom: 0.75rem; line-height: 1.3; }
+.prose h2 { font-size: 1.5rem !important; font-weight: 700 !important; margin-top: 2rem; margin-bottom: 0.75rem; line-height: 1.3; color: hsl(var(--foreground)); }
+.prose h3 { font-size: 1.25rem !important; font-weight: 600 !important; margin-top: 1.5rem; margin-bottom: 0.5rem; line-height: 1.3; color: hsl(var(--foreground)); }
+.prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+.prose ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
+.prose li { margin-bottom: 0.25rem; }
+.prose blockquote { border-left: 3px solid hsl(var(--primary)); padding-left: 1rem; margin: 1rem 0; font-style: italic; color: hsl(var(--muted-foreground)); }
+.prose a { color: hsl(var(--primary)); text-decoration: underline; }
+.prose strong { font-weight: 700; }
+
+/* Blog special components */
+.prose .key-takeaway { background: hsl(var(--primary) / 0.05); border: 1px solid hsl(var(--primary) / 0.2); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+.prose .key-takeaway h3 { margin-top: 0; font-size: 1.1rem !important; }
+.prose .table-of-contents { background: hsl(var(--secondary)); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+.prose .faq-item { border-bottom: 1px solid hsl(var(--border)); padding-bottom: 1rem; margin-bottom: 1rem; }
+.prose .related-products { background: hsl(var(--secondary)); border-radius: 12px; padding: 1.5rem; margin-top: 2rem; }
+.prose .related-products .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.prose .related-products .product-card { background: hsl(var(--background)); border: 1px solid hsl(var(--border)); border-radius: 8px; padding: 1rem; }
+.prose .related-products .product-card a { font-weight: 600; text-decoration: none; }
 /* Global Edit Mode visual feedback */
 [contenteditable="true"] {
   cursor: text;
