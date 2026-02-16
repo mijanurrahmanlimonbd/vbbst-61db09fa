@@ -80,10 +80,11 @@ interface PendingFile {
   originalFile: File;
   webpFile: File;
   previewUrl: string;
-  fileName: string; // internal storage name
-  urlSlug: string;  // SEO-friendly public slug
+  fileName: string; // internal plain text name
+  urlSlug: string;  // SEO-friendly public slug with .webp
   altText: string;
   caption: string;
+  imageDetails: string; // long-form metadata
   dimensions: { width: number; height: number };
 }
 
@@ -212,8 +213,9 @@ const FileDetailsSidebar = ({
         </div>
 
         <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Description</label>
-          <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Long-form metadata…" rows={3} className="text-sm" />
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Image Details</label>
+          <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Long-form metadata, e.g. 'Account created in 2023 with $500 daily spending limit and full document verification'" rows={4} className="text-sm" />
+          <p className="text-[10px] text-muted-foreground mt-0.5">Used for Schema.org image metadata</p>
         </div>
       </div>
 
@@ -304,6 +306,7 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
           urlSlug: slug,
           altText: plainName,
           caption: "",
+          imageDetails: "",
           dimensions: dims,
         },
       ]);
@@ -369,6 +372,7 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
         height: pending.dimensions.height,
         alt_text: finalAlt,
         caption: pending.caption,
+        description: pending.imageDetails,
         url: urlData.publicUrl,
         url_slug: safeSlug,
       });
@@ -529,6 +533,10 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
                   <div>
                     <label className="text-xs font-medium text-muted-foreground">Caption</label>
                     <Input value={p.caption} onChange={(e) => updatePendingField(p.id, "caption", e.target.value)} placeholder="Optional caption" className="text-sm h-8" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">Image Details</label>
+                    <Textarea value={p.imageDetails} onChange={(e) => updatePendingField(p.id, "imageDetails", e.target.value)} placeholder="Long-form metadata, e.g. 'Account created in 2023 with $500 daily spending limit...'" rows={2} className="text-sm" />
                   </div>
                   <div className="flex gap-2 pt-1">
                     <Button size="sm" onClick={() => confirmUpload(p)} className="gap-1">
