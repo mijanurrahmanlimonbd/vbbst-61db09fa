@@ -13,11 +13,16 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 # RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L]
 
 # ── Reverse Proxy: Branded Media URLs ────────
+# Option A: mod_proxy (LiteSpeed / Apache with mod_proxy enabled)
 # /media/filename.webp → Supabase storage
 RewriteRule ^media/(.+)$ https://xukkejkvcgixogvbllmf.supabase.co/storage/v1/object/public/media/$1 [P,L]
 
 # /branding/filename.webp → Supabase branding bucket
 RewriteRule ^branding/(.+)$ https://xukkejkvcgixogvbllmf.supabase.co/storage/v1/object/public/branding/$1 [P,L]
+
+# Option B: PHP proxy fallback (uncomment below & comment out Option A if [P] flag causes 404/500)
+# RewriteRule ^media/(.+)$ /media-proxy.php?file=$1 [L,QSA]
+# RewriteRule ^branding/(.+)$ /media-proxy.php?file=$1&bucket=branding [L,QSA]
 
 # ── SPA Pretty Permalinks ────────────────────
 # All routes that don't match a file/directory → index.html
