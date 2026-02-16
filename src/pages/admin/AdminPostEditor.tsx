@@ -604,7 +604,9 @@ const AdminPostEditor = () => {
           if (editor && data.content) {
             editor.commands.setContent(data.content);
           }
-          if (data.featuredImageSlug) {
+          if (data.featuredImageUrl) {
+            setFeaturedImage(data.featuredImageUrl);
+          } else if (data.featuredImageSlug) {
             setFeaturedImage(`https://verifiedbmservices.com/media/${data.featuredImageSlug}`);
           }
           markUnsaved();

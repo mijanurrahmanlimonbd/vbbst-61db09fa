@@ -7,6 +7,94 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function base64ToUint8Array(base64: string): Uint8Array {
+  const raw = atob(base64);
+  const arr = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return arr;
+}
+
+async function generateAndUploadImage(
+  apiKey: string,
+  prompt: string,
+  fileName: string,
+  sb: any
+): Promise<string | null> {
+  try {
+    console.log(`Generating image: ${fileName}`);
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-image",
+        messages: [{ role: "user", content: prompt }],
+        modalities: ["image", "text"],
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(`Image generation failed: ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+    const imageData = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    if (!imageData) {
+      console.error("No image data in response");
+      return null;
+    }
+
+    // Extract base64 data
+    const base64Match = imageData.match(/^data:image\/(\w+);base64,(.+)$/);
+    if (!base64Match) {
+      console.error("Invalid base64 image format");
+      return null;
+    }
+
+    const ext = base64Match[1] === "jpeg" ? "jpg" : base64Match[1];
+    const base64Content = base64Match[2];
+    const imageBytes = base64ToUint8Array(base64Content);
+    const filePath = `blog/${fileName}.${ext}`;
+    const mimeType = `image/${base64Match[1]}`;
+
+    // Upload to media bucket
+    const { error: uploadError } = await sb.storage
+      .from("media")
+      .upload(filePath, imageBytes, {
+        contentType: mimeType,
+        upsert: true,
+      });
+
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
+      return null;
+    }
+
+    const { data: urlData } = sb.storage.from("media").getPublicUrl(filePath);
+    const publicUrl = urlData?.publicUrl;
+
+    // Save to media_files table
+    await sb.from("media_files").insert({
+      file_name: fileName,
+      file_path: filePath,
+      url: publicUrl,
+      mime_type: mimeType,
+      file_size: imageBytes.length,
+      alt_text: prompt.substring(0, 120),
+      url_slug: `${fileName}.webp`,
+    });
+
+    console.log(`Image uploaded: ${publicUrl}`);
+    return publicUrl;
+  } catch (err) {
+    console.error("Image generation error:", err);
+    return null;
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -45,7 +133,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const { topic, focusKeyword, category, tone } = await req.json();
+    const { topic, focusKeyword, category, tone, generateImages } = await req.json();
 
     if (!topic || !focusKeyword) {
       return new Response(JSON.stringify({ error: "Topic and focus keyword are required" }), {
@@ -195,6 +283,44 @@ For the Key Takeaway box:
     } catch {
       console.error("Failed to parse AI response:", content);
       parsed = { error: "Failed to parse AI response", raw: content };
+    }
+
+    // Generate images if requested
+    if (generateImages && parsed.title && !parsed.error) {
+      const slug = parsed.slug || focusKeyword.toLowerCase().replace(/\s+/g, "-");
+      const thumbnailFileName = `${slug}-thumbnail`;
+      const bodyFileName = `${slug}-body`;
+
+      const thumbnailPrompt = `Create a professional, modern blog thumbnail image for an article titled "${parsed.title}". The image should be about ${topic}. Style: clean, corporate, digital marketing theme with blue and white tones. Include subtle tech/business imagery. The image should be eye-catching for social media sharing. 16:9 aspect ratio. Ultra high resolution.`;
+
+      const bodyPrompt = `Create a professional illustration for a blog article about ${topic}. The image should visually represent the concept of ${focusKeyword}. Style: modern, informative infographic style with icons and clean design. Use professional blue, teal and white color scheme. Suitable for embedding within a blog post body. 16:9 aspect ratio. Ultra high resolution.`;
+
+      // Generate both images in parallel
+      const [thumbnailUrl, bodyImageUrl] = await Promise.all([
+        generateAndUploadImage(LOVABLE_API_KEY, thumbnailPrompt, thumbnailFileName, sb),
+        generateAndUploadImage(LOVABLE_API_KEY, bodyPrompt, bodyFileName, sb),
+      ]);
+
+      parsed.featuredImageUrl = thumbnailUrl;
+      parsed.bodyImageUrl = bodyImageUrl;
+
+      // Insert body image into content after the first H2 section
+      if (bodyImageUrl && parsed.content) {
+        const bodyImgHtml = `<figure class="blog-body-image" style="margin: 2rem 0;"><img src="${bodyImageUrl}" alt="${parsed.title} - ${focusKeyword}" style="width:100%;border-radius:12px;" /><figcaption style="text-align:center;font-size:0.85rem;color:#666;margin-top:0.5rem;">${parsed.title}</figcaption></figure>`;
+        // Insert after first </h2>...</p> block
+        const firstH2End = parsed.content.indexOf("</p>", parsed.content.indexOf("<h2"));
+        if (firstH2End !== -1) {
+          const insertPos = firstH2End + 4;
+          parsed.content = parsed.content.slice(0, insertPos) + bodyImgHtml + parsed.content.slice(insertPos);
+        } else {
+          // Fallback: insert after intro
+          const introEnd = parsed.content.indexOf("</p>", parsed.content.indexOf("<p"));
+          if (introEnd !== -1) {
+            const insertPos = introEnd + 4;
+            parsed.content = parsed.content.slice(0, insertPos) + bodyImgHtml + parsed.content.slice(insertPos);
+          }
+        }
+      }
     }
 
     return new Response(JSON.stringify(parsed), {
