@@ -1,4 +1,5 @@
 import { useState } from "react";
+import headerFallback from "@/assets/verified-bm-services-header.png";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -128,17 +129,12 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
           <div className="p-6 sm:p-8 space-y-6">
             {/* Logo */}
             <div className="text-center">
-              {branding.header_logo ? (
-                <img
-                  src={branding.header_logo}
-                  alt={branding.site_title || "Store"}
-                  className="h-10 max-w-[160px] object-contain mx-auto mb-2"
-                />
-              ) : (
-                <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-primary-foreground font-bold mx-auto mb-2">
-                  VS
-                </div>
-              )}
+              <img
+                src={branding.header_logo || headerFallback}
+                alt={branding.site_title || "Verified BM services"}
+                className="h-10 max-w-[160px] object-contain mx-auto mb-2"
+                onError={(e) => { (e.target as HTMLImageElement).src = headerFallback; }}
+              />
               <p className="text-sm text-muted-foreground">
                 {tab === "login" ? "Sign in to your account" : "Create a new account"}
               </p>
