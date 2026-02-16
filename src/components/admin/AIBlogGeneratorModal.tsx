@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Sparkles, Loader2, Wand2, FileText, Target, Tag, MessageSquare } from "lucide-react";
+import { Sparkles, Loader2, Wand2, FileText, Target, Tag, MessageSquare, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -46,6 +47,8 @@ export interface GeneratedBlogData {
   readTime: string;
   focusKeyword: string;
   featuredImageSlug?: string;
+  featuredImageUrl?: string;
+  bodyImageUrl?: string;
 }
 
 interface AIBlogGeneratorModalProps {
@@ -59,6 +62,7 @@ const AIBlogGeneratorModal = ({ open, onOpenChange, onGenerated }: AIBlogGenerat
   const [focusKeyword, setFocusKeyword] = useState("");
   const [category, setCategory] = useState("Verified BM");
   const [tone, setTone] = useState(TONES[0]);
+  const [generateImages, setGenerateImages] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [progress, setProgress] = useState("");
 
@@ -78,10 +82,16 @@ const AIBlogGeneratorModal = ({ open, onOpenChange, onGenerated }: AIBlogGenerat
     try {
       setTimeout(() => setProgress("Generating SEO-optimized content..."), 3000);
       setTimeout(() => setProgress("Building FAQ section and structure..."), 8000);
-      setTimeout(() => setProgress("Adding related products and final touches..."), 13000);
+      if (generateImages) {
+        setTimeout(() => setProgress("🎨 Generating AI thumbnail image..."), 13000);
+        setTimeout(() => setProgress("🎨 Generating AI body image..."), 18000);
+        setTimeout(() => setProgress("Uploading images and finalizing..."), 23000);
+      } else {
+        setTimeout(() => setProgress("Adding related products and final touches..."), 13000);
+      }
 
       const { data, error } = await supabase.functions.invoke("generate-blog-post", {
-        body: { topic, focusKeyword, category, tone },
+        body: { topic, focusKeyword, category, tone, generateImages },
       });
 
       if (error) throw error;
@@ -97,13 +107,18 @@ const AIBlogGeneratorModal = ({ open, onOpenChange, onGenerated }: AIBlogGenerat
         readTime: data.readTime || "5 min read",
         focusKeyword,
         featuredImageSlug: data.featuredImageSlug,
+        featuredImageUrl: data.featuredImageUrl,
+        bodyImageUrl: data.bodyImageUrl,
       };
 
       onGenerated(result);
-      toast.success("Blog post generated! Review and edit before publishing.");
+
+      const imgMsg = generateImages
+        ? (result.featuredImageUrl ? " with AI-generated images!" : " (images could not be generated)")
+        : "!";
+      toast.success(`Blog post generated${imgMsg} Review and edit before publishing.`);
       onOpenChange(false);
 
-      // Reset form
       setTopic("");
       setFocusKeyword("");
     } catch (err: any) {
@@ -124,7 +139,7 @@ const AIBlogGeneratorModal = ({ open, onOpenChange, onGenerated }: AIBlogGenerat
             AI Blog Generator
           </DialogTitle>
           <DialogDescription>
-            Generate a professional, SEO-optimized blog post with human-like writing.
+            Generate a professional, SEO-optimized blog post with AI-generated images.
           </DialogDescription>
         </DialogHeader>
 
@@ -199,6 +214,26 @@ const AIBlogGeneratorModal = ({ open, onOpenChange, onGenerated }: AIBlogGenerat
             </div>
           </div>
 
+          {/* Generate Images Toggle */}
+          <div className="bg-secondary/40 rounded-lg p-3">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <Checkbox
+                checked={generateImages}
+                onCheckedChange={(v) => setGenerateImages(!!v)}
+                disabled={generating}
+              />
+              <div className="flex-1">
+                <div className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+                  <ImageIcon className="w-3.5 h-3.5 text-primary" />
+                  Generate AI Images
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Creates a featured thumbnail + a body illustration, uploaded to Media Library automatically.
+                </p>
+              </div>
+            </label>
+          </div>
+
           {/* What AI will generate */}
           <div className="bg-secondary/40 rounded-lg p-3 space-y-1.5">
             <p className="text-xs font-semibold text-foreground">✨ AI will generate:</p>
@@ -209,7 +244,12 @@ const AIBlogGeneratorModal = ({ open, onOpenChange, onGenerated }: AIBlogGenerat
               <li>• FAQ section targeting "People Also Ask" snippets</li>
               <li>• Related Products widget with internal links</li>
               <li>• Meta description under 155 chars with CTA</li>
-              <li>• Branded URL slug for featured image</li>
+              {generateImages && (
+                <>
+                  <li>• 🎨 Featured thumbnail image (16:9, social-ready)</li>
+                  <li>• 🎨 In-body illustration inserted after first section</li>
+                </>
+              )}
             </ul>
           </div>
 
