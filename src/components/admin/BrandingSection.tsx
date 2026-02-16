@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { convertToWebP } from "@/lib/imageUtils";
 import { Button } from "@/components/ui/button";
-import { Loader2, Upload, X, Image as ImageIcon } from "lucide-react";
+import { Loader2, Upload, X, Image as ImageIcon, FolderOpen } from "lucide-react";
 import { toast } from "sonner";
+import MediaLibraryModal from "@/components/admin/MediaLibraryModal";
+import type { MediaFile } from "@/components/admin/MediaLibrary";
 
 const BRANDING_FIELDS = [
   { key: "header_logo", label: "Header Logo", desc: "Main navigation bar logo (PNG/SVG, max 2MB)", accept: ".png,.svg,.webp" },
@@ -17,6 +19,8 @@ const BrandingSection = () => {
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [mediaModalOpen, setMediaModalOpen] = useState(false);
+  const [mediaTargetKey, setMediaTargetKey] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -85,6 +89,19 @@ const BrandingSection = () => {
       delete next[key];
       return next;
     });
+  };
+
+  const openMediaFor = (key: string) => {
+    setMediaTargetKey(key);
+    setMediaModalOpen(true);
+  };
+
+  const handleMediaSelect = (file: MediaFile) => {
+    if (mediaTargetKey) {
+      const url = `${file.url}?t=${Date.now()}`;
+      setLogos((p) => ({ ...p, [mediaTargetKey]: url }));
+      toast.success("Selected! Click 'Save Branding' to apply.");
+    }
   };
 
   const saveBranding = async () => {
@@ -165,27 +182,32 @@ const BrandingSection = () => {
                 </div>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-6 cursor-pointer hover:border-primary/50 transition-colors">
-                {uploading[field.key] ? (
-                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                ) : (
-                  <>
-                    <ImageIcon className="w-8 h-8 text-muted-foreground/50 mb-2" />
-                    <span className="text-sm text-muted-foreground">Click to upload</span>
-                    <span className="text-xs text-muted-foreground/70 mt-1">{field.accept.replace(/\./g, "").toUpperCase()}</span>
-                  </>
-                )}
-                <input
-                  type="file"
-                  accept={field.accept}
-                  className="hidden"
-                  disabled={uploading[field.key]}
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) handleUpload(field.key, f);
-                  }}
-                />
-              </label>
+              <div className="space-y-3">
+                <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl p-4 cursor-pointer hover:border-primary/50 transition-colors">
+                  {uploading[field.key] ? (
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  ) : (
+                    <>
+                      <ImageIcon className="w-8 h-8 text-muted-foreground/50 mb-2" />
+                      <span className="text-sm text-muted-foreground">Click to upload</span>
+                      <span className="text-xs text-muted-foreground/70 mt-1">{field.accept.replace(/\./g, "").toUpperCase()}</span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept={field.accept}
+                    className="hidden"
+                    disabled={uploading[field.key]}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleUpload(field.key, f);
+                    }}
+                  />
+                </label>
+                <Button variant="outline" size="sm" className="w-full gap-1.5" onClick={() => openMediaFor(field.key)}>
+                  <FolderOpen className="w-4 h-4" /> Select from Media Library
+                </Button>
+              </div>
             )}
           </div>
         ))}
@@ -194,6 +216,12 @@ const BrandingSection = () => {
       <Button onClick={saveBranding} disabled={saving} className="gap-2">
         {saving && <Loader2 className="w-4 h-4 animate-spin" />} Save Branding
       </Button>
+
+      <MediaLibraryModal
+        open={mediaModalOpen}
+        onOpenChange={setMediaModalOpen}
+        onSelect={handleMediaSelect}
+      />
     </div>
   );
 };
