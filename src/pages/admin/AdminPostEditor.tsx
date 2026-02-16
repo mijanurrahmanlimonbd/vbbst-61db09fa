@@ -25,9 +25,11 @@ import {
   Upload,
   ImageIcon,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import MediaLibraryModal from "@/components/admin/MediaLibraryModal";
+import AIBlogGeneratorModal, { type GeneratedBlogData } from "@/components/admin/AIBlogGeneratorModal";
 import SEOSettingsPanel from "@/components/admin/SEOSettingsPanel";
 import AdvancedSEOSidebar from "@/components/admin/AdvancedSEOSidebar";
 import { Input } from "@/components/ui/input";
@@ -85,6 +87,7 @@ const AdminPostEditor = () => {
   const [saveStatus, setSaveStatus] = useState<"saved" | "unsaved" | "saving">("saved");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mediaLibraryOpen, setMediaLibraryOpen] = useState(false);
+  const [aiGeneratorOpen, setAiGeneratorOpen] = useState(false);
   const [loading, setLoading] = useState(!isNew);
   const autosaveTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const hasChanges = useRef(false);
@@ -274,6 +277,17 @@ const AdminPostEditor = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          {isNew && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setAiGeneratorOpen(true)}
+              className="gap-1.5 border-primary/30 text-primary hover:bg-primary/5"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Generate with AI</span>
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
@@ -570,6 +584,29 @@ const AdminPostEditor = () => {
         onOpenChange={setMediaLibraryOpen}
         onSelect={(file) => {
           setFeaturedImage(file.url);
+          markUnsaved();
+        }}
+      />
+
+      {/* AI Blog Generator Modal */}
+      <AIBlogGeneratorModal
+        open={aiGeneratorOpen}
+        onOpenChange={setAiGeneratorOpen}
+        onGenerated={(data: GeneratedBlogData) => {
+          setTitle(data.title);
+          setSlug(data.slug);
+          setSlugManual(true);
+          setExcerpt(data.excerpt);
+          setMetaTitle(data.metaTitle);
+          setMetaDescription(data.metaDescription);
+          setFocusKeyword(data.focusKeyword);
+          setReadTime(data.readTime);
+          if (editor && data.content) {
+            editor.commands.setContent(data.content);
+          }
+          if (data.featuredImageSlug) {
+            setFeaturedImage(`https://verifiedbmservices.com/media/${data.featuredImageSlug}`);
+          }
           markUnsaved();
         }}
       />
