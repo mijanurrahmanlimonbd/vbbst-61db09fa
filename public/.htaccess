@@ -13,10 +13,11 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 # RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L]
 
 # ── Branded Media URLs with Slug Mapping ─────
-# Routes through PHP proxy to resolve URL slugs → actual storage files
-# The proxy queries the media_files table for slug mappings
-RewriteRule ^media/(.+)$ /media-proxy.php?file=$1 [L,QSA]
-RewriteRule ^branding/(.+)$ /media-proxy.php?file=$1&bucket=branding [L,QSA]
+# Resolve branded /media/ slugs via Edge Function (302 → Supabase storage)
+RewriteRule ^media/(.+)$ https://xukkejkvcgixogvbllmf.supabase.co/functions/v1/media-resolve?slug=$1 [L,R=302]
+
+# Resolve branded /branding/ assets directly to Supabase storage bucket
+RewriteRule ^branding/(.+)$ https://xukkejkvcgixogvbllmf.supabase.co/storage/v1/object/public/branding/$1 [L,R=302]
 
 # ── SPA Pretty Permalinks ────────────────────
 # All routes that don't match a file/directory → index.html

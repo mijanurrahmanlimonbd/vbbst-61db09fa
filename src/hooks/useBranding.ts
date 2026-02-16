@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { toBrandedUrl } from "@/lib/imageUtils";
 
 export interface BrandingSettings {
   header_logo: string;
@@ -47,10 +48,10 @@ export const useBranding = () => {
         const map: Record<string, string> = {};
         data.forEach((r) => { map[r.key] = r.value; });
         setBranding({
-          header_logo: ensurePublicUrl(map.header_logo || ""),
-          footer_logo: ensurePublicUrl(map.footer_logo || ""),
-          favicon: ensurePublicUrl(map.favicon || ""),
-          invoice_logo: ensurePublicUrl(map.invoice_logo || ""),
+          header_logo: toBrandedUrl(ensurePublicUrl(map.header_logo || "")),
+          footer_logo: toBrandedUrl(ensurePublicUrl(map.footer_logo || "")),
+          favicon: toBrandedUrl(ensurePublicUrl(map.favicon || "")),
+          invoice_logo: toBrandedUrl(ensurePublicUrl(map.invoice_logo || "")),
           site_title: map.site_title || "Verified BM services",
         });
       }
