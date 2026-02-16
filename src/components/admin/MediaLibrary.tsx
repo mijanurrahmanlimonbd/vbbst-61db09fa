@@ -30,6 +30,38 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+/** Editable Public URL field with explicit Save */
+const PublicUrlField = ({ file, onSave }: { file: MediaFile; onSave: (url: string) => void }) => {
+  const branded = toBrandedUrl(file.url);
+  const [value, setValue] = useState(branded);
+  const [dirty, setDirty] = useState(false);
+
+  // Reset when a different file is selected
+  useEffect(() => {
+    setValue(toBrandedUrl(file.url));
+    setDirty(false);
+  }, [file.id, file.url]);
+
+  return (
+    <div>
+      <label className="text-xs font-medium text-muted-foreground mb-1 block">Public URL</label>
+      <div className="flex gap-1">
+        <Input
+          value={value}
+          onChange={(e) => { setValue(e.target.value); setDirty(true); }}
+          className="text-xs h-8 font-mono flex-1"
+        />
+        {dirty && (
+          <Button size="sm" variant="default" className="h-8 px-2 text-xs" onClick={() => { onSave(value); setDirty(false); toast.success("URL saved"); }}>
+            Save
+          </Button>
+        )}
+      </div>
+      <p className="text-[10px] text-muted-foreground mt-1">Edit to set a custom path. Click Save to persist.</p>
+    </div>
+  );
+};
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export interface MediaFile {
@@ -434,16 +466,8 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
             </div>
           </div>
 
-          {/* File URL (editable) */}
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">File URL</label>
-            <Input
-              value={toBrandedUrl(selectedFile.url)}
-              onChange={(e) => updateFileField(selectedFile.id, "url", e.target.value)}
-              className="text-xs h-8 font-mono"
-            />
-            <p className="text-[10px] text-muted-foreground mt-1">Edit to override the branded path. Changes are saved automatically.</p>
-          </div>
+          {/* Public URL (editable) */}
+          <PublicUrlField file={selectedFile} onSave={(val) => updateFileField(selectedFile.id, "url", val)} />
 
           {/* Editable Fields */}
           <div className="space-y-3">
