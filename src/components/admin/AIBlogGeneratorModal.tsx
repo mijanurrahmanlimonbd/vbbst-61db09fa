@@ -49,6 +49,7 @@ export interface GeneratedBlogData {
   featuredImageSlug?: string;
   featuredImageUrl?: string;
   bodyImageUrl?: string;
+  faqs?: { question: string; answer: string }[];
 }
 
 interface AIBlogGeneratorModalProps {
@@ -109,6 +110,7 @@ const AIBlogGeneratorModal = ({ open, onOpenChange, onGenerated }: AIBlogGenerat
         featuredImageSlug: data.featuredImageSlug,
         featuredImageUrl: data.featuredImageUrl,
         bodyImageUrl: data.bodyImageUrl,
+        faqs: data.faqs || [],
       };
 
       onGenerated(result);

@@ -182,8 +182,21 @@ The blog post MUST follow this exact structure:
 2. **Table of Contents** — Linked list of all H2 sections
 3. **Introduction** — Hook the reader, state the problem, preview the solution (include focus keyword)
 4. **Main Body** — 3-5 H2 sections with clear bullet points and actionable advice
-5. **FAQ Section** — 3-5 questions targeting "People Also Ask" snippets, each answer 2-3 sentences
+5. **FAQ Section** — CRITICAL: Generate 3-5 FAQs following these STRICT rules:
+   a. Questions MUST mirror real "People Also Ask" queries on Google for this topic. Think about what a buyer/advertiser would actually search.
+   b. Each answer MUST be exactly 40-60 words — this is the Featured Snippet sweet spot.
+   c. The FIRST sentence of every answer MUST directly answer the question with zero fluff or preamble. No "Great question!" or "Well,".
+   d. In at least ONE answer, naturally include an internal link: <a href="https://verifiedbmservices.com/shop">verified Business Manager</a> or link to a specific product.
+   e. Use <h3> for questions and <p> for answers.
 6. **Related Products** — Widget linking to relevant Verified BM products
+
+## FAQ JSON-LD OUTPUT (MANDATORY)
+In addition to the HTML FAQ section, you MUST also output a separate "faqs" array in the JSON response with this structure:
+"faqs": [
+  { "question": "...", "answer": "..." },
+  ...
+]
+This array will be used to generate FAQPage Schema markup for Google indexing.
 
 ## AVAILABLE PRODUCTS FOR INTERNAL LINKING
 ${productListings}
@@ -193,12 +206,13 @@ Respond ONLY with valid JSON (no markdown fences). The JSON must have these exac
 {
   "title": "SEO-optimized H1 title with a power word + number (under 60 chars)",
   "slug": "seo-friendly-url-slug",
-  "content": "Full HTML content of the blog post",
+  "content": "Full HTML content of the blog post (including the HTML FAQ section with faq-item divs)",
   "excerpt": "2-3 sentence summary for previews",
   "metaTitle": "SEO title under 60 chars with power word + number",
   "metaDescription": "Meta description under 155 chars with CTA",
   "readTime": "X min read",
-  "featuredImageSlug": "branded-image-slug"
+  "featuredImageSlug": "branded-image-slug",
+  "faqs": [{"question": "...", "answer": "..."}]
 }`;
 
     const userPrompt = `Write a complete blog post about: "${topic}"
@@ -226,9 +240,11 @@ For the Related Products section, use this HTML format:
 
 For the FAQ section, format each Q&A as:
 <div class="faq-item">
-<h3>Question here?</h3>
-<p>Answer here (2-3 sentences).</p>
+<h3>Question here? (mirror a real Google "People Also Ask" query)</h3>
+<p>Answer here — MUST be 40-60 words. First sentence directly answers the question. In at least one FAQ, include an internal link like <a href="https://verifiedbmservices.com/shop">verified Business Manager</a>.</p>
 </div>
+
+IMPORTANT: Also include a separate "faqs" array in the JSON output with the same questions and answers as plain text (no HTML in the faqs array answers, except <a> links). This is used for Schema markup.
 
 For the Key Takeaway box:
 <div class="key-takeaway">
