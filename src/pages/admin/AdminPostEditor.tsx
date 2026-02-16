@@ -105,7 +105,7 @@ const AdminPostEditor = () => {
     },
     editorProps: {
       attributes: {
-        class: "prose prose-sm sm:prose max-w-none min-h-[400px] focus:outline-none p-4",
+        class: "tiptap prose prose-sm sm:prose max-w-none min-h-[400px] focus:outline-none p-4",
       },
     },
   });
