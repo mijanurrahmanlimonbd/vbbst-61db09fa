@@ -15,10 +15,15 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 # ── Reverse Proxy: Branded Media URLs ────────
 # Option A: mod_proxy (LiteSpeed / Apache with mod_proxy enabled)
 # /media/filename.webp → Supabase storage
-RewriteRule ^media/(.+)$ https://xukkejkvcgixogvbllmf.supabase.co/storage/v1/object/public/media/$1 [P,L]
-
-# /branding/filename.webp → Supabase branding bucket
-RewriteRule ^branding/(.+)$ https://xukkejkvcgixogvbllmf.supabase.co/storage/v1/object/public/branding/$1 [P,L]
+# Try mod_proxy first; if unavailable, fall back to 301 redirect
+<IfModule mod_proxy.c>
+  RewriteRule ^media/(.+)$ https://xukkejkvcgixogvbllmf.supabase.co/storage/v1/object/public/media/$1 [P,L]
+  RewriteRule ^branding/(.+)$ https://xukkejkvcgixogvbllmf.supabase.co/storage/v1/object/public/branding/$1 [P,L]
+</IfModule>
+<IfModule !mod_proxy.c>
+  RewriteRule ^media/(.+)$ https://xukkejkvcgixogvbllmf.supabase.co/storage/v1/object/public/media/$1 [L,R=301]
+  RewriteRule ^branding/(.+)$ https://xukkejkvcgixogvbllmf.supabase.co/storage/v1/object/public/branding/$1 [L,R=301]
+</IfModule>
 
 # Option B: PHP proxy fallback (uncomment below & comment out Option A if [P] flag causes 404/500)
 # RewriteRule ^media/(.+)$ /media-proxy.php?file=$1 [L,QSA]
