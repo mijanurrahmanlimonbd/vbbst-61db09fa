@@ -58,7 +58,7 @@ const BlogPost = () => {
     if (!post) return "";
     const raw = post.content || post.excerpt || "";
     const withIds = addHeadingIds(raw);
-    return DOMPurify.sanitize(withIds);
+    return DOMPurify.sanitize(withIds, { ADD_ATTR: ['id'] });
   }, [post]);
 
   const faqs = useMemo(() => {
