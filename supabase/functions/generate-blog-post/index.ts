@@ -307,9 +307,9 @@ For the Key Takeaway box:
       const thumbnailFileName = `${slug}-thumbnail`;
       const bodyFileName = `${slug}-body`;
 
-      const thumbnailPrompt = `Create a professional, modern blog thumbnail image for an article titled "${parsed.title}". The image should be about ${topic}. Style: clean, corporate, digital marketing theme with blue and white tones. Include subtle tech/business imagery. The image should be eye-catching for social media sharing. 16:9 aspect ratio. Ultra high resolution.`;
+      const thumbnailPrompt = `Create a professional, modern blog featured image for an article titled "${parsed.title}". Topic: ${topic}. Style: clean, corporate, digital marketing theme with blue and white tones. Include subtle tech/business imagery. Eye-catching for social media sharing. IMPORTANT: The image must be exactly 1200x630 pixels (1.91:1 aspect ratio), optimized for Open Graph / social sharing and blog hero banners. Ultra high resolution.`;
 
-      const bodyPrompt = `Create a professional illustration for a blog article about ${topic}. The image should visually represent the concept of ${focusKeyword}. Style: modern, informative infographic style with icons and clean design. Use professional blue, teal and white color scheme. Suitable for embedding within a blog post body. 16:9 aspect ratio. Ultra high resolution.`;
+      const bodyPrompt = `Create a professional illustration for a blog article about ${topic}. Visually represent the concept of ${focusKeyword}. Style: modern, informative infographic style with icons and clean design. Professional blue, teal and white color scheme. IMPORTANT: The image must be exactly 1200x675 pixels (16:9 aspect ratio), optimized for inline blog content at full-width within an article body. Ultra high resolution.`;
 
       // Generate both images in parallel
       const [thumbnailUrl, bodyImageUrl] = await Promise.all([
