@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 Deno.serve(async (req) => {
@@ -19,10 +19,10 @@ Deno.serve(async (req) => {
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  // Look up the file_path by url_slug
+  // Look up the file_path by url_slug (exact match including .webp)
   const { data, error } = await supabase
     .from("media_files")
     .select("file_path")
@@ -33,10 +33,20 @@ Deno.serve(async (req) => {
   if (error || !data) {
     // Fallback: try using the slug directly as the storage path
     const storageUrl = `${supabaseUrl}/storage/v1/object/public/media/${slug}`;
-    return Response.redirect(storageUrl, 302);
+    return new Response(null, {
+      status: 302,
+      headers: { ...corsHeaders, Location: storageUrl },
+    });
   }
 
   // Redirect to the actual storage file
   const storageUrl = `${supabaseUrl}/storage/v1/object/public/media/${data.file_path}`;
-  return Response.redirect(storageUrl, 302);
+  return new Response(null, {
+    status: 302,
+    headers: {
+      ...corsHeaders,
+      Location: storageUrl,
+      "Cache-Control": "public, max-age=31536000, immutable",
+    },
+  });
 });
