@@ -12,6 +12,13 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 # RewriteCond %{HTTP_HOST} !^www\. [NC]
 # RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L]
 
+# ── Reverse Proxy: Branded Media URLs ────────
+# /media/filename.webp → Supabase storage
+RewriteRule ^media/(.+)$ https://xukkejkvcgixogvbllmf.supabase.co/storage/v1/object/public/media/$1 [P,L]
+
+# /branding/filename.webp → Supabase branding bucket
+RewriteRule ^branding/(.+)$ https://xukkejkvcgixogvbllmf.supabase.co/storage/v1/object/public/branding/$1 [P,L]
+
 # ── SPA Pretty Permalinks ────────────────────
 # All routes that don't match a file/directory → index.html
 RewriteCond %{REQUEST_FILENAME} !-f

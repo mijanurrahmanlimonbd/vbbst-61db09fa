@@ -1,3 +1,27 @@
+const SUPABASE_STORAGE_BASE = "https://xukkejkvcgixogvbllmf.supabase.co/storage/v1/object/public/media/";
+const BRANDED_DOMAIN = "https://verifiedbmservices.com";
+const BRANDED_MEDIA_PATH = `${BRANDED_DOMAIN}/media/`;
+
+/**
+ * Convert a Supabase storage URL to a branded domain URL.
+ * e.g. https://xukkej...supabase.co/storage/v1/object/public/media/image.webp
+ *   → https://verifiedbmservices.com/media/image.webp
+ */
+export const toBrandedUrl = (url: string): string => {
+  if (!url) return url;
+  if (url.startsWith(SUPABASE_STORAGE_BASE)) {
+    const path = url.substring(SUPABASE_STORAGE_BASE.length).split("?")[0];
+    return `${BRANDED_MEDIA_PATH}${path}`;
+  }
+  // Also handle branding bucket
+  const brandingBase = "https://xukkejkvcgixogvbllmf.supabase.co/storage/v1/object/public/branding/";
+  if (url.startsWith(brandingBase)) {
+    const path = url.substring(brandingBase.length).split("?")[0];
+    return `${BRANDED_DOMAIN}/branding/${path}`;
+  }
+  return url;
+};
+
 /**
  * Convert an image File to WebP format at specified quality using Canvas API.
  * Returns the original file if conversion fails or file is already WebP.
