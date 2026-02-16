@@ -51,6 +51,7 @@ const AdminWorkSamples = lazy(() => import("./pages/admin/AdminWorkSamples"));
 const AdminTestimonials = lazy(() => import("./pages/admin/AdminTestimonials"));
 const AdminFAQs = lazy(() => import("./pages/admin/AdminFAQs"));
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
+const AdminCustomers = lazy(() => import("./pages/admin/AdminCustomers"));
 
 const queryClient = new QueryClient();
 
@@ -111,6 +112,7 @@ const App = () => (
               <Route path="testimonials" element={<AdminTestimonials />} />
               <Route path="faqs" element={<AdminFAQs />} />
               <Route path="messages" element={<AdminMessages />} />
+              <Route path="customers" element={<AdminCustomers />} />
             </Route>
             <Route path="/page/:slug" element={<DynamicPage />} />
             <Route path="*" element={<NotFound />} />
