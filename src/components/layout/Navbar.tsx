@@ -74,9 +74,11 @@ const Navbar = () => {
     setMobileOpen(false);
   }, [user, navigate]);
 
+  const logoSrc = branding.header_logo || headerLogo;
+
   const logoElement = (
     <img
-      src={headerLogo}
+      src={logoSrc}
       alt={branding.site_title || "Verified BM services official logo"}
       width={180}
       height={38}
@@ -95,16 +97,16 @@ const Navbar = () => {
       <nav className="sticky top-0 z-50 bg-background border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center gap-2 min-w-[160px]">
+            <Link to="/" className="flex items-center shrink-0">
               {logoElement}
             </Link>
 
-            <div className="hidden md:flex items-center gap-6">
+            <div className="hidden md:flex items-center justify-center flex-1 gap-6">
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`text-sm font-medium transition-colors hover:text-primary ${
+                  className={`text-sm font-medium whitespace-nowrap transition-colors hover:text-primary ${
                     location.pathname === link.path ? "text-primary" : "text-foreground"
                   }`}
                 >
