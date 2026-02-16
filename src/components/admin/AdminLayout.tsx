@@ -125,6 +125,10 @@ const AdminLayout = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[hsl(210,20%,96%)] flex items-center justify-center">
@@ -133,8 +137,44 @@ const AdminLayout = () => {
     );
   }
 
+  // Strict admin middleware: must be authenticated
   if (!user) {
     return <Navigate to="/admin/login" replace />;
+  }
+
+  // Must have admin or editor role to access admin panel
+  if (!role || (role !== "admin" && role !== "editor")) {
+    return (
+      <div className="min-h-screen bg-[hsl(210,20%,96%)] flex items-center justify-center">
+        <div className="bg-background border border-border rounded-xl p-8 max-w-md text-center space-y-4">
+          <div className="w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+            <Lock className="w-7 h-7 text-destructive" />
+          </div>
+          <h2 className="text-xl font-bold text-foreground">Access Denied</h2>
+          <p className="text-sm text-muted-foreground">
+            You don't have permission to access the admin panel. Contact an administrator to request access.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Signed in as: <span className="font-medium">{user.email}</span>
+            {role && <> · Role: <span className="font-medium capitalize">{role}</span></>}
+          </p>
+          <div className="flex gap-3 justify-center pt-2">
+            <button
+              onClick={handleSignOut}
+              className="px-4 py-2 rounded-lg text-sm font-medium bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+            >
+              Sign Out
+            </button>
+            <Link
+              to="/"
+              className="px-4 py-2 rounded-lg text-sm font-medium bg-accent text-foreground hover:bg-accent/80 transition-colors"
+            >
+              Go to Site
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const isActive = (path: string) =>
@@ -145,9 +185,6 @@ const AdminLayout = () => {
   const displayName = profile?.full_name || user.email || "Admin";
   const initials = displayName.charAt(0).toUpperCase();
 
-  const handleSignOut = async () => {
-    await signOut();
-  };
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-[hsl(220,20%,14%)] text-white">
@@ -328,10 +365,13 @@ const AdminLayout = () => {
               {profileOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)} />
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-background border border-border rounded-lg shadow-lg z-50 py-1">
-                    <div className="px-4 py-2 border-b border-border">
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-background border border-border rounded-lg shadow-lg z-50 py-1">
+                    <div className="px-4 py-3 border-b border-border">
                       <p className="text-sm font-medium text-foreground">{displayName}</p>
-                      <p className="text-xs text-muted-foreground capitalize">{role}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                      <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-primary/10 text-primary">
+                        {role}
+                      </span>
                     </div>
                     {canAccess("settings") && (
                       <Link
