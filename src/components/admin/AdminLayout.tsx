@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation, Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBranding } from "@/hooks/useBranding";
+import headerFallback from "@/assets/verified-bm-services-header.png";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
@@ -152,23 +153,12 @@ const AdminLayout = () => {
     <div className="flex flex-col h-full bg-[hsl(220,20%,14%)] text-white">
       <div className="h-16 flex items-center justify-center px-4 border-b border-white/10">
         <Link to="/admin" className="flex items-center gap-2 min-w-0">
-          {branding.header_logo ? (
-            <img
-              src={branding.header_logo}
-              alt={branding.site_title || "Admin"}
-              className="max-h-[50px] w-auto object-contain"
+          <img
+              src={branding.header_logo || headerFallback}
+              alt={branding.site_title || "Verified BM services"}
+              className="max-h-[36px] w-auto object-contain"
+              onError={(e) => { (e.target as HTMLImageElement).src = headerFallback; }}
             />
-          ) : (
-            sidebarOpen ? (
-              <span className="text-lg font-bold text-white whitespace-nowrap truncate">
-                {branding.site_title || "VBB Admin"}
-              </span>
-            ) : (
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0">
-                {(branding.site_title || "VS").substring(0, 2).toUpperCase()}
-              </div>
-            )
-          )}
         </Link>
       </div>
 
