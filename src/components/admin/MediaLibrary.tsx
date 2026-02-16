@@ -188,6 +188,17 @@ interface UploadingFile {
   progress: number;
 }
 
+interface PendingFile {
+  id: string;
+  originalFile: File;
+  webpFile: File;
+  previewUrl: string;
+  fileName: string;
+  altText: string;
+  caption: string;
+  dimensions: { width: number; height: number };
+}
+
 interface MediaLibraryProps {
   mode?: "page" | "modal";
   onSelect?: (file: MediaFile) => void;
@@ -207,6 +218,7 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
   const [bulkMode, setBulkMode] = useState(false);
   const [bulkSelected, setBulkSelected] = useState<Set<string>>(new Set());
   const [uploading, setUploading] = useState<UploadingFile[]>([]);
+  const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -237,79 +249,116 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
       img.src = URL.createObjectURL(file);
     });
 
-  const uploadFile = async (originalFile: File) => {
-    if (!ALLOWED_TYPES.includes(originalFile.type)) {
-      toast.error(`"${originalFile.name}" is not allowed. Only JPG, PNG, and WebP images are supported.`);
-      return;
+  /** Stage files for pending review instead of uploading immediately */
+  const stageFiles = async (fileList: FileList | File[]) => {
+    const arr = Array.from(fileList);
+    for (const originalFile of arr) {
+      if (!ALLOWED_TYPES.includes(originalFile.type)) {
+        toast.error(`"${originalFile.name}" is not allowed. Only JPG, PNG, and WebP.`);
+        continue;
+      }
+      if (originalFile.size > MAX_FILE_SIZE) {
+        toast.error(`"${originalFile.name}" exceeds the 10MB limit.`);
+        continue;
+      }
+      const webpFile = await convertToWebP(originalFile, 0.8);
+      const dims = await getImageDimensions(webpFile);
+      const baseName = originalFile.name.replace(/\.[^.]+$/, "").replace(/\s+/g, "-").toLowerCase();
+      const previewUrl = URL.createObjectURL(webpFile);
+      setPendingFiles((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          originalFile,
+          webpFile,
+          previewUrl,
+          fileName: `${baseName}.webp`,
+          altText: baseName.replace(/[-_]/g, " "),
+          caption: "",
+          dimensions: dims,
+        },
+      ]);
     }
-    if (originalFile.size > MAX_FILE_SIZE) {
-      toast.error(`"${originalFile.name}" exceeds the 10MB size limit.`);
-      return;
-    }
+  };
 
-    // Auto-convert to WebP at 80% quality
-    const file = await convertToWebP(originalFile, 0.8);
+  const updatePendingField = (id: string, field: keyof PendingFile, value: string) => {
+    setPendingFiles((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, [field]: value } : p))
+    );
+  };
 
-    const uploadId = crypto.randomUUID();
-    const ext = file.name.split(".").pop();
-    const filePath = `${Date.now()}-${uploadId}.${ext}`;
+  const removePending = (id: string) => {
+    setPendingFiles((prev) => {
+      const item = prev.find((p) => p.id === id);
+      if (item) URL.revokeObjectURL(item.previewUrl);
+      return prev.filter((p) => p.id !== id);
+    });
+  };
 
-    setUploading((prev) => [...prev, { id: uploadId, name: file.name, progress: 30 }]);
+  /** Confirm and upload a single pending file with the user's custom name */
+  const confirmUpload = async (pending: PendingFile) => {
+    const uploadId = pending.id;
+    // Use custom file name as the storage path (slug)
+    const filePath = pending.fileName;
+
+    setUploading((prev) => [...prev, { id: uploadId, name: pending.fileName, progress: 30 }]);
+    removePending(pending.id);
 
     try {
-      const dims = await getImageDimensions(file);
       setUploading((prev) => prev.map((u) => (u.id === uploadId ? { ...u, progress: 50 } : u)));
 
       const { error: uploadError } = await supabase.storage
         .from("media")
-        .upload(filePath, file, { contentType: file.type });
+        .upload(filePath, pending.webpFile, { contentType: "image/webp" });
 
       if (uploadError) throw uploadError;
 
       setUploading((prev) => prev.map((u) => (u.id === uploadId ? { ...u, progress: 80 } : u)));
 
       const { data: urlData } = supabase.storage.from("media").getPublicUrl(filePath);
-
-      // Auto-generate alt text from filename (strip extension, replace dashes/underscores)
-      const autoAlt = file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
+      const finalAlt = pending.altText.trim() || pending.fileName.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
 
       await supabase.from("media_files").insert({
-        file_name: file.name,
+        file_name: pending.fileName,
         file_path: filePath,
-        file_size: file.size,
-        mime_type: file.type,
-        width: dims.width,
-        height: dims.height,
-        alt_text: autoAlt,
-        caption: "",
+        file_size: pending.webpFile.size,
+        mime_type: "image/webp",
+        width: pending.dimensions.width,
+        height: pending.dimensions.height,
+        alt_text: finalAlt,
+        caption: pending.caption,
         url: urlData.publicUrl,
       });
 
       setUploading((prev) => prev.map((u) => (u.id === uploadId ? { ...u, progress: 100 } : u)));
-      setTimeout(() => {
-        setUploading((prev) => prev.filter((u) => u.id !== uploadId));
-      }, 500);
+      setTimeout(() => setUploading((prev) => prev.filter((u) => u.id !== uploadId)), 500);
 
-      toast.success(`"${file.name}" uploaded successfully.`);
+      toast.success(`"${pending.fileName}" uploaded successfully.`);
       fetchFiles();
     } catch (err: any) {
-      toast.error(`Failed to upload "${file.name}".`);
+      toast.error(`Failed to upload "${pending.fileName}".`);
       setUploading((prev) => prev.filter((u) => u.id !== uploadId));
+    }
+  };
+
+  const confirmAllPending = async () => {
+    const toUpload = [...pendingFiles];
+    for (const p of toUpload) {
+      await confirmUpload(p);
     }
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileList = e.target.files;
     if (!fileList) return;
-    Array.from(fileList).forEach(uploadFile);
+    stageFiles(fileList);
     e.target.value = "";
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
-    const fileList = e.dataTransfer.files;
-    Array.from(fileList).forEach(uploadFile);
+    stageFiles(e.dataTransfer.files);
   };
 
   const handleDelete = async (id: string) => {
@@ -427,6 +476,51 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
           className="hidden"
           onChange={handleFileSelect}
         />
+
+        {/* Pending Uploads — edit before confirming */}
+        {pendingFiles.length > 0 && (
+          <div className="space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-foreground">Pending Uploads — Edit Before Confirming</h3>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={() => { pendingFiles.forEach((p) => URL.revokeObjectURL(p.previewUrl)); setPendingFiles([]); }}>
+                  <X className="w-3.5 h-3.5 mr-1" /> Cancel All
+                </Button>
+                <Button size="sm" onClick={confirmAllPending}>
+                  <Check className="w-3.5 h-3.5 mr-1" /> Confirm All
+                </Button>
+              </div>
+            </div>
+            {pendingFiles.map((p) => (
+              <div key={p.id} className="flex gap-4 items-start bg-background rounded-lg border border-border p-3">
+                <img src={p.previewUrl} alt="Preview" className="w-20 h-20 rounded-md object-cover shrink-0 border border-border" />
+                <div className="flex-1 space-y-2 min-w-0">
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">File Name (URL Slug)</label>
+                    <Input value={p.fileName} onChange={(e) => updatePendingField(p.id, "fileName", e.target.value)} className="text-sm h-8 font-mono" />
+                    <p className="text-[10px] text-muted-foreground">Final URL: verifiedbmservices.com/media/{p.fileName}</p>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">Alt Text</label>
+                    <Input value={p.altText} onChange={(e) => updatePendingField(p.id, "altText", e.target.value)} placeholder="SEO & accessibility" className="text-sm h-8" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">Caption</label>
+                    <Input value={p.caption} onChange={(e) => updatePendingField(p.id, "caption", e.target.value)} placeholder="Optional caption" className="text-sm h-8" />
+                  </div>
+                  <div className="flex gap-2 pt-1">
+                    <Button size="sm" onClick={() => confirmUpload(p)} className="gap-1">
+                      <Upload className="w-3.5 h-3.5" /> Confirm Upload
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => removePending(p.id)}>
+                      <X className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Grid */}
         <div
