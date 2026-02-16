@@ -1,13 +1,12 @@
 <?php
 /**
- * PHP Proxy for Branded Media URLs
- * Fallback if mod_proxy is unavailable on Hostinger.
+ * PHP Proxy for Branded Media URLs with Slug Mapping
+ *
+ * Resolves SEO-friendly URL slugs to actual Supabase storage files
+ * by querying the media_files table for the url_slug → file_name mapping.
  *
  * Usage in .htaccess:
  *   RewriteRule ^media/(.+)$ /media-proxy.php?file=$1 [L,QSA]
- *
- * This script fetches the image from Supabase storage
- * and streams it back with proper cache headers.
  */
 
 $file = isset($_GET['file']) ? $_GET['file'] : '';
@@ -17,15 +16,45 @@ if (empty($file) || preg_match('/\.\./', $file)) {
     exit('Bad request');
 }
 
-$supabaseUrl = 'https://xukkejkvcgixogvbllmf.supabase.co/storage/v1/object/public/media/' . $file;
-
-// Determine bucket from referer path
 $bucket = 'media';
 if (isset($_GET['bucket']) && $_GET['bucket'] === 'branding') {
-    $supabaseUrl = 'https://xukkejkvcgixogvbllmf.supabase.co/storage/v1/object/public/branding/' . $file;
+    $bucket = 'branding';
 }
 
-$ch = curl_init($supabaseUrl);
+// Strip extension for slug lookup
+$slug = preg_replace('/\.[^.]+$/', '', $file);
+
+// --- Slug-to-file mapping via Supabase REST API ---
+$supabaseUrl = 'https://xukkejkvcgixogvbllmf.supabase.co';
+$anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1a2tlamt2Y2dpeG9ndmJsbG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMjE5OTUsImV4cCI6MjA4NjY5Nzk5NX0.OAYDM8SFgKAXSN1WMlHkJIwMSA4xwgvH3m05TwUJky0';
+
+$resolvedFile = $file; // default: use the requested path as-is
+
+// Try to resolve slug → actual file_name
+$apiUrl = $supabaseUrl . '/rest/v1/media_files?url_slug=eq.' . urlencode($slug) . '&select=file_name&limit=1';
+$ch = curl_init($apiUrl);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'apikey: ' . $anonKey,
+    'Authorization: Bearer ' . $anonKey,
+    'Accept: application/json',
+]);
+curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+$apiResponse = curl_exec($ch);
+$apiCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+if ($apiCode === 200 && $apiResponse) {
+    $rows = json_decode($apiResponse, true);
+    if (!empty($rows) && isset($rows[0]['file_name'])) {
+        $resolvedFile = $rows[0]['file_name'];
+    }
+}
+
+// Fetch the actual file from Supabase storage
+$storageUrl = $supabaseUrl . '/storage/v1/object/public/' . $bucket . '/' . $resolvedFile;
+
+$ch = curl_init($storageUrl);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 curl_setopt($ch, CURLOPT_HEADER, true);

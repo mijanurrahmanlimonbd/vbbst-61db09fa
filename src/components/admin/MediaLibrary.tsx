@@ -30,8 +30,64 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const BRANDED_DOMAIN = "https://verifiedbmservices.com";
 
-/** Sidebar with full metadata editing + Save button */
+/** Force lowercase, replace spaces/underscores with hyphens, strip non-web-safe chars */
+const toWebSafeSlug = (val: string): string =>
+  val
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/_/g, "-")
+    .replace(/[^a-z0-9\-\.]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+export interface MediaFile {
+  id: string;
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  mime_type: string;
+  width: number | null;
+  height: number | null;
+  alt_text: string;
+  caption: string;
+  url: string;
+  url_slug: string | null;
+  created_at: string;
+}
+
+interface UploadingFile {
+  id: string;
+  name: string;
+  progress: number;
+}
+
+interface PendingFile {
+  id: string;
+  originalFile: File;
+  webpFile: File;
+  previewUrl: string;
+  fileName: string; // internal storage name
+  urlSlug: string;  // SEO-friendly public slug
+  altText: string;
+  caption: string;
+  dimensions: { width: number; height: number };
+}
+
+interface MediaLibraryProps {
+  mode?: "page" | "modal";
+  onSelect?: (file: MediaFile) => void;
+}
+
+const formatFileSize = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+/** Sidebar with full metadata editing */
 const FileDetailsSidebar = ({
   file,
   onSave,
@@ -47,34 +103,32 @@ const FileDetailsSidebar = ({
   onSelect?: (f: MediaFile) => void;
   mode: "page" | "modal";
 }) => {
-  const [fileName, setFileName] = useState(file.file_name);
+  const [urlSlug, setUrlSlug] = useState(file.url_slug || "");
   const [altText, setAltText] = useState(file.alt_text || "");
   const [caption, setCaption] = useState(file.caption || "");
   const [description, setDescription] = useState((file as any).description || "");
-  const [publicUrl, setPublicUrl] = useState(toBrandedUrl(file.url));
   const [saving, setSaving] = useState(false);
 
-  // Reset on file change
   useEffect(() => {
-    setFileName(file.file_name);
+    setUrlSlug(file.url_slug || "");
     setAltText(file.alt_text || "");
     setCaption(file.caption || "");
     setDescription((file as any).description || "");
-    setPublicUrl(toBrandedUrl(file.url));
   }, [file.id]);
+
+  const brandedUrl = `${BRANDED_DOMAIN}/media/${urlSlug || file.file_name}`;
 
   const handleSave = async () => {
     setSaving(true);
-    // If alt_text is empty, default to cleaned file name
-    const finalAlt = altText.trim() || fileName.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
+    const safeSlug = toWebSafeSlug(urlSlug);
+    const finalAlt = altText.trim() || safeSlug.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
     await onSave(file.id, {
-      file_name: fileName,
+      url_slug: safeSlug || null,
       alt_text: finalAlt,
       caption,
-      url: publicUrl,
-      // description is passed via the spread
       ...({ description } as any),
-    });
+    } as any);
+    setUrlSlug(safeSlug);
     setSaving(false);
     toast.success("Metadata saved!");
   };
@@ -88,7 +142,6 @@ const FileDetailsSidebar = ({
         </button>
       </div>
 
-      {/* Preview */}
       <img
         src={file.url}
         alt={file.alt_text || file.file_name}
@@ -113,18 +166,26 @@ const FileDetailsSidebar = ({
         </div>
       </div>
 
-      {/* Editable Metadata Fields */}
       <div className="space-y-3">
+        {/* Internal File Name — read-only after upload */}
         <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">File Name / URL Slug</label>
-          <Input value={fileName} onChange={(e) => setFileName(e.target.value)} className="text-sm h-8 font-mono" />
-          <p className="text-[10px] text-muted-foreground mt-0.5">Determines the branded URL path</p>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Internal File Name</label>
+          <Input value={file.file_name} readOnly className="text-sm h-8 font-mono bg-muted cursor-not-allowed" />
+          <p className="text-[10px] text-muted-foreground mt-0.5">Stored in backend — cannot be changed after upload</p>
         </div>
 
+        {/* URL Slug — editable */}
         <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Public URL</label>
-          <Input value={publicUrl} onChange={(e) => setPublicUrl(e.target.value)} className="text-xs h-8 font-mono" />
-          <p className="text-[10px] text-muted-foreground mt-0.5">verifiedbmservices.com/media/[file-name].webp</p>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Public URL Slug</label>
+          <Input
+            value={urlSlug}
+            onChange={(e) => setUrlSlug(e.target.value)}
+            placeholder={file.file_name.replace(/\.[^.]+$/, "")}
+            className="text-sm h-8 font-mono"
+          />
+          <p className="text-[10px] text-muted-foreground mt-0.5">
+            Branded URL: {brandedUrl}
+          </p>
         </div>
 
         <div>
@@ -143,71 +204,24 @@ const FileDetailsSidebar = ({
         </div>
       </div>
 
-      {/* Save Metadata */}
       <Button className="w-full gap-2" onClick={handleSave} disabled={saving}>
         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
         Save Metadata
       </Button>
 
-      {/* Select in modal */}
       {mode === "modal" && onSelect && (
         <Button variant="outline" className="w-full" onClick={() => onSelect(file)}>Select Image</Button>
       )}
 
-      {/* Copy URL */}
-      <Button variant="outline" size="sm" className="w-full gap-2" onClick={() => { navigator.clipboard.writeText(publicUrl); toast.success("Branded URL copied!"); }}>
-        <Copy className="w-3.5 h-3.5" /> Copy URL
+      <Button variant="outline" size="sm" className="w-full gap-2" onClick={() => { navigator.clipboard.writeText(brandedUrl); toast.success("Branded URL copied!"); }}>
+        <Copy className="w-3.5 h-3.5" /> Copy Branded URL
       </Button>
 
-      {/* Delete */}
       <Button variant="destructive" size="sm" className="w-full gap-2" onClick={() => onDelete(file.id)}>
         <Trash2 className="w-3.5 h-3.5" /> Delete Permanently
       </Button>
     </div>
   );
-};
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-
-export interface MediaFile {
-  id: string;
-  file_name: string;
-  file_path: string;
-  file_size: number;
-  mime_type: string;
-  width: number | null;
-  height: number | null;
-  alt_text: string;
-  caption: string;
-  url: string;
-  created_at: string;
-}
-
-interface UploadingFile {
-  id: string;
-  name: string;
-  progress: number;
-}
-
-interface PendingFile {
-  id: string;
-  originalFile: File;
-  webpFile: File;
-  previewUrl: string;
-  fileName: string;
-  altText: string;
-  caption: string;
-  dimensions: { width: number; height: number };
-}
-
-interface MediaLibraryProps {
-  mode?: "page" | "modal";
-  onSelect?: (file: MediaFile) => void;
-}
-
-const formatFileSize = (bytes: number) => {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
 const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
@@ -235,9 +249,7 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
     setLoading(false);
   }, []);
 
-  useEffect(() => {
-    fetchFiles();
-  }, [fetchFiles]);
+  useEffect(() => { fetchFiles(); }, [fetchFiles]);
 
   const selectedFile = files.find((f) => f.id === selectedId) || null;
 
@@ -249,7 +261,7 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
       img.src = URL.createObjectURL(file);
     });
 
-  /** Stage files for pending review instead of uploading immediately */
+  /** Stage files for pending review */
   const stageFiles = async (fileList: FileList | File[]) => {
     const arr = Array.from(fileList);
     for (const originalFile of arr) {
@@ -263,7 +275,9 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
       }
       const webpFile = await convertToWebP(originalFile, 0.8);
       const dims = await getImageDimensions(webpFile);
-      const baseName = originalFile.name.replace(/\.[^.]+$/, "").replace(/\s+/g, "-").toLowerCase();
+      const baseName = originalFile.name.replace(/\.[^.]+$/, "");
+      const safeInternal = toWebSafeSlug(baseName) + ".webp";
+      const slug = toWebSafeSlug(baseName);
       const previewUrl = URL.createObjectURL(webpFile);
       setPendingFiles((prev) => [
         ...prev,
@@ -272,8 +286,9 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
           originalFile,
           webpFile,
           previewUrl,
-          fileName: `${baseName}.webp`,
-          altText: baseName.replace(/[-_]/g, " "),
+          fileName: safeInternal,
+          urlSlug: slug,
+          altText: slug.replace(/-/g, " "),
           caption: "",
           dimensions: dims,
         },
@@ -283,7 +298,16 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
 
   const updatePendingField = (id: string, field: keyof PendingFile, value: string) => {
     setPendingFiles((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, [field]: value } : p))
+      prev.map((p) => {
+        if (p.id !== id) return p;
+        const updated = { ...p, [field]: value };
+        // When URL slug changes, auto-fill alt text from slug
+        if (field === "urlSlug") {
+          const safeSlug = toWebSafeSlug(value);
+          updated.altText = safeSlug.replace(/-/g, " ");
+        }
+        return updated;
+      })
     );
   };
 
@@ -295,13 +319,13 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
     });
   };
 
-  /** Confirm and upload a single pending file with the user's custom name */
+  /** Confirm and upload a single pending file */
   const confirmUpload = async (pending: PendingFile) => {
     const uploadId = pending.id;
-    // Use custom file name as the storage path (slug)
-    const filePath = pending.fileName;
+    const safeFileName = toWebSafeSlug(pending.fileName.replace(/\.webp$/, "")) + ".webp";
+    const safeSlug = toWebSafeSlug(pending.urlSlug);
 
-    setUploading((prev) => [...prev, { id: uploadId, name: pending.fileName, progress: 30 }]);
+    setUploading((prev) => [...prev, { id: uploadId, name: safeFileName, progress: 30 }]);
     removePending(pending.id);
 
     try {
@@ -309,18 +333,18 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
 
       const { error: uploadError } = await supabase.storage
         .from("media")
-        .upload(filePath, pending.webpFile, { contentType: "image/webp" });
+        .upload(safeFileName, pending.webpFile, { contentType: "image/webp" });
 
       if (uploadError) throw uploadError;
 
       setUploading((prev) => prev.map((u) => (u.id === uploadId ? { ...u, progress: 80 } : u)));
 
-      const { data: urlData } = supabase.storage.from("media").getPublicUrl(filePath);
-      const finalAlt = pending.altText.trim() || pending.fileName.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
+      const { data: urlData } = supabase.storage.from("media").getPublicUrl(safeFileName);
+      const finalAlt = pending.altText.trim() || safeSlug.replace(/-/g, " ");
 
       await supabase.from("media_files").insert({
-        file_name: pending.fileName,
-        file_path: filePath,
+        file_name: safeFileName,
+        file_path: safeFileName,
         file_size: pending.webpFile.size,
         mime_type: "image/webp",
         width: pending.dimensions.width,
@@ -328,24 +352,23 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
         alt_text: finalAlt,
         caption: pending.caption,
         url: urlData.publicUrl,
+        url_slug: safeSlug || null,
       });
 
       setUploading((prev) => prev.map((u) => (u.id === uploadId ? { ...u, progress: 100 } : u)));
       setTimeout(() => setUploading((prev) => prev.filter((u) => u.id !== uploadId)), 500);
 
-      toast.success(`"${pending.fileName}" uploaded successfully.`);
+      toast.success(`"${safeFileName}" uploaded successfully.`);
       fetchFiles();
     } catch (err: any) {
-      toast.error(`Failed to upload "${pending.fileName}".`);
+      toast.error(`Failed to upload "${safeFileName}".`);
       setUploading((prev) => prev.filter((u) => u.id !== uploadId));
     }
   };
 
   const confirmAllPending = async () => {
     const toUpload = [...pendingFiles];
-    for (const p of toUpload) {
-      await confirmUpload(p);
-    }
+    for (const p of toUpload) await confirmUpload(p);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -376,12 +399,8 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
     const toDelete = files.filter((f) => bulkSelected.has(f.id));
     const paths = toDelete.map((f) => f.file_path);
     const ids = toDelete.map((f) => f.id);
-
     await supabase.storage.from("media").remove(paths);
-    for (const id of ids) {
-      await supabase.from("media_files").delete().eq("id", id);
-    }
-
+    for (const id of ids) await supabase.from("media_files").delete().eq("id", id);
     setFiles((prev) => prev.filter((f) => !bulkSelected.has(f.id)));
     setBulkSelected(new Set());
     setBulkDeleteOpen(false);
@@ -395,11 +414,6 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
     setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, ...data } : f)));
   };
 
-  const updateFileField = async (id: string, field: "alt_text" | "caption" | "url", value: string) => {
-    await supabase.from("media_files").update({ [field]: value }).eq("id", id);
-    setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, [field]: value } : f)));
-  };
-
   const toggleBulkSelect = (id: string) => {
     setBulkSelected((prev) => {
       const next = new Set(prev);
@@ -409,9 +423,10 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
     });
   };
 
-  const filteredFiles = files.filter((f) =>
-    f.file_name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredFiles = files.filter((f) => {
+    const q = search.toLowerCase();
+    return f.file_name.toLowerCase().includes(q) || (f.url_slug || "").toLowerCase().includes(q);
+  });
 
   const isCompact = mode === "modal";
 
@@ -423,35 +438,21 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           {!isCompact && <h2 className="text-2xl font-bold text-foreground">Media Library</h2>}
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Button
-              onClick={() => fileInputRef.current?.click()}
-              className="gap-2"
-              size={isCompact ? "sm" : "default"}
-            >
-              <Upload className="w-4 h-4" />
-              Upload New
+            <Button onClick={() => fileInputRef.current?.click()} className="gap-2" size={isCompact ? "sm" : "default"}>
+              <Upload className="w-4 h-4" /> Upload New
             </Button>
             <Button
               variant={bulkMode ? "default" : "outline"}
               size={isCompact ? "sm" : "default"}
-              onClick={() => {
-                setBulkMode((b) => !b);
-                setBulkSelected(new Set());
-              }}
+              onClick={() => { setBulkMode((b) => !b); setBulkSelected(new Set()); }}
               className="gap-2"
             >
               <CheckSquare className="w-4 h-4" />
               <span className="hidden sm:inline">Bulk Select</span>
             </Button>
             {bulkMode && bulkSelected.size > 0 && (
-              <Button
-                variant="destructive"
-                size={isCompact ? "sm" : "default"}
-                onClick={() => setBulkDeleteOpen(true)}
-                className="gap-2"
-              >
-                <Trash2 className="w-4 h-4" />
-                Delete ({bulkSelected.size})
+              <Button variant="destructive" size={isCompact ? "sm" : "default"} onClick={() => setBulkDeleteOpen(true)} className="gap-2">
+                <Trash2 className="w-4 h-4" /> Delete ({bulkSelected.size})
               </Button>
             )}
           </div>
@@ -460,24 +461,12 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
         {/* Search */}
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search images…"
-            className="pl-9"
-          />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or slug…" className="pl-9" />
         </div>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".jpg,.jpeg,.png,.webp"
-          multiple
-          className="hidden"
-          onChange={handleFileSelect}
-        />
+        <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png,.webp" multiple className="hidden" onChange={handleFileSelect} />
 
-        {/* Pending Uploads — edit before confirming */}
+        {/* Pending Uploads */}
         {pendingFiles.length > 0 && (
           <div className="space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
             <div className="flex items-center justify-between">
@@ -496,9 +485,24 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
                 <img src={p.previewUrl} alt="Preview" className="w-20 h-20 rounded-md object-cover shrink-0 border border-border" />
                 <div className="flex-1 space-y-2 min-w-0">
                   <div>
-                    <label className="text-xs font-medium text-muted-foreground">File Name (URL Slug)</label>
-                    <Input value={p.fileName} onChange={(e) => updatePendingField(p.id, "fileName", e.target.value)} className="text-sm h-8 font-mono" />
-                    <p className="text-[10px] text-muted-foreground">Final URL: verifiedbmservices.com/media/{p.fileName}</p>
+                    <label className="text-xs font-medium text-muted-foreground">Internal File Name</label>
+                    <Input
+                      value={p.fileName}
+                      onChange={(e) => updatePendingField(p.id, "fileName", e.target.value)}
+                      className="text-sm h-8 font-mono"
+                    />
+                    <p className="text-[10px] text-muted-foreground">Stored in backend — locked after upload</p>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">Public URL Slug</label>
+                    <Input
+                      value={p.urlSlug}
+                      onChange={(e) => updatePendingField(p.id, "urlSlug", e.target.value)}
+                      className="text-sm h-8 font-mono"
+                    />
+                    <p className="text-[10px] text-muted-foreground">
+                      Branded URL: {BRANDED_DOMAIN}/media/{toWebSafeSlug(p.urlSlug)}.webp
+                    </p>
                   </div>
                   <div>
                     <label className="text-xs font-medium text-muted-foreground">Alt Text</label>
@@ -535,32 +539,20 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
         >
           {loading ? (
             <div className="p-16 text-center text-muted-foreground">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
-              Loading…
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" /> Loading…
             </div>
           ) : filteredFiles.length === 0 && uploading.length === 0 ? (
-            <div
-              className="p-16 text-center cursor-pointer"
-              onClick={() => fileInputRef.current?.click()}
-            >
+            <div className="p-16 text-center cursor-pointer" onClick={() => fileInputRef.current?.click()}>
               <ImageIcon className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-1">
                 {search ? "No images match your search" : "Drag and drop your first image"}
               </h3>
               <p className="text-sm text-muted-foreground">
-                {search
-                  ? "Try a different search term."
-                  : "Or click here to browse. Supports JPG, PNG, WebP up to 10MB."}
+                {search ? "Try a different search term." : "Or click here to browse. Supports JPG, PNG, WebP up to 10MB."}
               </p>
             </div>
           ) : (
-            <div className={cn(
-              "grid gap-3",
-              isCompact
-                ? "grid-cols-3 sm:grid-cols-4"
-                : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
-            )}>
-              {/* Uploading items */}
+            <div className={cn("grid gap-3", isCompact ? "grid-cols-3 sm:grid-cols-4" : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5")}>
               {uploading.map((u) => (
                 <div key={u.id} className="aspect-square rounded-lg border border-border bg-secondary/50 relative overflow-hidden">
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
@@ -568,57 +560,37 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
                     <span className="text-xs text-muted-foreground truncate max-w-[80%]">{u.name}</span>
                   </div>
                   <div className="absolute bottom-0 left-0 right-0 h-1 bg-secondary">
-                    <div
-                      className="h-full bg-primary transition-all duration-300"
-                      style={{ width: `${u.progress}%` }}
-                    />
+                    <div className="h-full bg-primary transition-all duration-300" style={{ width: `${u.progress}%` }} />
                   </div>
                 </div>
               ))}
 
-              {/* Files */}
               {filteredFiles.map((file) => {
                 const isSelected = selectedId === file.id;
                 const isBulkSelected = bulkSelected.has(file.id);
-
                 return (
                   <div
                     key={file.id}
                     onClick={() => {
-                      if (bulkMode) {
-                        toggleBulkSelect(file.id);
-                      } else if (mode === "modal" && onSelect) {
-                        setSelectedId(file.id);
-                      } else {
-                        setSelectedId(isSelected ? null : file.id);
-                      }
+                      if (bulkMode) toggleBulkSelect(file.id);
+                      else setSelectedId(isSelected ? null : file.id);
                     }}
                     className={cn(
                       "aspect-square rounded-lg border-2 relative overflow-hidden cursor-pointer group transition-all",
-                      isSelected || isBulkSelected
-                        ? "border-primary ring-2 ring-primary/20"
-                        : "border-border hover:border-primary/50"
+                      isSelected || isBulkSelected ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/50"
                     )}
                   >
-                    <img
-                      src={file.url}
-                      alt={file.alt_text || file.file_name}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                    {/* Selection indicator */}
+                    <img src={file.url} alt={file.alt_text || file.file_name} className="w-full h-full object-cover" loading="lazy" />
                     {(isSelected || isBulkSelected) && (
                       <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-primary flex items-center justify-center">
                         <Check className="w-3.5 h-3.5 text-primary-foreground" />
                       </div>
                     )}
-                    {/* Bulk checkbox */}
                     {bulkMode && !isBulkSelected && (
                       <div className="absolute top-2 right-2 w-6 h-6 rounded-full border-2 border-background/80 bg-background/50" />
                     )}
-                    {/* Hover overlay */}
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-foreground/60 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <p className="text-xs text-background truncate">{file.file_name}</p>
+                      <p className="text-xs text-background truncate">{file.url_slug || file.file_name}</p>
                     </div>
                   </div>
                 );
@@ -628,12 +600,9 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
         </div>
       </div>
 
-      {/* Sidebar Details */}
+      {/* Sidebar */}
       {selectedFile && !bulkMode && (
-        <div className={cn(
-          "bg-background rounded-xl border border-border p-5",
-          isCompact ? "w-full lg:w-64" : "w-full lg:w-80 shrink-0"
-        )}>
+        <div className={cn("bg-background rounded-xl border border-border p-5", isCompact ? "w-full lg:w-64" : "w-full lg:w-80 shrink-0")}>
           <FileDetailsSidebar
             file={selectedFile}
             onSave={saveFileMetadata}
@@ -650,39 +619,25 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this file?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. The file will be permanently removed from storage.
-            </AlertDialogDescription>
+            <AlertDialogDescription>This action cannot be undone. The file will be permanently removed from storage.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deleteTarget && handleDelete(deleteTarget)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
+            <AlertDialogAction onClick={() => deleteTarget && handleDelete(deleteTarget)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Bulk Delete Confirmation */}
+      {/* Bulk Delete */}
       <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {bulkSelected.size} file(s)?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. All selected files will be permanently removed.
-            </AlertDialogDescription>
+            <AlertDialogDescription>This action cannot be undone. All selected files will be permanently removed.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleBulkDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete All
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleBulkDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete All</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
