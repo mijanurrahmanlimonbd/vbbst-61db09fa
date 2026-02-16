@@ -448,11 +448,9 @@ const OrdersTab = ({
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="font-semibold text-foreground">${order.total_amount}</span>
-                  {order.status === "completed" && (
-                    <Button size="sm" variant="outline" className="gap-1.5 text-xs h-8" onClick={() => onViewInvoice(order)}>
-                      <FileText className="w-3.5 h-3.5" /> Invoice
-                    </Button>
-                  )}
+                  <Button size="sm" variant="outline" className="gap-1.5 text-xs h-8" onClick={() => onViewInvoice(order)}>
+                    <FileText className="w-3.5 h-3.5" /> Invoice
+                  </Button>
                 </div>
               </div>
             </div>

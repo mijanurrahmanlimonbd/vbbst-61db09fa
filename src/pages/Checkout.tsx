@@ -417,7 +417,27 @@ const Checkout = () => {
               <p className="text-muted-foreground max-w-md mx-auto">
                 Our team is verifying your transaction. You will receive an update within 24 hours.
               </p>
-              <Button variant="outline" onClick={() => navigate("/shop")}>Back to Shop</Button>
+
+              {/* Invoice gating — prompt registration */}
+              <div className="bg-secondary/40 border border-border rounded-xl p-5 max-w-md mx-auto text-left space-y-3">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Download Your Official Invoice</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Register or login to your account to download a professional PDF invoice for this order.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="default" onClick={() => navigate("/dashboard")}>
+                    Login / Register
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => navigate("/shop")}>
+                    Back to Shop
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
         </div>
