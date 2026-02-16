@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, Search, Package, Edit, Image as ImageIcon, X, Check, PlusCircle, MinusCircle, CheckCircle } from "lucide-react";
+import { Plus, Trash2, Search, Package, Edit, Image as ImageIcon, X, Check, PlusCircle, MinusCircle, CheckCircle, Wand2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +24,9 @@ import { Textarea } from "@/components/ui/textarea";
 import MediaLibraryModal from "@/components/admin/MediaLibraryModal";
 import { toast } from "sonner";
 import AdvancedSEOSidebar from "@/components/admin/AdvancedSEOSidebar";
+import { computeSEOScore, getScoreBadgeClasses, SEOScoreResult } from "@/lib/seoScoring";
+import SEOQuickFixPopup from "@/components/admin/SEOQuickFixPopup";
+import { toast as sonnerToast } from "sonner";
 
 const CATEGORIES = ["Verified BM", "WhatsApp API", "Facebook Accounts", "TikTok Ads", "Agency Accounts"];
 
@@ -93,6 +96,57 @@ const AdminProducts = () => {
   const [attributes, setAttributes] = useState<ProductAttribute[]>([]);
   const [specGroups, setSpecGroups] = useState<SpecGroup[]>([]);
   const [trustPoints, setTrustPoints] = useState<TrustPoint[]>([]);
+
+  // SEO scoring
+  const [seoPopup, setSeoPopup] = useState<{ product: Product; result: SEOScoreResult } | null>(null);
+  const [bulkScanning, setBulkScanning] = useState(false);
+
+  const seoScores = useMemo(() => {
+    const map = new Map<string, SEOScoreResult>();
+    products.forEach((p) => {
+      map.set(p.id, computeSEOScore({
+        title: p.title,
+        slug: p.slug,
+        metaTitle: p.meta_title,
+        metaDescription: p.meta_description,
+        focusKeyword: p.focus_keyword,
+        content: p.description,
+        urlPrefix: "/product/",
+      }));
+    });
+    return map;
+  }, [products]);
+
+  const bulkAIScan = async () => {
+    setBulkScanning(true);
+    let fixCount = 0;
+    for (const p of products) {
+      const result = seoScores.get(p.id);
+      if (!result || result.score >= 80 || !p.focus_keyword) continue;
+      try {
+        const updates: Record<string, any> = {};
+        if (result.issues.some((i) => i.includes("description"))) {
+          const { data } = await supabase.functions.invoke("seo-ai-fix", {
+            body: { action: "fix_meta_description", context: { focusKeyword: p.focus_keyword, productTitle: p.title, currentTitle: p.meta_title } },
+          });
+          if (data?.metaDescription) updates.meta_description = data.metaDescription;
+        }
+        if (result.issues.some((i) => i.includes("title"))) {
+          const { data } = await supabase.functions.invoke("seo-ai-fix", {
+            body: { action: "fix_meta_title", context: { focusKeyword: p.focus_keyword, productTitle: p.title } },
+          });
+          if (data?.metaTitle) updates.meta_title = data.metaTitle;
+        }
+        if (Object.keys(updates).length > 0) {
+          await supabase.from("products").update(updates).eq("id", p.id);
+          fixCount++;
+        }
+      } catch { /* skip failures */ }
+    }
+    sonnerToast.success(`AI scan complete. Fixed ${fixCount} product(s).`);
+    setBulkScanning(false);
+    fetchProducts();
+  };
 
   // Inline editing
   const [inlineEditId, setInlineEditId] = useState<string | null>(null);
@@ -239,7 +293,13 @@ const AdminProducts = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h2 className="text-2xl font-bold text-foreground">Products</h2>
-        <Button onClick={openNew} className="gap-2"><Plus className="w-4 h-4" /> New Product</Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={bulkAIScan} disabled={bulkScanning} className="gap-1.5">
+            {bulkScanning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
+            AI Scan All
+          </Button>
+          <Button onClick={openNew} className="gap-2"><Plus className="w-4 h-4" /> New Product</Button>
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -282,6 +342,7 @@ const AdminProducts = () => {
                 <TableHead className="hidden sm:table-cell">SKU</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead className="hidden md:table-cell">Stock</TableHead>
+                <TableHead className="hidden lg:table-cell">SEO</TableHead>
                 <TableHead className="w-28"></TableHead>
               </TableRow>
             </TableHeader>
@@ -337,6 +398,21 @@ const AdminProducts = () => {
                       </div>
                     )}
                   </TableCell>
+                  <TableCell className="hidden lg:table-cell">
+                    {(() => {
+                      const result = seoScores.get(p.id);
+                      if (!result) return null;
+                      return (
+                        <button
+                          onClick={() => setSeoPopup({ product: p, result })}
+                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold cursor-pointer transition-colors hover:opacity-80 ${getScoreBadgeClasses(result.score)}`}
+                          title="Click to quick-fix SEO"
+                        >
+                          {result.score}
+                        </button>
+                      );
+                    })()}
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
                       {inlineEditId === p.id ? (
@@ -369,6 +445,20 @@ const AdminProducts = () => {
           </Table>
         )}
       </div>
+
+      {/* SEO Quick Fix Popup */}
+      {seoPopup && (
+        <SEOQuickFixPopup
+          itemTitle={seoPopup.product.title}
+          seoResult={seoPopup.result}
+          onClose={() => setSeoPopup(null)}
+          onFixed={async (updates) => {
+            await supabase.from("products").update(updates).eq("id", seoPopup.product.id);
+            setSeoPopup(null);
+            fetchProducts();
+          }}
+        />
+      )}
 
       {/* Product Editor Dialog */}
       <Dialog open={editorOpen} onOpenChange={setEditorOpen}>
