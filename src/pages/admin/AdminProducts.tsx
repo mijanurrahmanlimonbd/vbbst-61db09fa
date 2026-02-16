@@ -689,6 +689,7 @@ const AdminProducts = () => {
                 onFocusKeywordChange={(v) => setEditProduct({ ...editProduct, focus_keyword: v })}
                 onMetaTitleChange={(v) => setEditProduct({ ...editProduct, meta_title: v })}
                 onMetaDescriptionChange={(v) => setEditProduct({ ...editProduct, meta_description: v })}
+                onSlugChange={(v) => { setEditProduct({ ...editProduct, slug: v }); setSlugManual(true); }}
               />
             </TabsContent>
           </Tabs>

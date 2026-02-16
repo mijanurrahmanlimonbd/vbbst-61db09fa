@@ -1,8 +1,11 @@
 import { useMemo, useState } from "react";
-import { CheckCircle, AlertCircle, XCircle, TrendingUp, ChevronDown, ChevronUp, Search } from "lucide-react";
+import { CheckCircle, AlertCircle, XCircle, TrendingUp, ChevronDown, ChevronUp, Search, Wand2, Loader2, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 /* ── Types ── */
 export interface SEOCheckResult {
@@ -10,6 +13,7 @@ export interface SEOCheckResult {
   label: string;
   status: "good" | "warning" | "error";
   detail: string;
+  fixAction?: string; // AI action to call
 }
 
 export interface AdvancedSEOData {
@@ -17,10 +21,10 @@ export interface AdvancedSEOData {
   metaTitle: string;
   metaDescription: string;
   slug: string;
-  content: string; // HTML or plain
+  content: string;
   postTitle: string;
   featuredImageAlt?: string;
-  urlPrefix?: string; // e.g. "/product/" or "/blog/"
+  urlPrefix?: string;
 }
 
 /* ── Helpers ── */
@@ -29,10 +33,6 @@ const countWords = (text: string) => { const c = stripHtml(text); return c ? c.s
 const getHeadings = (html: string): string[] => {
   const m = html.match(/<h[23][^>]*>(.*?)<\/h[23]>/gi) || [];
   return m.map((x) => stripHtml(x).toLowerCase());
-};
-const getFirstParagraph = (html: string): string => {
-  const m = html.match(/<p[^>]*>(.*?)<\/p>/i);
-  return m ? stripHtml(m[1]).toLowerCase() : "";
 };
 
 const POWER_WORDS = [
@@ -69,9 +69,9 @@ export function runAdvancedSEOAudit(data: AdvancedSEOData): { score: number; che
   } else if (title.startsWith(kw)) {
     checks.push({ id: "kw-title", label: "Keyword in SEO Title", status: "good", detail: "Keyword at the beginning of the title." });
   } else if (title.includes(kw)) {
-    checks.push({ id: "kw-title", label: "Keyword in SEO Title", status: "warning", detail: "Found but not at the start. Move it forward." });
+    checks.push({ id: "kw-title", label: "Keyword in SEO Title", status: "warning", detail: "Found but not at the start. Move it forward.", fixAction: "fix_meta_title" });
   } else {
-    checks.push({ id: "kw-title", label: "Keyword in SEO Title", status: "error", detail: "Keyword not in the SEO title." });
+    checks.push({ id: "kw-title", label: "Keyword in SEO Title", status: "error", detail: "Keyword not in the SEO title.", fixAction: "fix_meta_title" });
   }
 
   // 2. Keyword in Meta Description
@@ -80,7 +80,7 @@ export function runAdvancedSEOAudit(data: AdvancedSEOData): { score: number; che
   } else if (data.metaDescription.toLowerCase().includes(kw)) {
     checks.push({ id: "kw-meta", label: "Keyword in Meta Description", status: "good", detail: "Found in description." });
   } else {
-    checks.push({ id: "kw-meta", label: "Keyword in Meta Description", status: "error", detail: "Add keyword to the meta description." });
+    checks.push({ id: "kw-meta", label: "Keyword in Meta Description", status: "error", detail: "Add keyword to the meta description.", fixAction: "fix_meta_description" });
   }
 
   // 3. Keyword in URL
@@ -91,7 +91,7 @@ export function runAdvancedSEOAudit(data: AdvancedSEOData): { score: number; che
     if (data.slug.toLowerCase().includes(kwSlug) || data.slug.toLowerCase().includes(kw.replace(/\s+/g, ""))) {
       checks.push({ id: "kw-url", label: "Keyword in URL", status: "good", detail: "Keyword appears in the slug." });
     } else {
-      checks.push({ id: "kw-url", label: "Keyword in URL", status: "error", detail: "Include keyword in the URL slug." });
+      checks.push({ id: "kw-url", label: "Keyword in URL", status: "error", detail: "Include keyword in the URL slug.", fixAction: "fix_slug" });
     }
   }
 
@@ -101,7 +101,7 @@ export function runAdvancedSEOAudit(data: AdvancedSEOData): { score: number; che
     if (tenPercent.includes(kw)) {
       checks.push({ id: "kw-intro", label: "Keyword in first 10% of content", status: "good", detail: "Found early in the content." });
     } else {
-      checks.push({ id: "kw-intro", label: "Keyword in first 10% of content", status: "warning", detail: "Add the keyword in the opening paragraph." });
+      checks.push({ id: "kw-intro", label: "Keyword in first 10% of content", status: "warning", detail: "Add the keyword in the opening paragraph.", fixAction: "fix_content_intro" });
     }
   }
 
@@ -110,8 +110,8 @@ export function runAdvancedSEOAudit(data: AdvancedSEOData): { score: number; che
     const headings = getHeadings(data.content);
     const kwH = headings.filter((h) => h.includes(kw));
     if (kwH.length >= 2) checks.push({ id: "kw-headings", label: "Keyword in subheadings", status: "good", detail: `Found in ${kwH.length} H2/H3 headings.` });
-    else if (kwH.length === 1) checks.push({ id: "kw-headings", label: "Keyword in subheadings", status: "warning", detail: "Found in 1 heading. Aim for 2+." });
-    else checks.push({ id: "kw-headings", label: "Keyword in subheadings", status: "error", detail: "Not found in any H2/H3." });
+    else if (kwH.length === 1) checks.push({ id: "kw-headings", label: "Keyword in subheadings", status: "warning", detail: "Found in 1 heading. Aim for 2+.", fixAction: "suggest_headings" });
+    else checks.push({ id: "kw-headings", label: "Keyword in subheadings", status: "error", detail: "Not found in any H2/H3.", fixAction: "suggest_headings" });
   }
 
   // 6. Image alt text with keyword
@@ -128,11 +128,11 @@ export function runAdvancedSEOAudit(data: AdvancedSEOData): { score: number; che
     if (altTexts.some((a) => a.includes(kw))) {
       checks.push({ id: "img-alt", label: "Image with keyword alt text", status: "good", detail: "At least one image alt contains the keyword." });
     } else {
-      checks.push({ id: "img-alt", label: "Image with keyword alt text", status: "warning", detail: "Add keyword to at least one image alt." });
+      checks.push({ id: "img-alt", label: "Image with keyword alt text", status: "warning", detail: "Add keyword to at least one image alt.", fixAction: "fix_alt_text" });
     }
   }
 
-  // 7. Keyword density (target 1.0-1.5%)
+  // 7. Keyword density
   if (kw && wordCount > 0) {
     const kwRegex = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
     const kwCount = (plainText.match(kwRegex) || []).length;
@@ -158,15 +158,15 @@ export function runAdvancedSEOAudit(data: AdvancedSEOData): { score: number; che
   // 9. Title length
   const titleLen = fullTitle.length;
   if (titleLen > 0 && titleLen <= 60) checks.push({ id: "title-len", label: "SEO title length", status: "good", detail: `${titleLen}/60 chars.` });
-  else if (titleLen > 60) checks.push({ id: "title-len", label: "SEO title length", status: "warning", detail: `${titleLen}/60 — may be truncated.` });
-  else checks.push({ id: "title-len", label: "SEO title length", status: "error", detail: "No title set." });
+  else if (titleLen > 60) checks.push({ id: "title-len", label: "SEO title length", status: "warning", detail: `${titleLen}/60 — may be truncated.`, fixAction: "fix_meta_title" });
+  else checks.push({ id: "title-len", label: "SEO title length", status: "error", detail: "No title set.", fixAction: "fix_meta_title" });
 
   // 10. Meta description length
   const descLen = data.metaDescription.length;
   if (descLen >= 120 && descLen <= 160) checks.push({ id: "meta-len", label: "Meta description length", status: "good", detail: `${descLen}/160 — ideal.` });
-  else if (descLen > 0 && descLen < 120) checks.push({ id: "meta-len", label: "Meta description length", status: "warning", detail: `${descLen}/160 — aim for 120–160.` });
-  else if (descLen > 160) checks.push({ id: "meta-len", label: "Meta description length", status: "warning", detail: `${descLen}/160 — too long.` });
-  else checks.push({ id: "meta-len", label: "Meta description length", status: "error", detail: "No meta description." });
+  else if (descLen > 0 && descLen < 120) checks.push({ id: "meta-len", label: "Meta description length", status: "warning", detail: `${descLen}/160 — aim for 120–160.`, fixAction: "fix_meta_description" });
+  else if (descLen > 160) checks.push({ id: "meta-len", label: "Meta description length", status: "warning", detail: `${descLen}/160 — too long.`, fixAction: "fix_meta_description" });
+  else checks.push({ id: "meta-len", label: "Meta description length", status: "error", detail: "No meta description.", fixAction: "fix_meta_description" });
 
   // 11. Power word in title
   const titleWords = fullTitle.toLowerCase().split(/\s+/);
@@ -174,7 +174,7 @@ export function runAdvancedSEOAudit(data: AdvancedSEOData): { score: number; che
   if (hasPowerWord) {
     checks.push({ id: "power-word", label: "Power word in title", status: "good", detail: "Title contains a power word for CTR." });
   } else {
-    checks.push({ id: "power-word", label: "Power word in title", status: "warning", detail: "Add a power word (Best, Ultimate, Proven…)." });
+    checks.push({ id: "power-word", label: "Power word in title", status: "warning", detail: "Add a power word (Best, Ultimate, Proven…).", fixAction: "suggest_titles" });
   }
 
   // 12. Number in title
@@ -182,7 +182,7 @@ export function runAdvancedSEOAudit(data: AdvancedSEOData): { score: number; che
   if (hasNumber) {
     checks.push({ id: "number-title", label: "Number in title", status: "good", detail: "Title contains a number — boosts CTR." });
   } else {
-    checks.push({ id: "number-title", label: "Number in title", status: "warning", detail: "Add a number (e.g. '5 Best…', '2025 Guide')." });
+    checks.push({ id: "number-title", label: "Number in title", status: "warning", detail: "Add a number (e.g. '5 Best…', '2025 Guide').", fixAction: "suggest_titles" });
   }
 
   // 13. Sentiment analysis
@@ -191,17 +191,17 @@ export function runAdvancedSEOAudit(data: AdvancedSEOData): { score: number; che
   if (posCount > 0 && negCount === 0) {
     checks.push({ id: "sentiment", label: "Title sentiment", status: "good", detail: "Positive sentiment detected — attracts clicks." });
   } else if (negCount > 0 && posCount === 0) {
-    checks.push({ id: "sentiment", label: "Title sentiment", status: "warning", detail: "Negative sentiment. Consider a positive angle." });
+    checks.push({ id: "sentiment", label: "Title sentiment", status: "warning", detail: "Negative sentiment. Consider a positive angle.", fixAction: "suggest_titles" });
   } else if (posCount > 0 && negCount > 0) {
-    checks.push({ id: "sentiment", label: "Title sentiment", status: "warning", detail: "Mixed sentiment. Keep it clear and positive." });
+    checks.push({ id: "sentiment", label: "Title sentiment", status: "warning", detail: "Mixed sentiment. Keep it clear and positive.", fixAction: "suggest_titles" });
   } else {
-    checks.push({ id: "sentiment", label: "Title sentiment", status: "warning", detail: "Neutral. Add emotional words for more CTR." });
+    checks.push({ id: "sentiment", label: "Title sentiment", status: "warning", detail: "Neutral. Add emotional words for more CTR.", fixAction: "suggest_titles" });
   }
 
-  // 14. Slug length (branded URL)
+  // 14. Slug length
   const fullSlug = `https://verifiedbmservices.com${prefix}${data.slug}`;
   if (fullSlug.length > 75) {
-    checks.push({ id: "slug-len", label: "URL length", status: "warning", detail: `${fullSlug.length} chars — over 75. Shorten the slug.` });
+    checks.push({ id: "slug-len", label: "URL length", status: "warning", detail: `${fullSlug.length} chars — over 75. Shorten the slug.`, fixAction: "fix_slug" });
   } else {
     checks.push({ id: "slug-len", label: "URL length", status: "good", detail: `${fullSlug.length} chars — concise URL.` });
   }
@@ -263,16 +263,23 @@ interface AdvancedSEOSidebarProps {
   onFocusKeywordChange: (v: string) => void;
   onMetaTitleChange: (v: string) => void;
   onMetaDescriptionChange: (v: string) => void;
+  onSlugChange?: (v: string) => void;
+  onContentChange?: (v: string) => void;
 }
 
 const AdvancedSEOSidebar = ({
   data, focusKeyword, metaTitle, metaDescription,
   onFocusKeywordChange, onMetaTitleChange, onMetaDescriptionChange,
+  onSlugChange, onContentChange,
 }: AdvancedSEOSidebarProps) => {
   const auditData = useMemo(() => ({ ...data, focusKeyword, metaTitle, metaDescription }), [data, focusKeyword, metaTitle, metaDescription]);
   const { score, checks } = useMemo(() => runAdvancedSEOAudit(auditData), [auditData]);
 
   const [section, setSection] = useState<"basic" | "content" | "title" | "advanced">("basic");
+  const [fixingId, setFixingId] = useState<string | null>(null);
+  const [titleSuggestions, setTitleSuggestions] = useState<string[] | null>(null);
+  const [headingSuggestions, setHeadingSuggestions] = useState<string[] | null>(null);
+
   const errors = checks.filter((c) => c.status === "error");
   const warnings = checks.filter((c) => c.status === "warning");
   const goods = checks.filter((c) => c.status === "good");
@@ -290,6 +297,89 @@ const AdvancedSEOSidebar = ({
     { key: "title" as const, label: "Title & Readability", ids: titleIds },
     { key: "advanced" as const, label: "Branded URL", ids: advancedIds },
   ];
+
+  const callAIFix = async (action: string, checkId: string) => {
+    if (!focusKeyword.trim()) {
+      toast.error("Set a focus keyword first.");
+      return;
+    }
+
+    setFixingId(checkId);
+    try {
+      const { data: result, error } = await supabase.functions.invoke("seo-ai-fix", {
+        body: {
+          action,
+          context: {
+            focusKeyword,
+            currentTitle: metaTitle,
+            currentDescription: metaDescription,
+            currentSlug: data.slug,
+            currentContent: data.content,
+            productTitle: data.postTitle,
+            urlPrefix: data.urlPrefix,
+          },
+        },
+      });
+
+      if (error) throw error;
+      if (result?.error) { toast.error(result.error); return; }
+
+      // Apply fixes based on action
+      if (action === "fix_meta_description" && result?.metaDescription) {
+        onMetaDescriptionChange(result.metaDescription);
+        toast.success("Meta description updated by AI!");
+      } else if (action === "fix_meta_title" && result?.metaTitle) {
+        onMetaTitleChange(result.metaTitle);
+        toast.success("SEO title updated by AI!");
+      } else if (action === "fix_slug" && result?.slug) {
+        if (onSlugChange) {
+          onSlugChange(result.slug);
+          toast.success("Slug updated by AI!");
+        } else {
+          toast.info(`Suggested slug: ${result.slug} — update it manually.`);
+        }
+      } else if (action === "suggest_titles" && result?.titles) {
+        setTitleSuggestions(result.titles);
+        toast.success("3 title alternatives generated!");
+      } else if (action === "suggest_headings" && result?.headings) {
+        setHeadingSuggestions(result.headings);
+        toast.success("Heading suggestions generated!");
+      } else if (action === "fix_content_intro" && result?.introText) {
+        if (onContentChange) {
+          onContentChange(result.introText);
+          toast.success("Intro paragraph updated!");
+        } else {
+          toast.info("Suggested intro: " + result.introText.substring(0, 100) + "…");
+        }
+      } else if (action === "fix_alt_text" && result?.altText) {
+        toast.info(`Suggested alt text: "${result.altText}" — update in Media Library.`);
+      } else {
+        toast.info("AI suggestion received. Check the fields.");
+      }
+    } catch (err: any) {
+      console.error("AI fix error:", err);
+      toast.error("AI fix failed. Try again.");
+    } finally {
+      setFixingId(null);
+    }
+  };
+
+  const fixAllErrors = async () => {
+    const fixable = checks.filter((c) => c.status !== "good" && c.fixAction);
+    if (fixable.length === 0) { toast.info("Nothing to fix!"); return; }
+    if (!focusKeyword.trim()) { toast.error("Set a focus keyword first."); return; }
+
+    setFixingId("fix-all");
+    let fixed = 0;
+    for (const check of fixable) {
+      try {
+        await callAIFix(check.fixAction!, check.id);
+        fixed++;
+      } catch {}
+    }
+    setFixingId(null);
+    toast.success(`Fixed ${fixed}/${fixable.length} issues!`);
+  };
 
   return (
     <div className="bg-background rounded-xl border border-border p-5 space-y-4">
@@ -312,6 +402,23 @@ const AdvancedSEOSidebar = ({
          score >= 50 ? "Decent. Address warnings below." :
          "Needs work. Fix the errors below."}
       </p>
+
+      {/* Fix All Button */}
+      {(errors.length > 0 || warnings.length > 0) && (
+        <Button
+          onClick={fixAllErrors}
+          disabled={fixingId === "fix-all" || !focusKeyword.trim()}
+          size="sm"
+          className="w-full gap-2 bg-gradient-to-r from-primary to-[hsl(280,80%,55%)] hover:opacity-90 text-white"
+        >
+          {fixingId === "fix-all" ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Sparkles className="w-4 h-4" />
+          )}
+          Fix All with AI ({errors.length + warnings.filter(w => w.fixAction).length} issues)
+        </Button>
+      )}
 
       {/* Focus Keyword Input */}
       <div>
@@ -366,6 +473,45 @@ const AdvancedSEOSidebar = ({
         </p>
       </div>
 
+      {/* Title Suggestions */}
+      {titleSuggestions && (
+        <div className="bg-primary/5 rounded-lg p-3 space-y-2 border border-primary/20">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-primary" /> AI Title Suggestions
+            </p>
+            <button onClick={() => setTitleSuggestions(null)} className="text-muted-foreground hover:text-foreground text-xs">✕</button>
+          </div>
+          {titleSuggestions.map((t, i) => (
+            <button
+              key={i}
+              onClick={() => { onMetaTitleChange(t); setTitleSuggestions(null); toast.success("Title applied!"); }}
+              className="w-full text-left text-xs p-2 rounded-md bg-background border border-border hover:border-primary/50 hover:bg-primary/5 transition-colors"
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Heading Suggestions */}
+      {headingSuggestions && (
+        <div className="bg-primary/5 rounded-lg p-3 space-y-2 border border-primary/20">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-primary" /> Suggested H2 Headings
+            </p>
+            <button onClick={() => setHeadingSuggestions(null)} className="text-muted-foreground hover:text-foreground text-xs">✕</button>
+          </div>
+          {headingSuggestions.map((h, i) => (
+            <div key={i} className="text-xs p-2 rounded-md bg-background border border-border">
+              <code className="text-primary font-mono">&lt;h2&gt;</code> {h} <code className="text-primary font-mono">&lt;/h2&gt;</code>
+            </div>
+          ))}
+          <p className="text-[10px] text-muted-foreground">Copy these headings into your content.</p>
+        </div>
+      )}
+
       {/* Section Tabs */}
       <div className="flex gap-1 flex-wrap">
         {sectionData.map((s) => {
@@ -399,10 +545,28 @@ const AdvancedSEOSidebar = ({
             "bg-destructive/5"
           )}>
             {statusIcon(c.status)}
-            <div>
+            <div className="flex-1 min-w-0">
               <p className="text-xs font-medium text-foreground">{c.label}</p>
               <p className="text-[11px] text-muted-foreground">{c.detail}</p>
             </div>
+            {c.fixAction && c.status !== "good" && (
+              <button
+                onClick={() => callAIFix(c.fixAction!, c.id)}
+                disabled={!!fixingId}
+                className={cn(
+                  "shrink-0 flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-md transition-colors",
+                  "bg-primary/10 text-primary hover:bg-primary/20 disabled:opacity-50"
+                )}
+                title="Fix with AI"
+              >
+                {fixingId === c.id ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Wand2 className="w-3 h-3" />
+                )}
+                Fix
+              </button>
+            )}
           </div>
         ))}
       </div>
