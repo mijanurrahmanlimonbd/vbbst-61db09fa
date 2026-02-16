@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Edit, Trash2, FileText, ExternalLink, Search, RefreshCw } from "lucide-react";
+import { Plus, Edit, Trash2, FileText, ExternalLink, Search, RefreshCw, Wand2, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { computeSEOScore, getScoreBadgeClasses, SEOScoreResult } from "@/lib/seoScoring";
+import SEOQuickFixPopup from "@/components/admin/SEOQuickFixPopup";
 
 interface Page {
   id: string;
@@ -14,6 +16,9 @@ interface Page {
   slug: string;
   status: string;
   updated_at: string;
+  meta_title: string | null;
+  meta_description: string | null;
+  content: string | null;
 }
 
 const AdminPages = () => {
@@ -26,7 +31,7 @@ const AdminPages = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("pages")
-      .select("id, title, slug, status, updated_at")
+      .select("id, title, slug, status, updated_at, meta_title, meta_description, content")
       .order("created_at", { ascending: true });
     if (error) toast.error(`Failed to load pages: ${error.message}`);
     else setPages((data || []) as Page[]);
@@ -34,6 +39,58 @@ const AdminPages = () => {
   };
 
   useEffect(() => { fetchPages(); }, []);
+
+  // SEO scoring
+  const [seoPopup, setSeoPopup] = useState<{ page: Page; result: SEOScoreResult } | null>(null);
+  const [bulkScanning, setBulkScanning] = useState(false);
+
+  const seoScores = useMemo(() => {
+    const map = new Map<string, SEOScoreResult>();
+    pages.forEach((p) => {
+      const knownRoutes: Record<string, string> = { home: "/", about: "/about", contact: "/contact", shop: "/shop", faq: "/faq", blog: "/blog" };
+      const prefix = knownRoutes[p.slug] || `/page/${p.slug}`;
+      map.set(p.id, computeSEOScore({
+        title: p.title,
+        slug: p.slug,
+        metaTitle: p.meta_title,
+        metaDescription: p.meta_description,
+        content: p.content,
+        urlPrefix: prefix === "/" ? "/" : `${prefix}/`.replace(/\/\//g, "/"),
+      }));
+    });
+    return map;
+  }, [pages]);
+
+  const bulkAIScan = async () => {
+    setBulkScanning(true);
+    let fixCount = 0;
+    for (const p of pages) {
+      const result = seoScores.get(p.id);
+      if (!result || result.score >= 80) continue;
+      try {
+        const updates: Record<string, any> = {};
+        if (result.issues.some((i) => i.includes("description"))) {
+          const { data } = await supabase.functions.invoke("seo-ai-fix", {
+            body: { action: "fix_meta_description", context: { focusKeyword: result.focusKeyword || p.title, productTitle: p.title } },
+          });
+          if (data?.metaDescription) updates.meta_description = data.metaDescription;
+        }
+        if (result.issues.some((i) => i.includes("title"))) {
+          const { data } = await supabase.functions.invoke("seo-ai-fix", {
+            body: { action: "fix_meta_title", context: { focusKeyword: result.focusKeyword || p.title, productTitle: p.title } },
+          });
+          if (data?.metaTitle) updates.meta_title = data.metaTitle;
+        }
+        if (Object.keys(updates).length > 0) {
+          await supabase.from("pages").update(updates).eq("id", p.id);
+          fixCount++;
+        }
+      } catch { /* skip */ }
+    }
+    toast.success(`AI scan complete. Fixed ${fixCount} page(s).`);
+    setBulkScanning(false);
+    fetchPages();
+  };
 
   const filtered = useMemo(() => {
     if (!search.trim()) return pages;
@@ -55,6 +112,10 @@ const AdminPages = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-foreground">Pages</h2>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={bulkAIScan} disabled={bulkScanning} className="gap-1.5">
+            {bulkScanning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
+            AI Scan All
+          </Button>
           <Button variant="outline" size="sm" onClick={fetchPages} className="gap-1.5" disabled={loading}>
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
           </Button>
@@ -102,6 +163,19 @@ const AdminPages = () => {
                     <Badge variant={page.status === "published" ? "default" : "secondary"} className="text-xs capitalize">
                       {page.status}
                     </Badge>
+                    {(() => {
+                      const result = seoScores.get(page.id);
+                      if (!result) return null;
+                      return (
+                        <button
+                          onClick={() => setSeoPopup({ page, result })}
+                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold cursor-pointer transition-colors hover:opacity-80 ${getScoreBadgeClasses(result.score)}`}
+                          title="Click to quick-fix SEO"
+                        >
+                          SEO {result.score}
+                        </button>
+                      );
+                    })()}
                   </div>
                   <span className="text-xs text-muted-foreground">/{page.slug} · Updated {format(new Date(page.updated_at), "MMM d, yyyy")}</span>
                 </div>
@@ -136,6 +210,20 @@ const AdminPages = () => {
           </div>
         )}
       </div>
+
+      {/* SEO Quick Fix Popup */}
+      {seoPopup && (
+        <SEOQuickFixPopup
+          itemTitle={seoPopup.page.title}
+          seoResult={seoPopup.result}
+          onClose={() => setSeoPopup(null)}
+          onFixed={async (updates) => {
+            await supabase.from("pages").update(updates).eq("id", seoPopup.page.id);
+            setSeoPopup(null);
+            fetchPages();
+          }}
+        />
+      )}
     </div>
   );
 };

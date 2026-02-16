@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Trash2, Search, FileText, ArrowUpDown } from "lucide-react";
+import { Plus, Trash2, Search, FileText, ArrowUpDown, Wand2, Loader2 } from "lucide-react";
+import { computeSEOScore, getScoreBadgeClasses, SEOScoreResult } from "@/lib/seoScoring";
+import SEOQuickFixPopup from "@/components/admin/SEOQuickFixPopup";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +40,9 @@ interface BlogPost {
   slug: string;
   content: string | null;
   excerpt: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  focus_keyword?: string | null;
   featured_image: string | null;
   category: string;
   read_time: string | null;
@@ -71,6 +76,8 @@ const AdminPosts = () => {
   const [sortField, setSortField] = useState<SortField>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [seoPopup, setSeoPopup] = useState<{ post: BlogPost; result: SEOScoreResult } | null>(null);
+  const [bulkScanning, setBulkScanning] = useState(false);
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -118,14 +125,69 @@ const AdminPosts = () => {
       const bVal = (b[sortField] || "").toString().toLowerCase();
       return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
     });
+  const seoScores = useMemo(() => {
+    const map = new Map<string, SEOScoreResult>();
+    posts.forEach((p) => {
+      map.set(p.id, computeSEOScore({
+        title: p.title,
+        slug: p.slug,
+        metaTitle: p.meta_title,
+        metaDescription: p.meta_description,
+        focusKeyword: p.focus_keyword,
+        content: p.content,
+        urlPrefix: "/blog/",
+      }));
+    });
+    return map;
+  }, [posts]);
+
+  const bulkAIScan = async () => {
+    setBulkScanning(true);
+    let fixCount = 0;
+    for (const p of posts) {
+      if (p.id.startsWith("mock-")) continue;
+      const result = seoScores.get(p.id);
+      if (!result || result.score >= 80) continue;
+      try {
+        const updates: Record<string, any> = {};
+        const kw = p.focus_keyword || p.title;
+        if (result.issues.some((i) => i.includes("description"))) {
+          const { data } = await supabase.functions.invoke("seo-ai-fix", {
+            body: { action: "fix_meta_description", context: { focusKeyword: kw, productTitle: p.title } },
+          });
+          if (data?.metaDescription) updates.meta_description = data.metaDescription;
+        }
+        if (result.issues.some((i) => i.includes("title"))) {
+          const { data } = await supabase.functions.invoke("seo-ai-fix", {
+            body: { action: "fix_meta_title", context: { focusKeyword: kw, productTitle: p.title } },
+          });
+          if (data?.metaTitle) updates.meta_title = data.metaTitle;
+        }
+        if (Object.keys(updates).length > 0) {
+          await supabase.from("blog_posts").update(updates).eq("id", p.id);
+          fixCount++;
+        }
+      } catch { /* skip */ }
+    }
+    toast.success(`AI scan complete. Fixed ${fixCount} post(s).`);
+    setBulkScanning(false);
+    fetchPosts();
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h2 className="text-2xl font-bold text-foreground">Posts</h2>
-        <Button onClick={() => navigate("/admin/posts/new")} className="gap-2">
-          <Plus className="w-4 h-4" />
-          New Post
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={bulkAIScan} disabled={bulkScanning} className="gap-1.5">
+            {bulkScanning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
+            AI Scan All
+          </Button>
+          <Button onClick={() => navigate("/admin/posts/new")} className="gap-2">
+            <Plus className="w-4 h-4" />
+            New Post
+          </Button>
+        </div>
       </div>
 
       {/* Search & Filter */}
@@ -190,6 +252,7 @@ const AdminPosts = () => {
                     Status <ArrowUpDown className="w-3 h-3" />
                   </button>
                 </TableHead>
+                <TableHead className="hidden md:table-cell">SEO</TableHead>
                 <TableHead className="hidden md:table-cell">
                   <button onClick={() => toggleSort("created_at")} className="flex items-center gap-1 hover:text-foreground transition-colors">
                     Date <ArrowUpDown className="w-3 h-3" />
@@ -223,6 +286,21 @@ const AdminPosts = () => {
                     >
                       {post.status === "published" ? "Published" : "Draft"}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    {(() => {
+                      const result = seoScores.get(post.id);
+                      if (!result) return null;
+                      return (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setSeoPopup({ post, result }); }}
+                          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold cursor-pointer transition-colors hover:opacity-80 ${getScoreBadgeClasses(result.score)}`}
+                          title="Click to quick-fix SEO"
+                        >
+                          {result.score}
+                        </button>
+                      );
+                    })()}
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
                     {new Date(post.created_at).toLocaleDateString("en-US", {
@@ -269,6 +347,21 @@ const AdminPosts = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {/* SEO Quick Fix Popup */}
+      {seoPopup && (
+        <SEOQuickFixPopup
+          itemTitle={seoPopup.post.title}
+          seoResult={seoPopup.result}
+          onClose={() => setSeoPopup(null)}
+          onFixed={async (updates) => {
+            if (!seoPopup.post.id.startsWith("mock-")) {
+              await supabase.from("blog_posts").update(updates).eq("id", seoPopup.post.id);
+            }
+            setSeoPopup(null);
+            fetchPosts();
+          }}
+        />
+      )}
     </div>
   );
 };
