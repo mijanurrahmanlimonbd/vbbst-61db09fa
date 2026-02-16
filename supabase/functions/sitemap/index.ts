@@ -37,8 +37,8 @@ Deno.serve(async (req) => {
   const defaultPriority = s["sitemap_default_priority"] || "0.6";
   const defaultChangefreq = s["sitemap_default_changefreq"] || "weekly";
 
-  // Fetch published posts, products, and pages in parallel
-  const [postsRes, productsRes, pagesRes] = await Promise.all([
+  // Fetch published posts, products, pages, and media in parallel
+  const [postsRes, productsRes, pagesRes, mediaRes] = await Promise.all([
     supabase
       .from("blog_posts")
       .select("slug, published_at")
@@ -53,11 +53,17 @@ Deno.serve(async (req) => {
       .select("slug, updated_at")
       .eq("status", "published")
       .order("updated_at", { ascending: false }),
+    supabase
+      .from("media_files")
+      .select("url_slug, created_at")
+      .not("url_slug", "is", null)
+      .order("created_at", { ascending: false }),
   ]);
 
   const posts = postsRes.data || [];
   const products = productsRes.data || [];
   const pages = pagesRes.data || [];
+  const mediaFiles = mediaRes.data || [];
 
   // Static pages (including new policy/legal pages)
   const staticPages = [
@@ -125,6 +131,19 @@ Deno.serve(async (req) => {
     <lastmod>${new Date(page.updated_at).toISOString().split("T")[0]}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>${hreflang(pageUrl)}
+  </url>`;
+  }
+
+  // Branded media URLs
+  for (const media of mediaFiles) {
+    if (!media.url_slug) continue;
+    const mediaUrl = `${siteUrl}/media/${media.url_slug}`;
+    xml += `
+  <url>
+    <loc>${mediaUrl}</loc>
+    <lastmod>${new Date(media.created_at).toISOString().split("T")[0]}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
   </url>`;
   }
 

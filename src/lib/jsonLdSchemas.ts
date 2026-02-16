@@ -206,14 +206,24 @@ export function generateBreadcrumbs(items: { name: string; url: string }[]) {
   };
 }
 
-/** 7. ImageObject */
-export function generateImageObject(url: string, caption?: string, width?: number, height?: number) {
+/** 7. ImageObject (with full SEO metadata) */
+export function generateImageObject(
+  url: string,
+  caption?: string,
+  width?: number,
+  height?: number,
+  altText?: string,
+  description?: string,
+) {
   return {
     "@type": "ImageObject",
     url,
-    caption: caption || "",
+    caption: caption || undefined,
+    description: description || undefined,
+    name: altText || undefined,
     width: width || undefined,
     height: height || undefined,
+    contentUrl: url,
   };
 }
 
@@ -230,9 +240,26 @@ export function generateProduct(product: {
   stock_status: string;
   rating?: number;
   category?: string;
+  /** Optional rich image metadata from media_files */
+  imageMetadata?: Array<{
+    url: string;
+    alt_text?: string;
+    caption?: string;
+    description?: string;
+    width?: number;
+    height?: number;
+  }>;
 }, branding: BrandingData) {
   const siteUrl = getSiteUrl();
-  const images = [product.image_url, ...(product.gallery_images || [])].filter(Boolean);
+  const rawImages = [product.image_url, ...(product.gallery_images || [])].filter(Boolean);
+
+  // Use rich metadata if available, otherwise fall back to basic ImageObject
+  const images = product.imageMetadata && product.imageMetadata.length > 0
+    ? product.imageMetadata.map((img) =>
+        generateImageObject(img.url, img.caption, img.width, img.height, img.alt_text, img.description)
+      )
+    : rawImages.map((url) => ({ "@type": "ImageObject" as const, url }));
+
   const inStock = product.stock_status === "in_stock";
 
   return {
@@ -240,10 +267,7 @@ export function generateProduct(product: {
     "@type": "Product",
     name: product.title,
     description: product.description,
-    image: images.map((url) => ({
-      "@type": "ImageObject",
-      url,
-    })),
+    image: images,
     sku: product.sku || undefined,
     category: product.category,
     brand: {
