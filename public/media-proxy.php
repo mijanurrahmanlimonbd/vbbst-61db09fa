@@ -21,8 +21,8 @@ if (isset($_GET['bucket']) && $_GET['bucket'] === 'branding') {
     $bucket = 'branding';
 }
 
-// Strip extension for slug lookup
-$slug = preg_replace('/\.[^.]+$/', '', $file);
+// Use the full requested file (including extension) as the slug for lookup
+$slug = $file;
 
 // --- Slug-to-file mapping via Supabase REST API ---
 $supabaseUrl = 'https://xukkejkvcgixogvbllmf.supabase.co';
@@ -31,7 +31,7 @@ $anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI
 $resolvedFile = $file; // default: use the requested path as-is
 
 // Try to resolve slug → actual file_name
-$apiUrl = $supabaseUrl . '/rest/v1/media_files?url_slug=eq.' . urlencode($slug) . '&select=file_name&limit=1';
+$apiUrl = $supabaseUrl . '/rest/v1/media_files?url_slug=eq.' . urlencode($slug) . '&select=file_path&limit=1';
 $ch = curl_init($apiUrl);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -46,8 +46,8 @@ curl_close($ch);
 
 if ($apiCode === 200 && $apiResponse) {
     $rows = json_decode($apiResponse, true);
-    if (!empty($rows) && isset($rows[0]['file_name'])) {
-        $resolvedFile = $rows[0]['file_name'];
+    if (!empty($rows) && isset($rows[0]['file_path'])) {
+        $resolvedFile = $rows[0]['file_path'];
     }
 }
 

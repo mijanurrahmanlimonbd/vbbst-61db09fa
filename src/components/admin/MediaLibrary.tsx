@@ -37,11 +37,22 @@ const BRANDED_DOMAIN = "https://verifiedbmservices.com";
 const toWebSafeSlug = (val: string): string =>
   val
     .toLowerCase()
+    .replace(/\.webp$/i, "")
     .replace(/\s+/g, "-")
     .replace(/_/g, "-")
-    .replace(/[^a-z0-9\-\.]/g, "")
+    .replace(/[^a-z0-9\-]/g, "")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
+
+/** Plain text identifier: lowercase, spaces preserved, no extension */
+const toPlainName = (val: string): string =>
+  val
+    .toLowerCase()
+    .replace(/\.webp$/i, "")
+    .replace(/[-_]+/g, " ")
+    .replace(/[^a-z0-9 ]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 
 export interface MediaFile {
   id: string;
@@ -116,19 +127,21 @@ const FileDetailsSidebar = ({
     setDescription((file as any).description || "");
   }, [file.id]);
 
-  const brandedUrl = `${BRANDED_DOMAIN}/media/${urlSlug || file.file_name}`;
+  const slugForUrl = urlSlug.includes(".webp") ? urlSlug : (urlSlug ? toWebSafeSlug(urlSlug) + ".webp" : "");
+  const brandedUrl = `${BRANDED_DOMAIN}/media/${slugForUrl || file.file_name}`;
 
   const handleSave = async () => {
     setSaving(true);
     const safeSlug = toWebSafeSlug(urlSlug);
-    const finalAlt = altText.trim() || safeSlug.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
+    const slugWithExt = safeSlug ? safeSlug + ".webp" : "";
+    const finalAlt = altText.trim() || safeSlug.replace(/-/g, " ");
     await onSave(file.id, {
-      url_slug: safeSlug || null,
+      url_slug: slugWithExt || null,
       alt_text: finalAlt,
       caption,
       ...({ description } as any),
     } as any);
-    setUrlSlug(safeSlug);
+    setUrlSlug(slugWithExt);
     setSaving(false);
     toast.success("Metadata saved!");
   };
@@ -167,20 +180,20 @@ const FileDetailsSidebar = ({
       </div>
 
       <div className="space-y-3">
-        {/* Internal File Name — read-only after upload */}
+        {/* Internal File Name — plain text, read-only after upload */}
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Internal File Name</label>
-          <Input value={file.file_name} readOnly className="text-sm h-8 font-mono bg-muted cursor-not-allowed" />
-          <p className="text-[10px] text-muted-foreground mt-0.5">Stored in backend — cannot be changed after upload</p>
+          <Input value={file.file_name} readOnly className="text-sm h-8 bg-muted cursor-not-allowed" />
+          <p className="text-[10px] text-muted-foreground mt-0.5">Plain text identifier — locked after upload</p>
         </div>
 
-        {/* URL Slug — editable */}
+        {/* URL Slug — editable, includes .webp */}
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Public URL Slug</label>
           <Input
             value={urlSlug}
             onChange={(e) => setUrlSlug(e.target.value)}
-            placeholder={file.file_name.replace(/\.[^.]+$/, "")}
+            placeholder={toWebSafeSlug(file.file_name) + ".webp"}
             className="text-sm h-8 font-mono"
           />
           <p className="text-[10px] text-muted-foreground mt-0.5">
@@ -276,8 +289,9 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
       const webpFile = await convertToWebP(originalFile, 0.8);
       const dims = await getImageDimensions(webpFile);
       const baseName = originalFile.name.replace(/\.[^.]+$/, "");
-      const safeInternal = toWebSafeSlug(baseName) + ".webp";
-      const slug = toWebSafeSlug(baseName);
+      const plainName = toPlainName(baseName);
+      const slug = toWebSafeSlug(baseName) + ".webp";
+      const storagePath = toWebSafeSlug(baseName) + ".webp";
       const previewUrl = URL.createObjectURL(webpFile);
       setPendingFiles((prev) => [
         ...prev,
@@ -286,9 +300,9 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
           originalFile,
           webpFile,
           previewUrl,
-          fileName: safeInternal,
+          fileName: plainName,
           urlSlug: slug,
-          altText: slug.replace(/-/g, " "),
+          altText: plainName,
           caption: "",
           dimensions: dims,
         },
@@ -301,10 +315,10 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
       prev.map((p) => {
         if (p.id !== id) return p;
         const updated = { ...p, [field]: value };
-        // When URL slug changes, auto-fill alt text from slug
+        // When URL slug changes, auto-fill alt text from slug (without .webp)
         if (field === "urlSlug") {
-          const safeSlug = toWebSafeSlug(value);
-          updated.altText = safeSlug.replace(/-/g, " ");
+          const cleanSlug = toWebSafeSlug(value);
+          updated.altText = cleanSlug.replace(/-/g, " ");
         }
         return updated;
       })
@@ -322,10 +336,14 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
   /** Confirm and upload a single pending file */
   const confirmUpload = async (pending: PendingFile) => {
     const uploadId = pending.id;
-    const safeFileName = toWebSafeSlug(pending.fileName.replace(/\.webp$/, "")) + ".webp";
-    const safeSlug = toWebSafeSlug(pending.urlSlug);
+    // URL slug with .webp is used as the storage path
+    const safeSlug = pending.urlSlug.endsWith(".webp")
+      ? toWebSafeSlug(pending.urlSlug.replace(/\.webp$/, "")) + ".webp"
+      : toWebSafeSlug(pending.urlSlug) + ".webp";
+    const storagePath = safeSlug;
+    const plainName = pending.fileName; // plain text internal name
 
-    setUploading((prev) => [...prev, { id: uploadId, name: safeFileName, progress: 30 }]);
+    setUploading((prev) => [...prev, { id: uploadId, name: plainName, progress: 30 }]);
     removePending(pending.id);
 
     try {
@@ -333,18 +351,18 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
 
       const { error: uploadError } = await supabase.storage
         .from("media")
-        .upload(safeFileName, pending.webpFile, { contentType: "image/webp" });
+        .upload(storagePath, pending.webpFile, { contentType: "image/webp" });
 
       if (uploadError) throw uploadError;
 
       setUploading((prev) => prev.map((u) => (u.id === uploadId ? { ...u, progress: 80 } : u)));
 
-      const { data: urlData } = supabase.storage.from("media").getPublicUrl(safeFileName);
-      const finalAlt = pending.altText.trim() || safeSlug.replace(/-/g, " ");
+      const { data: urlData } = supabase.storage.from("media").getPublicUrl(storagePath);
+      const finalAlt = pending.altText.trim() || toWebSafeSlug(pending.urlSlug).replace(/-/g, " ");
 
       await supabase.from("media_files").insert({
-        file_name: safeFileName,
-        file_path: safeFileName,
+        file_name: plainName,
+        file_path: storagePath,
         file_size: pending.webpFile.size,
         mime_type: "image/webp",
         width: pending.dimensions.width,
@@ -352,16 +370,16 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
         alt_text: finalAlt,
         caption: pending.caption,
         url: urlData.publicUrl,
-        url_slug: safeSlug || null,
+        url_slug: safeSlug,
       });
 
       setUploading((prev) => prev.map((u) => (u.id === uploadId ? { ...u, progress: 100 } : u)));
       setTimeout(() => setUploading((prev) => prev.filter((u) => u.id !== uploadId)), 500);
 
-      toast.success(`"${safeFileName}" uploaded successfully.`);
+      toast.success(`"${plainName}" uploaded successfully.`);
       fetchFiles();
     } catch (err: any) {
-      toast.error(`Failed to upload "${safeFileName}".`);
+      toast.error(`Failed to upload "${plainName}".`);
       setUploading((prev) => prev.filter((u) => u.id !== uploadId));
     }
   };
@@ -485,23 +503,23 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
                 <img src={p.previewUrl} alt="Preview" className="w-20 h-20 rounded-md object-cover shrink-0 border border-border" />
                 <div className="flex-1 space-y-2 min-w-0">
                   <div>
-                    <label className="text-xs font-medium text-muted-foreground">Internal File Name</label>
+                    <label className="text-xs font-medium text-muted-foreground">Internal File Name (plain text)</label>
                     <Input
                       value={p.fileName}
                       onChange={(e) => updatePendingField(p.id, "fileName", e.target.value)}
-                      className="text-sm h-8 font-mono"
+                      className="text-sm h-8"
                     />
-                    <p className="text-[10px] text-muted-foreground">Stored in backend — locked after upload</p>
+                    <p className="text-[10px] text-muted-foreground">Plain text identifier — no extension needed</p>
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-muted-foreground">Public URL Slug</label>
+                    <label className="text-xs font-medium text-muted-foreground">Public URL Slug (.webp)</label>
                     <Input
                       value={p.urlSlug}
                       onChange={(e) => updatePendingField(p.id, "urlSlug", e.target.value)}
                       className="text-sm h-8 font-mono"
                     />
                     <p className="text-[10px] text-muted-foreground">
-                      Branded URL: {BRANDED_DOMAIN}/media/{toWebSafeSlug(p.urlSlug)}.webp
+                      Branded URL: {BRANDED_DOMAIN}/media/{p.urlSlug.endsWith(".webp") ? toWebSafeSlug(p.urlSlug.replace(/\.webp$/, "")) + ".webp" : toWebSafeSlug(p.urlSlug) + ".webp"}
                     </p>
                   </div>
                   <div>
