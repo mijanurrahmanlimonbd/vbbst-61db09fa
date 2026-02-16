@@ -242,12 +242,13 @@ const compressImage = (file: File, maxDim: number): Promise<Blob> => {
       canvas.height = height;
       const ctx = canvas.getContext("2d")!;
       ctx.drawImage(img, 0, 0, width, height);
+      const mimeType = file.type.includes("png") ? "image/png" : file.type.includes("webp") ? "image/webp" : "image/jpeg";
       canvas.toBlob(
         (blob) => {
           if (blob) resolve(blob);
           else reject(new Error("Compression failed"));
         },
-        file.type.includes("png") ? "image/png" : "image/jpeg",
+        mimeType,
         0.85
       );
     };
