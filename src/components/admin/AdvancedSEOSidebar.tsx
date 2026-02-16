@@ -298,6 +298,44 @@ const AdvancedSEOSidebar = ({
     { key: "advanced" as const, label: "Branded URL", ids: advancedIds },
   ];
 
+  const callAIFixInternal = async (action: string, context: Record<string, any>) => {
+    const { data: result, error } = await supabase.functions.invoke("seo-ai-fix", {
+      body: { action, context },
+    });
+
+    if (error) throw error;
+    if (result?.error) throw new Error(result.error);
+
+    // Apply fixes based on action
+    if (action === "fix_meta_description" && result?.metaDescription) {
+      onMetaDescriptionChange(result.metaDescription);
+    } else if (action === "fix_meta_title" && result?.metaTitle) {
+      onMetaTitleChange(result.metaTitle);
+    } else if (action === "fix_slug" && result?.slug) {
+      if (onSlugChange) onSlugChange(result.slug);
+    } else if (action === "suggest_titles" && result?.titles) {
+      setTitleSuggestions(result.titles);
+    } else if (action === "suggest_headings" && result?.headings) {
+      setHeadingSuggestions(result.headings);
+    } else if (action === "fix_content_intro" && result?.introText) {
+      if (onContentChange) onContentChange(result.introText);
+    } else if (action === "fix_alt_text" && result?.altText) {
+      toast.info(`Suggested alt text: "${result.altText}" — update in Media Library.`);
+    }
+
+    return result;
+  };
+
+  const getAIContext = () => ({
+    focusKeyword,
+    currentTitle: metaTitle,
+    currentDescription: metaDescription,
+    currentSlug: data.slug,
+    currentContent: data.content,
+    productTitle: data.postTitle,
+    urlPrefix: data.urlPrefix,
+  });
+
   const callAIFix = async (action: string, checkId: string) => {
     if (!focusKeyword.trim()) {
       toast.error("Set a focus keyword first.");
@@ -306,56 +344,8 @@ const AdvancedSEOSidebar = ({
 
     setFixingId(checkId);
     try {
-      const { data: result, error } = await supabase.functions.invoke("seo-ai-fix", {
-        body: {
-          action,
-          context: {
-            focusKeyword,
-            currentTitle: metaTitle,
-            currentDescription: metaDescription,
-            currentSlug: data.slug,
-            currentContent: data.content,
-            productTitle: data.postTitle,
-            urlPrefix: data.urlPrefix,
-          },
-        },
-      });
-
-      if (error) throw error;
-      if (result?.error) { toast.error(result.error); return; }
-
-      // Apply fixes based on action
-      if (action === "fix_meta_description" && result?.metaDescription) {
-        onMetaDescriptionChange(result.metaDescription);
-        toast.success("Meta description updated by AI!");
-      } else if (action === "fix_meta_title" && result?.metaTitle) {
-        onMetaTitleChange(result.metaTitle);
-        toast.success("SEO title updated by AI!");
-      } else if (action === "fix_slug" && result?.slug) {
-        if (onSlugChange) {
-          onSlugChange(result.slug);
-          toast.success("Slug updated by AI!");
-        } else {
-          toast.info(`Suggested slug: ${result.slug} — update it manually.`);
-        }
-      } else if (action === "suggest_titles" && result?.titles) {
-        setTitleSuggestions(result.titles);
-        toast.success("3 title alternatives generated!");
-      } else if (action === "suggest_headings" && result?.headings) {
-        setHeadingSuggestions(result.headings);
-        toast.success("Heading suggestions generated!");
-      } else if (action === "fix_content_intro" && result?.introText) {
-        if (onContentChange) {
-          onContentChange(result.introText);
-          toast.success("Intro paragraph updated!");
-        } else {
-          toast.info("Suggested intro: " + result.introText.substring(0, 100) + "…");
-        }
-      } else if (action === "fix_alt_text" && result?.altText) {
-        toast.info(`Suggested alt text: "${result.altText}" — update in Media Library.`);
-      } else {
-        toast.info("AI suggestion received. Check the fields.");
-      }
+      await callAIFixInternal(action, getAIContext());
+      toast.success("AI fix applied!");
     } catch (err: any) {
       console.error("AI fix error:", err);
       toast.error("AI fix failed. Try again.");
@@ -371,14 +361,21 @@ const AdvancedSEOSidebar = ({
 
     setFixingId("fix-all");
     let fixed = 0;
-    for (const check of fixable) {
-      try {
-        await callAIFix(check.fixAction!, check.id);
-        fixed++;
-      } catch {}
+    try {
+      for (const check of fixable) {
+        try {
+          await callAIFixInternal(check.fixAction!, getAIContext());
+          fixed++;
+          // Yield to UI thread between fixes
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        } catch {
+          // Skip individual failures
+        }
+      }
+      toast.success(`Fixed ${fixed}/${fixable.length} issues!`);
+    } finally {
+      setFixingId(null);
     }
-    setFixingId(null);
-    toast.success(`Fixed ${fixed}/${fixable.length} issues!`);
   };
 
   return (
