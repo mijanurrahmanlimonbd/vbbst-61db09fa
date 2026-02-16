@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
   const s: Record<string, string> = {};
   if (settings) for (const r of settings) s[r.key] = r.value;
 
-  const defaultPriority = s["sitemap_default_priority"] || "0.6";
+  const blogPriority = s["sitemap_blog_priority"] || "0.6";
   const defaultChangefreq = s["sitemap_default_changefreq"] || "weekly";
 
   // Fetch published posts, products, pages, and media in parallel
@@ -105,11 +105,11 @@ Deno.serve(async (req) => {
     <loc>${postUrl}</loc>
     <lastmod>${new Date(post.published_at).toISOString().split("T")[0]}</lastmod>
     <changefreq>${defaultChangefreq}</changefreq>
-    <priority>${defaultPriority}</priority>${hreflang(postUrl)}
+    <priority>${blogPriority}</priority>${hreflang(postUrl)}
   </url>`;
   }
 
-  const productPriority = s["sitemap_product_priority"] || "0.7";
+  const productPriority = s["sitemap_product_priority"] || "0.8";
   for (const product of products) {
     const prodUrl = `${siteUrl}/product/${product.slug}`;
     xml += `
