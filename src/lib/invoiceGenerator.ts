@@ -80,8 +80,8 @@ export const generateInvoicePDF = async (
       const img = await loadImage(settings.invoice_logo);
       // Flatten transparency onto the blue header background
       const flatDataUrl = flattenOnBackground(img, primaryColor);
-      // Draw logo in header area (max 40x20)
-      const ratio = Math.min(40 / img.width, 20 / img.height);
+      // Draw logo in header area (max 80x30)
+      const ratio = Math.min(80 / img.width, 30 / img.height);
       const w = img.width * ratio;
       const h = img.height * ratio;
       doc.addImage(flatDataUrl, "PNG", 15, y - 2, w, h);
