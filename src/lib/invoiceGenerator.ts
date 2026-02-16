@@ -73,14 +73,31 @@ export const generateInvoicePDF = async (
   doc.setFillColor(...primaryColor);
   doc.rect(0, 0, pageWidth, 45, "F");
 
-  // Store name
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(22);
-  doc.setFont("helvetica", "bold");
-  doc.text(settings.site_title, 15, y + 8);
+  // Try to load logo image
+  let logoLoaded = false;
+  if (settings.invoice_logo) {
+    try {
+      const img = await loadImage(settings.invoice_logo);
+      // Draw logo in white header area (max 40x20)
+      const ratio = Math.min(40 / img.width, 20 / img.height);
+      const w = img.width * ratio;
+      const h = img.height * ratio;
+      doc.addImage(img, "PNG", 15, y - 2, w, h);
+      logoLoaded = true;
+    } catch { /* fallback to text */ }
+  }
+
+  if (!logoLoaded) {
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.text(settings.site_title, 15, y + 8);
+  }
 
   // INVOICE label
+  doc.setTextColor(255, 255, 255);
   doc.setFontSize(28);
+  doc.setFont("helvetica", "bold");
   doc.text("INVOICE", pageWidth - 15, y + 8, { align: "right" });
 
   // Contact line
@@ -230,7 +247,7 @@ export const generateInvoicePDF = async (
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...primaryColor);
-  doc.text("TOTAL:", totalsX - 35, y);
+  doc.text("TOTAL:", totalsX - 55, y);
   doc.text(`$${order.total_amount.toFixed(2)} ${order.currency}`, totalsX, y, { align: "right" });
 
   // ──── Footer ────
@@ -246,11 +263,22 @@ export const generateInvoicePDF = async (
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...mutedColor);
-  doc.text(settings.site_url, pageWidth / 2, footerY + 14, { align: "center" });
+  doc.text("https://verifiedbmservices.com", pageWidth / 2, footerY + 14, { align: "center" });
   doc.text(`${settings.site_title} · ${settings.address}`, pageWidth / 2, footerY + 19, { align: "center" });
 
   // ──── Save ────
   const dateStr = format(new Date(order.created_at), "yyyy-MM-dd");
   const shortId = order.id.slice(0, 8).toUpperCase();
   doc.save(`Invoice_${shortId}_${dateStr}.pdf`);
+};
+
+/** Load an image URL as an HTMLImageElement for jsPDF */
+const loadImage = (url: string): Promise<HTMLImageElement> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = url;
+  });
 };
