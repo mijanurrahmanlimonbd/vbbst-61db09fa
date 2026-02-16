@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toBrandedUrl } from "@/lib/imageUtils";
 
 export interface BrandingSettings {
   header_logo: string;
@@ -15,14 +14,11 @@ const BRANDING_KEYS = ["header_logo", "footer_logo", "favicon", "invoice_logo", 
 /** Ensure a branding URL uses the public endpoint and has cache-busting */
 const ensurePublicUrl = (url: string): string => {
   if (!url) return "";
-  // Strip any existing query params for clean cache-bust
   const base = url.split("?")[0];
-  // If it's a relative storage path (e.g. "header_logo.png"), build the full public URL
   if (!base.startsWith("http")) {
     const { data } = supabase.storage.from("branding").getPublicUrl(base);
     return `${data.publicUrl}?v=${Date.now()}`;
   }
-  // Ensure /public/ is in the path for Supabase storage URLs
   const fixed = base.includes("/object/public/") ? base : base.replace("/object/", "/object/public/");
   return `${fixed}?v=${Date.now()}`;
 };
@@ -48,10 +44,10 @@ export const useBranding = () => {
         const map: Record<string, string> = {};
         data.forEach((r) => { map[r.key] = r.value; });
         setBranding({
-          header_logo: toBrandedUrl(ensurePublicUrl(map.header_logo || "")),
-          footer_logo: toBrandedUrl(ensurePublicUrl(map.footer_logo || "")),
-          favicon: toBrandedUrl(ensurePublicUrl(map.favicon || "")),
-          invoice_logo: toBrandedUrl(ensurePublicUrl(map.invoice_logo || "")),
+          header_logo: ensurePublicUrl(map.header_logo || ""),
+          footer_logo: ensurePublicUrl(map.footer_logo || ""),
+          favicon: ensurePublicUrl(map.favicon || ""),
+          invoice_logo: ensurePublicUrl(map.invoice_logo || ""),
           site_title: map.site_title || "Verified BM services",
         });
       }
