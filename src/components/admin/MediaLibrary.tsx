@@ -31,34 +31,138 @@ import { toast } from "sonner";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
-/** Editable Public URL field with explicit Save */
-const PublicUrlField = ({ file, onSave }: { file: MediaFile; onSave: (url: string) => void }) => {
-  const branded = toBrandedUrl(file.url);
-  const [value, setValue] = useState(branded);
-  const [dirty, setDirty] = useState(false);
+/** Sidebar with full metadata editing + Save button */
+const FileDetailsSidebar = ({
+  file,
+  onSave,
+  onClose,
+  onDelete,
+  onSelect,
+  mode,
+}: {
+  file: MediaFile;
+  onSave: (id: string, data: Partial<MediaFile>) => Promise<void>;
+  onClose: () => void;
+  onDelete: (id: string) => void;
+  onSelect?: (f: MediaFile) => void;
+  mode: "page" | "modal";
+}) => {
+  const [fileName, setFileName] = useState(file.file_name);
+  const [altText, setAltText] = useState(file.alt_text || "");
+  const [caption, setCaption] = useState(file.caption || "");
+  const [description, setDescription] = useState((file as any).description || "");
+  const [publicUrl, setPublicUrl] = useState(toBrandedUrl(file.url));
+  const [saving, setSaving] = useState(false);
 
-  // Reset when a different file is selected
+  // Reset on file change
   useEffect(() => {
-    setValue(toBrandedUrl(file.url));
-    setDirty(false);
-  }, [file.id, file.url]);
+    setFileName(file.file_name);
+    setAltText(file.alt_text || "");
+    setCaption(file.caption || "");
+    setDescription((file as any).description || "");
+    setPublicUrl(toBrandedUrl(file.url));
+  }, [file.id]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    // If alt_text is empty, default to cleaned file name
+    const finalAlt = altText.trim() || fileName.replace(/\.[^.]+$/, "").replace(/[-_]/g, " ");
+    await onSave(file.id, {
+      file_name: fileName,
+      alt_text: finalAlt,
+      caption,
+      url: publicUrl,
+      // description is passed via the spread
+      ...({ description } as any),
+    });
+    setSaving(false);
+    toast.success("Metadata saved!");
+  };
 
   return (
-    <div>
-      <label className="text-xs font-medium text-muted-foreground mb-1 block">Public URL</label>
-      <div className="flex gap-1">
-        <Input
-          value={value}
-          onChange={(e) => { setValue(e.target.value); setDirty(true); }}
-          className="text-xs h-8 font-mono flex-1"
-        />
-        {dirty && (
-          <Button size="sm" variant="default" className="h-8 px-2 text-xs" onClick={() => { onSave(value); setDirty(false); toast.success("URL saved"); }}>
-            Save
-          </Button>
-        )}
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-foreground">File Details</h3>
+        <button onClick={onClose} className="p-1 rounded hover:bg-accent text-muted-foreground">
+          <X className="w-4 h-4" />
+        </button>
       </div>
-      <p className="text-[10px] text-muted-foreground mt-1">Edit to set a custom path. Click Save to persist.</p>
+
+      {/* Preview */}
+      <img
+        src={file.url}
+        alt={file.alt_text || file.file_name}
+        className="w-full rounded-lg border border-border object-contain max-h-48"
+      />
+
+      {/* Info row */}
+      <div className="space-y-1.5 text-sm">
+        {file.width && file.height && (
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Dimensions</span>
+            <span className="text-foreground">{file.width} × {file.height}</span>
+          </div>
+        )}
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Size</span>
+          <span className="text-foreground">{formatFileSize(file.file_size)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Type</span>
+          <span className="text-foreground">{file.mime_type}</span>
+        </div>
+      </div>
+
+      {/* Editable Metadata Fields */}
+      <div className="space-y-3">
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">File Name / URL Slug</label>
+          <Input value={fileName} onChange={(e) => setFileName(e.target.value)} className="text-sm h-8 font-mono" />
+          <p className="text-[10px] text-muted-foreground mt-0.5">Determines the branded URL path</p>
+        </div>
+
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Public URL</label>
+          <Input value={publicUrl} onChange={(e) => setPublicUrl(e.target.value)} className="text-xs h-8 font-mono" />
+          <p className="text-[10px] text-muted-foreground mt-0.5">verifiedbmservices.com/media/[file-name].webp</p>
+        </div>
+
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Alt Text</label>
+          <Input value={altText} onChange={(e) => setAltText(e.target.value)} placeholder="SEO & accessibility text…" className="text-sm h-8" />
+        </div>
+
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Caption</label>
+          <Input value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="Text below the image…" className="text-sm h-8" />
+        </div>
+
+        <div>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Description</label>
+          <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Long-form metadata…" rows={3} className="text-sm" />
+        </div>
+      </div>
+
+      {/* Save Metadata */}
+      <Button className="w-full gap-2" onClick={handleSave} disabled={saving}>
+        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+        Save Metadata
+      </Button>
+
+      {/* Select in modal */}
+      {mode === "modal" && onSelect && (
+        <Button variant="outline" className="w-full" onClick={() => onSelect(file)}>Select Image</Button>
+      )}
+
+      {/* Copy URL */}
+      <Button variant="outline" size="sm" className="w-full gap-2" onClick={() => { navigator.clipboard.writeText(publicUrl); toast.success("Branded URL copied!"); }}>
+        <Copy className="w-3.5 h-3.5" /> Copy URL
+      </Button>
+
+      {/* Delete */}
+      <Button variant="destructive" size="sm" className="w-full gap-2" onClick={() => onDelete(file.id)}>
+        <Trash2 className="w-3.5 h-3.5" /> Delete Permanently
+      </Button>
     </div>
   );
 };
@@ -235,6 +339,11 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
     setBulkMode(false);
     setSelectedId(null);
     toast.success(`${ids.length} file(s) deleted.`);
+  };
+
+  const saveFileMetadata = async (id: string, data: Partial<MediaFile>) => {
+    await supabase.from("media_files").update(data as any).eq("id", id);
+    setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, ...data } : f)));
   };
 
   const updateFileField = async (id: string, field: "alt_text" | "caption" | "url", value: string) => {
@@ -428,101 +537,17 @@ const MediaLibrary = ({ mode = "page", onSelect }: MediaLibraryProps) => {
       {/* Sidebar Details */}
       {selectedFile && !bulkMode && (
         <div className={cn(
-          "bg-background rounded-xl border border-border p-5 space-y-4",
+          "bg-background rounded-xl border border-border p-5",
           isCompact ? "w-full lg:w-64" : "w-full lg:w-80 shrink-0"
         )}>
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-foreground">File Details</h3>
-            <button
-              onClick={() => setSelectedId(null)}
-              className="p-1 rounded hover:bg-accent text-muted-foreground"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Preview */}
-          <img
-            src={selectedFile.url}
-            alt={selectedFile.alt_text || selectedFile.file_name}
-            className="w-full rounded-lg border border-border object-contain max-h-48"
+          <FileDetailsSidebar
+            file={selectedFile}
+            onSave={saveFileMetadata}
+            onClose={() => setSelectedId(null)}
+            onDelete={(id) => setDeleteTarget(id)}
+            onSelect={onSelect}
+            mode={mode}
           />
-
-          {/* File Info */}
-          <div className="space-y-1.5 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Name</span>
-              <span className="text-foreground font-medium truncate max-w-[60%] text-right">{selectedFile.file_name}</span>
-            </div>
-            {selectedFile.width && selectedFile.height && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Dimensions</span>
-                <span className="text-foreground">{selectedFile.width} × {selectedFile.height}</span>
-              </div>
-            )}
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Size</span>
-              <span className="text-foreground">{formatFileSize(selectedFile.file_size)}</span>
-            </div>
-          </div>
-
-          {/* Public URL (editable) */}
-          <PublicUrlField file={selectedFile} onSave={(val) => updateFileField(selectedFile.id, "url", val)} />
-
-          {/* Editable Fields */}
-          <div className="space-y-3">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Alt Text</label>
-              <Input
-                value={selectedFile.alt_text || ""}
-                onChange={(e) => updateFileField(selectedFile.id, "alt_text", e.target.value)}
-                placeholder="Describe the image…"
-                className="text-sm h-8"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">Caption</label>
-              <Textarea
-                value={selectedFile.caption || ""}
-                onChange={(e) => updateFileField(selectedFile.id, "caption", e.target.value)}
-                placeholder="Optional caption…"
-                rows={2}
-                className="text-sm"
-              />
-            </div>
-          </div>
-
-          {/* Select button in modal mode */}
-          {mode === "modal" && onSelect && (
-            <Button className="w-full" onClick={() => onSelect(selectedFile)}>
-              Select Image
-            </Button>
-          )}
-
-          {/* Copy URL */}
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full gap-2"
-            onClick={() => {
-              navigator.clipboard.writeText(toBrandedUrl(selectedFile.url));
-              toast.success("Branded URL copied to clipboard!");
-            }}
-          >
-            <Copy className="w-3.5 h-3.5" />
-            Copy URL
-          </Button>
-
-          {/* Delete */}
-          <Button
-            variant="destructive"
-            size="sm"
-            className="w-full gap-2"
-            onClick={() => setDeleteTarget(selectedFile.id)}
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            Delete Permanently
-          </Button>
         </div>
       )}
 

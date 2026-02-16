@@ -279,6 +279,7 @@ export type Database = {
           alt_text: string | null
           caption: string | null
           created_at: string
+          description: string | null
           file_name: string
           file_path: string
           file_size: number
@@ -292,6 +293,7 @@ export type Database = {
           alt_text?: string | null
           caption?: string | null
           created_at?: string
+          description?: string | null
           file_name: string
           file_path: string
           file_size?: number
@@ -305,6 +307,7 @@ export type Database = {
           alt_text?: string | null
           caption?: string | null
           created_at?: string
+          description?: string | null
           file_name?: string
           file_path?: string
           file_size?: number
