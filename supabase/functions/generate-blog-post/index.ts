@@ -296,6 +296,10 @@ For the Key Takeaway box:
     try {
       const cleaned = content.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
       parsed = JSON.parse(cleaned);
+      // Strip any "blog/" prefix from slug to prevent double /blog/blog/ paths
+      if (parsed.slug && parsed.slug.startsWith("blog/")) {
+        parsed.slug = parsed.slug.replace(/^blog\//, "");
+      }
     } catch {
       console.error("Failed to parse AI response:", content);
       parsed = { error: "Failed to parse AI response", raw: content };
