@@ -44,6 +44,11 @@ interface TrustPoint {
   text: string;
 }
 
+interface ProductFAQ {
+  question: string;
+  answer: string;
+}
+
 interface Product {
   id: string;
   title: string;
@@ -96,6 +101,7 @@ const AdminProducts = () => {
   const [attributes, setAttributes] = useState<ProductAttribute[]>([]);
   const [specGroups, setSpecGroups] = useState<SpecGroup[]>([]);
   const [trustPoints, setTrustPoints] = useState<TrustPoint[]>([]);
+  const [productFaqs, setProductFaqs] = useState<ProductFAQ[]>([]);
 
   // SEO scoring
   const [seoPopup, setSeoPopup] = useState<{ product: Product; result: SEOScoreResult } | null>(null);
@@ -162,7 +168,7 @@ const AdminProducts = () => {
 
   useEffect(() => { fetchProducts(); }, []);
 
-  const openNew = () => { setEditProduct(emptyProduct()); setSkuError(""); setSlugManual(false); setAttributes([]); setSpecGroups([]); setTrustPoints([]); setEditorOpen(true); };
+  const openNew = () => { setEditProduct(emptyProduct()); setSkuError(""); setSlugManual(false); setAttributes([]); setSpecGroups([]); setTrustPoints([]); setProductFaqs([]); setEditorOpen(true); };
   const openEdit = (p: Product) => {
     setEditProduct({ ...p, gallery_images: p.gallery_images || [] });
     setSkuError("");
@@ -174,6 +180,7 @@ const AdminProducts = () => {
     setAttributes(flatAttrs);
     setSpecGroups((attrs as any)._specs || []);
     setTrustPoints(((attrs as any)._trust_points || []).map((t: string) => ({ text: t })));
+    setProductFaqs((attrs as any)._faqs || []);
     setEditorOpen(true);
   };
 
@@ -217,6 +224,7 @@ const AdminProducts = () => {
         ...attributes.reduce((acc, a) => { if (a.key.trim()) acc[a.key.trim()] = a.value; return acc; }, {} as Record<string, string>),
         _specs: specGroups.filter(g => g.title.trim() && g.items.some(i => i.trim())),
         _trust_points: trustPoints.map(t => t.text).filter(Boolean),
+        _faqs: productFaqs.filter(f => f.question.trim() && f.answer.trim()),
       },
     };
 
@@ -473,6 +481,7 @@ const AdminProducts = () => {
               <TabsTrigger value="attributes" className="flex-1">Attributes</TabsTrigger>
               <TabsTrigger value="images" className="flex-1">Images</TabsTrigger>
               <TabsTrigger value="seo" className="flex-1">SEO</TabsTrigger>
+              <TabsTrigger value="faqs" className="flex-1">FAQs</TabsTrigger>
             </TabsList>
 
             <TabsContent value="basic" className="space-y-4 pt-4">
@@ -781,6 +790,48 @@ const AdminProducts = () => {
                 onMetaDescriptionChange={(v) => setEditProduct({ ...editProduct, meta_description: v })}
                 onSlugChange={(v) => { setEditProduct({ ...editProduct, slug: v }); setSlugManual(true); }}
               />
+            </TabsContent>
+
+            <TabsContent value="faqs" className="space-y-4 pt-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-base font-semibold">Product FAQs</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">Add Q&A pairs shown on this product's page</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => setProductFaqs((prev) => [...prev, { question: "", answer: "" }])} className="gap-1.5">
+                  <PlusCircle className="w-4 h-4" /> Add FAQ
+                </Button>
+              </div>
+              {productFaqs.length === 0 ? (
+                <div className="py-8 text-center text-muted-foreground text-sm border border-dashed border-border rounded-lg">
+                  No product FAQs yet. Global FAQs will still appear on the product page.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {productFaqs.map((faq, i) => (
+                    <div key={i} className="rounded-lg border border-border p-4 space-y-2">
+                      <div className="flex items-start gap-2">
+                        <div className="flex-1 space-y-2">
+                          <Input
+                            value={faq.question}
+                            onChange={(e) => setProductFaqs((prev) => prev.map((f, j) => j === i ? { ...f, question: e.target.value } : f))}
+                            placeholder="Question (e.g. How many ad accounts can I run?)"
+                          />
+                          <Textarea
+                            value={faq.answer}
+                            onChange={(e) => setProductFaqs((prev) => prev.map((f, j) => j === i ? { ...f, answer: e.target.value } : f))}
+                            placeholder="Answer…"
+                            rows={2}
+                          />
+                        </div>
+                        <button onClick={() => setProductFaqs((prev) => prev.filter((_, j) => j !== i))} className="p-2 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0 mt-1">
+                          <MinusCircle className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </TabsContent>
           </Tabs>
 

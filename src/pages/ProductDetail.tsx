@@ -56,6 +56,7 @@ const ProductDetail = () => {
   const inStock = product.stock_status === "in_stock";
   const attrs = product.attributes && typeof product.attributes === "object" ? product.attributes : {};
   const attrEntries = Object.entries(attrs).filter(([key]) => !key.startsWith("_"));
+  const productFaqs: { question: string; answer: string }[] = (attrs as any)._faqs || [];
 
   // Fallback feature attributes when none are set in admin
   const defaultFeatures: [string, string][] = [
@@ -338,24 +339,20 @@ const ProductDetail = () => {
 
       {/* ─── FULL DESCRIPTION (Rich Text) ─── */}
       {product.description && (
-        <section className="py-14">
+        <section className="py-14 bg-muted/30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Description</p>
             <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">About This Product</h2>
-            <div className="mt-10 max-w-4xl mx-auto">
-              <div className="rounded-xl border border-border bg-card p-6 md:p-10 shadow-sm">
-                <div
-                  className="prose prose-sm md:prose-base max-w-none text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary"
-                  dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(
-                      product.description.includes("<") 
-                        ? product.description 
-                        : product.description.split("\n\n").map((p: string) => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("")
-                    )
-                  }}
-                />
-              </div>
-            </div>
+            <div
+              className="prose prose-sm md:prose-base max-w-none mt-10 text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary"
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(
+                  product.description.includes("<") 
+                    ? product.description 
+                    : product.description.split("\n\n").map((p: string) => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("")
+                )
+              }}
+            />
           </div>
         </section>
       )}
@@ -495,15 +492,15 @@ const ProductDetail = () => {
       )}
 
       {/* ─── FAQ ─── */}
-      {faqs.length > 0 && (
-        <section className="py-14 bg-muted/30">
+      {(productFaqs.length > 0 || faqs.length > 0) && (
+        <section className="py-14">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">FAQ</p>
             <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Frequently Asked Questions</h2>
             <p className="text-muted-foreground text-center mt-3">Common questions about {product.title}.</p>
 
             <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-4">
-              {faqs.map((faq) => (
+              {[...productFaqs.map((f: any, i: number) => ({ id: `pf-${i}`, question: f.question, answer: f.answer })), ...faqs].map((faq: any) => (
                 <div key={faq.id} className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
                   <button
                     onClick={() => setOpenFaq(openFaq === faq.id ? null : faq.id)}
