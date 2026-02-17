@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { FileText, Mail, MessageSquare, Image, Clock, ArrowRight, Save } from "lucide-react";
+import { FileText, Mail, MessageSquare, Image, Clock, ArrowRight, Save, Trash2, Loader2 } from "lucide-react";
 import SEOHealthWidget from "@/components/admin/SEOHealthWidget";
 import SalesAnalyticsWidget from "@/components/admin/SalesAnalyticsWidget";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,20 @@ const AdminDashboard = () => {
   const [draftTitle, setDraftTitle] = useState("");
   const [draftContent, setDraftContent] = useState("");
   const [savingDraft, setSavingDraft] = useState(false);
+  const [purging, setPurging] = useState(false);
 
+  const handlePurgeCache = async () => {
+    setPurging(true);
+    try {
+      const res = await fetch("https://verifiedbmservices.com/purge.php?key=vbs_secure_purge_123");
+      if (!res.ok) throw new Error("Purge failed");
+      toast.success("Cache Cleared! Your changes are now live.");
+    } catch {
+      toast.error("Failed to clear cache. Please try again.");
+    } finally {
+      setPurging(false);
+    }
+  };
   useEffect(() => {
     const load = async () => {
       const [postsRes, subsRes, commentsRes, mediaRes, recentCommentsRes, recentSubsRes, recentPostsRes] = await Promise.all([
@@ -136,11 +149,22 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h2 className="text-2xl font-bold text-foreground">
-          Welcome back{profile?.full_name ? `, ${profile.full_name}` : ""}
-        </h2>
-        <p className="text-muted-foreground mt-1">Here's what's happening with your site.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">
+            Welcome back{profile?.full_name ? `, ${profile.full_name}` : ""}
+          </h2>
+          <p className="text-muted-foreground mt-1">Here's what's happening with your site.</p>
+        </div>
+        <Button
+          variant="destructive"
+          onClick={handlePurgeCache}
+          disabled={purging}
+          className="shrink-0"
+        >
+          {purging ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+          {purging ? "Purging…" : "Clear Website Cache"}
+        </Button>
       </div>
 
       {/* Metric Cards */}
