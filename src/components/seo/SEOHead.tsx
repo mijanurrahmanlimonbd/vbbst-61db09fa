@@ -1,7 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 import { SITE_NAME, getSiteUrl, DEFAULT_DESCRIPTION } from "@/lib/config";
-import { useInternationalSEO } from "@/hooks/useInternationalSEO";
 import { toBrandedUrl } from "@/lib/imageUtils";
 
 interface SEOHeadProps {
@@ -24,22 +23,18 @@ const SEOHead = ({
   const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
   const canonicalUrl = `${siteUrl}${location.pathname}`;
   const resolvedOgImage = toBrandedUrl(ogImage || `https://verifiedbmservices.com/favicon.png`);
-  const { geoRegion, geoPlacename, targetLang } = useInternationalSEO();
 
   return (
     <Helmet>
+      <html lang="en" />
       <title>{fullTitle}</title>
       <meta name="description" content={description.slice(0, 160)} />
       <meta name="robots" content={noIndex ? "noindex,nofollow" : "index,follow"} />
       <link rel="canonical" href={canonicalUrl} />
 
       {/* Hreflang */}
-      <link rel="alternate" hrefLang={targetLang || "en"} href={canonicalUrl} />
+      <link rel="alternate" hrefLang="en" href={canonicalUrl} />
       <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
-
-      {/* Geo Meta Tags */}
-      {geoRegion && <meta name="geo.region" content={geoRegion} />}
-      {geoPlacename && <meta name="geo.placename" content={geoPlacename} />}
 
       {/* Open Graph */}
       <meta property="og:title" content={fullTitle} />
