@@ -112,7 +112,7 @@ export function generateOrganization(branding: BrandingData, biz: BusinessInfo =
       "@type": "ContactPoint",
       telephone: biz.phone,
       contactType: "customer support",
-      availableLanguage: ["English", "Bengali"],
+      availableLanguage: ["English"],
       areaServed: "Worldwide",
     },
     sameAs: biz.socialLinks || [],
