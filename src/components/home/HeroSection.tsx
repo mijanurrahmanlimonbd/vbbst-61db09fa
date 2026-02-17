@@ -61,8 +61,8 @@ const HeroSection = () => {
               style={{ animationDelay: "0.25s" }}
             >
               <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl md:text-[2.75rem] lg:text-[2.85rem] xl:text-[3.25rem]">
-                Buy Verified BM
-                <span className="mt-3 block">And WhatsApp Business API</span>
+                Buy <span className="text-primary">Verified BM</span>
+                <span className="mt-3 block">And <span className="text-[hsl(142,70%,45%)]">WhatsApp Business API</span></span>
               </h1>
             </div>
 
