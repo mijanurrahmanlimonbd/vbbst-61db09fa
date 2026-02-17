@@ -5,20 +5,7 @@ import { componentTagger } from "lovable-tagger";
 import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
-  // Run sitemap generator before production builds
-  if (mode === "production") {
-    import("child_process").then(({ execSync }) => {
-      try {
-        console.log("🗺️  Running sitemap generator...");
-        execSync("npx tsx scripts/generate-sitemap.ts", { stdio: "inherit" });
-      } catch (e) {
-        console.warn("⚠️  Sitemap generation skipped:", (e as Error).message);
-      }
-    });
-  }
-
-  return ({
+export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
@@ -132,5 +119,4 @@ export default defineConfig(({ mode }) => {
     chunkSizeWarningLimit: 600,
     cssMinify: true,
   },
-});
-});
+}));
