@@ -1,8 +1,11 @@
 /**
  * Build-time Sitemap Generator
- * Fetches all blog post slugs from the database and generates
- * a static sitemap.xml in /public with all URLs.
+ * Fetches the dynamic sitemap from the Edge Function and writes it
+ * as a static sitemap.xml into /public so the hosting can serve it directly.
  */
+
+const EDGE_FUNCTION_URL =
+  "https://xukkejkvcgixogvbllmf.supabase.co/functions/v1/sitemap";
 
 const SUPABASE_URL = "https://xukkejkvcgixogvbllmf.supabase.co";
 const SUPABASE_ANON_KEY =
