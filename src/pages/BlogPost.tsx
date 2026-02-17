@@ -161,6 +161,7 @@ const BlogPost = () => {
         description={post.meta_description || post.excerpt || `Read ${post.title} on Verified BM services blog.`}
         ogImage={featuredImage || undefined}
         ogType="article"
+        keywords={post.focus_keyword || undefined}
       />
 
       {/* Hero */}
@@ -213,6 +214,9 @@ const BlogPost = () => {
                   alt={post.title}
                   className="w-full rounded-xl mb-8 aspect-[16/9] object-cover"
                   loading="lazy"
+                  width={1200}
+                  height={675}
+                  decoding="async"
                 />
               )}
 

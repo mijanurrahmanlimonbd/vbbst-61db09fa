@@ -9,6 +9,7 @@ interface SEOHeadProps {
   ogImage?: string;
   ogType?: string;
   noIndex?: boolean;
+  keywords?: string;
 }
 
 const SEOHead = ({
@@ -17,6 +18,7 @@ const SEOHead = ({
   ogImage,
   ogType = "website",
   noIndex = false,
+  keywords,
 }: SEOHeadProps) => {
   const location = useLocation();
   const siteUrl = getSiteUrl();
@@ -29,6 +31,7 @@ const SEOHead = ({
       <html lang="en" />
       <title>{fullTitle}</title>
       <meta name="description" content={description.slice(0, 160)} />
+      {keywords && <meta name="keywords" content={keywords} />}
       <meta name="robots" content={noIndex ? "noindex,nofollow" : "index,follow"} />
       <link rel="canonical" href={canonicalUrl} />
 
