@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import DOMPurify from "dompurify";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
@@ -233,10 +234,10 @@ const ProductDetail = () => {
                 )}
               </div>
 
-              {/* Description */}
-              {(product.description || product.short_description) && (
+              {/* Short Description */}
+              {product.short_description && (
                 <p className="text-muted-foreground mt-5 leading-relaxed text-sm md:text-base">
-                  {product.description || product.short_description}
+                  {product.short_description}
                 </p>
               )}
 
@@ -335,7 +336,26 @@ const ProductDetail = () => {
         </div>
       </section>
 
-      {/* ─── 3B. HOW TO MAKE PAYMENT ─── */}
+      {/* ─── FULL DESCRIPTION (Rich Text) ─── */}
+      {product.description && (
+        <section className="py-14 bg-muted/30">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Description</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">About This Product</h2>
+            <div
+              className="prose prose-sm md:prose-base max-w-none mt-8 text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary"
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(
+                  product.description.includes("<") 
+                    ? product.description 
+                    : product.description.split("\n\n").map((p: string) => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("")
+                )
+              }}
+            />
+          </div>
+        </section>
+      )}
+
       <section className="py-14 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Payment</p>
