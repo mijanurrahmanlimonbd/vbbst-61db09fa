@@ -144,6 +144,10 @@ const Navbar = () => {
                           src={profile.avatar_url}
                           alt={displayName}
                           className="w-8 h-8 rounded-full object-cover border border-border"
+                          loading="lazy"
+                          width={32}
+                          height={32}
+                          decoding="async"
                         />
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold">

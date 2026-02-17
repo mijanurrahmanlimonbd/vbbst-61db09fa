@@ -12,9 +12,8 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 # RewriteCond %{HTTP_HOST} !^www\. [NC]
 # RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L]
 
-# ── Dynamic Sitemap & Robots via Edge Functions ──
-RewriteRule ^sitemap\.xml$ https://xukkejkvcgixogvbllmf.supabase.co/functions/v1/sitemap [L,R=302]
-RewriteRule ^robots\.txt$ https://xukkejkvcgixogvbllmf.supabase.co/functions/v1/robots-txt [L,R=302]
+# ── Sitemap & Robots — serve static files directly ──
+# sitemap.xml and robots.txt are physical files in the root; no rewrite needed.
 
 # ── Branded Media URLs with Slug Mapping ─────
 # Resolve branded /media/ slugs via Edge Function (302 → Supabase storage)
@@ -24,9 +23,12 @@ RewriteRule ^media/(.+)$ https://xukkejkvcgixogvbllmf.supabase.co/functions/v1/m
 RewriteRule ^branding/(.+)$ https://xukkejkvcgixogvbllmf.supabase.co/storage/v1/object/public/branding/$1 [L,R=302]
 
 # ── SPA Pretty Permalinks ────────────────────
-# All routes that don't match a file/directory → index.html
+# Exclude static files from SPA catch-all (sitemap, robots, llms)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/sitemap\.xml$ [NC]
+RewriteCond %{REQUEST_URI} !^/robots\.txt$ [NC]
+RewriteCond %{REQUEST_URI} !^/llms\.txt$ [NC]
 RewriteRule ^ index.html [QSA,L]
 
 # ── Gzip / Brotli Compression ────────────────

@@ -10,13 +10,22 @@ interface FooterProduct {
   title: string;
 }
 
+interface FooterBlogPost {
+  slug: string;
+  title: string;
+}
+
 const Footer = () => {
   const { branding } = useBranding();
   const [products, setProducts] = useState<FooterProduct[]>([]);
+  const [blogPosts, setBlogPosts] = useState<FooterBlogPost[]>([]);
 
   useEffect(() => {
     supabase.from("products").select("slug,title").order("sort_order").then(({ data }) => {
       if (data) setProducts(data);
+    });
+    supabase.from("blog_posts").select("slug,title").eq("status", "published").order("published_at", { ascending: false }).then(({ data }) => {
+      if (data) setBlogPosts(data);
     });
   }, []);
 
@@ -140,11 +149,29 @@ const Footer = () => {
       {products.length > 0 && (
         <div className="border-t border-border">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Our Products</h4>
+            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Products Site Map</h4>
             <ul className="flex flex-wrap gap-x-6 gap-y-2">
               {products.map((p) => (
                 <li key={p.slug}>
                   <Link to={`/product/${p.slug}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    {p.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* Blog Site Map — crawlable links for SEO */}
+      {blogPosts.length > 0 && (
+        <div className="border-t border-border">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Blog Site Map</h4>
+            <ul className="flex flex-wrap gap-x-6 gap-y-2">
+              {blogPosts.map((p) => (
+                <li key={p.slug}>
+                  <Link to={`/blog/${p.slug}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     {p.title}
                   </Link>
                 </li>
