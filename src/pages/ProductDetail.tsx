@@ -338,20 +338,24 @@ const ProductDetail = () => {
 
       {/* ─── FULL DESCRIPTION (Rich Text) ─── */}
       {product.description && (
-        <section className="py-14 bg-muted/30">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-14">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Description</p>
             <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">About This Product</h2>
-            <div
-              className="prose prose-sm md:prose-base max-w-none mt-8 text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary"
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(
-                  product.description.includes("<") 
-                    ? product.description 
-                    : product.description.split("\n\n").map((p: string) => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("")
-                )
-              }}
-            />
+            <div className="mt-10 max-w-4xl mx-auto">
+              <div className="rounded-xl border border-border bg-card p-6 md:p-10 shadow-sm">
+                <div
+                  className="prose prose-sm md:prose-base max-w-none text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary"
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(
+                      product.description.includes("<") 
+                        ? product.description 
+                        : product.description.split("\n\n").map((p: string) => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("")
+                    )
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </section>
       )}
@@ -493,23 +497,23 @@ const ProductDetail = () => {
       {/* ─── FAQ ─── */}
       {faqs.length > 0 && (
         <section className="py-14 bg-muted/30">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">FAQ</p>
             <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Frequently Asked Questions</h2>
             <p className="text-muted-foreground text-center mt-3">Common questions about {product.title}.</p>
 
-            <div className="mt-10 space-y-3">
+            <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-4">
               {faqs.map((faq) => (
-                <div key={faq.id} className="rounded-xl border border-border bg-card overflow-hidden">
+                <div key={faq.id} className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
                   <button
                     onClick={() => setOpenFaq(openFaq === faq.id ? null : faq.id)}
-                    className="w-full flex items-center justify-between p-4 text-left hover:bg-muted/30 transition-colors"
+                    className="w-full flex items-center justify-between p-5 text-left hover:bg-muted/30 transition-colors"
                   >
                     <span className="font-medium text-foreground pr-4">{faq.question}</span>
                     <ChevronDown className={`w-5 h-5 text-muted-foreground shrink-0 transition-transform duration-200 ${openFaq === faq.id ? "rotate-180" : ""}`} />
                   </button>
                   {openFaq === faq.id && (
-                    <div className="px-4 pb-4 text-sm text-muted-foreground leading-relaxed">
+                    <div className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed border-t border-border pt-4">
                       {faq.answer}
                     </div>
                   )}
