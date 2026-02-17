@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const DEFAULT_ROBOTS = `# =============================================
-# robots.txt — Verified BM services
+# robots.txt — Verified BM Services
 # =============================================
 
 User-agent: Googlebot
@@ -21,6 +21,12 @@ Allow: /
 Disallow: /admin/
 Disallow: /checkout
 
+User-agent: SemrushBot
+Allow: /
+
+User-agent: SiteAuditBot
+Allow: /
+
 User-agent: Twitterbot
 Allow: /
 
@@ -31,7 +37,6 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /checkout
-Disallow: /api/
 
 # Sitemap
 Sitemap: https://verifiedbmservices.com/sitemap.xml`;
