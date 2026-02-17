@@ -102,6 +102,7 @@ const AdminProducts = () => {
   const [specGroups, setSpecGroups] = useState<SpecGroup[]>([]);
   const [trustPoints, setTrustPoints] = useState<TrustPoint[]>([]);
   const [productFaqs, setProductFaqs] = useState<ProductFAQ[]>([]);
+  const [globalFaqs, setGlobalFaqs] = useState<{ id: string; question: string; answer: string; faq_group: string }[]>([]);
 
   // SEO scoring
   const [seoPopup, setSeoPopup] = useState<{ product: Product; result: SEOScoreResult } | null>(null);
@@ -167,6 +168,14 @@ const AdminProducts = () => {
   };
 
   useEffect(() => { fetchProducts(); }, []);
+
+  useEffect(() => {
+    const fetchGlobalFaqs = async () => {
+      const { data } = await supabase.from("faqs").select("*").order("sort_order");
+      if (data) setGlobalFaqs(data);
+    };
+    fetchGlobalFaqs();
+  }, []);
 
   const openNew = () => { setEditProduct(emptyProduct()); setSkuError(""); setSlugManual(false); setAttributes([]); setSpecGroups([]); setTrustPoints([]); setProductFaqs([]); setEditorOpen(true); };
   const openEdit = (p: Product) => {
@@ -793,49 +802,84 @@ const AdminProducts = () => {
               />
             </TabsContent>
 
-            <TabsContent value="faqs" className="space-y-4 pt-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label className="text-base font-semibold">Product FAQs</Label>
-                  <p className="text-xs text-muted-foreground mt-0.5">Add Q&A pairs shown on this product's page</p>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => setProductFaqs((prev) => [...prev, { question: "", answer: "" }])} className="gap-1.5">
-                  <PlusCircle className="w-4 h-4" /> Add FAQ
-                </Button>
-              </div>
-              {productFaqs.length === 0 ? (
-                <div className="py-8 text-center text-muted-foreground text-sm border border-dashed border-border rounded-lg">
-                  No product FAQs yet. Global FAQs will still appear on the product page.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {productFaqs.map((faq, i) => (
-                    <div key={i} className="rounded-lg border border-border p-4 space-y-2">
-                      <div className="flex items-start gap-2">
-                        <div className="flex-1 space-y-2">
-                          <Input
-                            value={faq.question}
-                            onChange={(e) => setProductFaqs((prev) => prev.map((f, j) => j === i ? { ...f, question: e.target.value } : f))}
-                            placeholder="Question (e.g. How many ad accounts can I run?)"
-                          />
-                          <Textarea
-                            value={faq.answer}
-                            onChange={(e) => setProductFaqs((prev) => prev.map((f, j) => j === i ? { ...f, answer: e.target.value } : f))}
-                            placeholder="Answer…"
-                            rows={2}
-                          />
-                        </div>
-                        <button onClick={() => setProductFaqs((prev) => prev.filter((_, j) => j !== i))} className="p-2 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0 mt-1">
-                          <MinusCircle className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-          </div>
-          </Tabs>
+             <TabsContent value="faqs" className="space-y-4 pt-4">
+               <div className="flex items-center justify-between">
+                 <div>
+                   <Label className="text-base font-semibold">Product FAQs</Label>
+                   <p className="text-xs text-muted-foreground mt-0.5">Add Q&A pairs shown on this product's page</p>
+                 </div>
+                 <Button variant="outline" size="sm" onClick={() => setProductFaqs((prev) => [...prev, { question: "", answer: "" }])} className="gap-1.5">
+                   <PlusCircle className="w-4 h-4" /> Add FAQ
+                 </Button>
+               </div>
+               {productFaqs.length === 0 ? (
+                 <div className="py-6 text-center text-muted-foreground text-sm border border-dashed border-border rounded-lg">
+                   No product-specific FAQs yet.
+                 </div>
+               ) : (
+                 <div className="space-y-3">
+                   {productFaqs.map((faq, i) => (
+                     <div key={i} className="rounded-lg border border-border p-4 space-y-2">
+                       <div className="flex items-start gap-2">
+                         <div className="flex-1 space-y-2">
+                           <Input
+                             value={faq.question}
+                             onChange={(e) => setProductFaqs((prev) => prev.map((f, j) => j === i ? { ...f, question: e.target.value } : f))}
+                             placeholder="Question"
+                           />
+                           <Textarea
+                             value={faq.answer}
+                             onChange={(e) => setProductFaqs((prev) => prev.map((f, j) => j === i ? { ...f, answer: e.target.value } : f))}
+                             placeholder="Answer…"
+                             rows={2}
+                           />
+                         </div>
+                         <button onClick={() => setProductFaqs((prev) => prev.filter((_, j) => j !== i))} className="p-2 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0 mt-1">
+                           <MinusCircle className="w-4 h-4" />
+                         </button>
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+               )}
+
+               {/* Global FAQs section */}
+               <div className="pt-4 border-t border-border">
+                 <div className="flex items-center justify-between mb-3">
+                   <div>
+                     <Label className="text-base font-semibold">Global FAQs</Label>
+                     <p className="text-xs text-muted-foreground mt-0.5">These appear on all product pages. Click + to copy into this product's FAQs.</p>
+                   </div>
+                 </div>
+                 <div className="space-y-2 max-h-60 overflow-y-auto">
+                   {globalFaqs.map((gfaq) => {
+                     const alreadyAdded = productFaqs.some((pf) => pf.question === gfaq.question);
+                     return (
+                       <div key={gfaq.id} className="flex items-center gap-2 rounded-lg border border-border bg-secondary/30 p-3">
+                         <div className="flex-1 min-w-0">
+                           <p className="text-sm font-medium text-foreground truncate">{gfaq.question}</p>
+                           <p className="text-xs text-muted-foreground truncate">{gfaq.answer}</p>
+                         </div>
+                         <Badge variant="outline" className="shrink-0 text-[10px]">{gfaq.faq_group}</Badge>
+                         {alreadyAdded ? (
+                           <CheckCircle className="w-4 h-4 text-primary shrink-0" />
+                         ) : (
+                           <button
+                             onClick={() => setProductFaqs((prev) => [...prev, { question: gfaq.question, answer: gfaq.answer }])}
+                             className="p-1.5 rounded text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors shrink-0"
+                             title="Copy to product FAQs"
+                           >
+                             <PlusCircle className="w-4 h-4" />
+                           </button>
+                         )}
+                       </div>
+                     );
+                   })}
+                 </div>
+               </div>
+             </TabsContent>
+           </div>
+           </Tabs>
 
           <div className="flex justify-end gap-2 pt-4 border-t border-border">
             <Button variant="outline" onClick={() => setEditorOpen(false)}>Cancel</Button>
