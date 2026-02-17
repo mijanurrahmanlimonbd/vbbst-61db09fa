@@ -37,7 +37,12 @@ const AdminDashboard = () => {
   const handlePurgeCache = async () => {
     setPurging(true);
     try {
-      const res = await fetch("https://verifiedbmservices.com/purge.php?key=vbs_secure_purge_123");
+    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/purge-cache`, {
+        headers: {
+          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          "Content-Type": "application/json",
+        },
+      });
       if (!res.ok) throw new Error("Purge failed");
       toast.success("Cache Cleared! Your changes are now live.");
     } catch {
