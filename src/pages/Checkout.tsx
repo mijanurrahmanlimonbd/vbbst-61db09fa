@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, Upload, CheckCircle, Copy, AlertCircle } from "lucide-react";
+import DOMPurify from "dompurify";
 import { triggerOrderThankYou } from "@/components/layout/OrderThankYouPopup";
 
 interface CartItem {
@@ -369,7 +370,7 @@ const Checkout = () => {
                 </div>
               ) : selectedMethod!.instructions ? (
                 <div className="bg-secondary/30 rounded-xl border border-border p-6">
-                  <div dangerouslySetInnerHTML={{ __html: selectedMethod!.instructions }} className="text-sm text-foreground prose prose-sm" />
+                  <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selectedMethod!.instructions || '') }} className="text-sm text-foreground prose prose-sm" />
                   <div className="text-center mt-4">
                     <p className="text-sm text-foreground font-semibold">Amount: ${total.toFixed(2)} USD</p>
                   </div>

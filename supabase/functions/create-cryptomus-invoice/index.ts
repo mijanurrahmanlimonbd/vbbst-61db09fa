@@ -14,7 +14,35 @@ Deno.serve(async (req) => {
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    // Validate caller is authenticated
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const authSupabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace("Bearer ", "");
+    // Allow anon key callers (guest checkout) - verify it's a valid token
+    const isAnonKey = token === supabaseAnonKey;
+    if (!isAnonKey) {
+      const { data: claimsData, error: claimsError } = await authSupabase.auth.getClaims(token);
+      if (claimsError || !claimsData?.claims) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     // Get Cryptomus settings from site_settings
@@ -45,6 +73,20 @@ Deno.serve(async (req) => {
     if (!order_id || !amount) {
       return new Response(
         JSON.stringify({ error: "Missing order_id or amount" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Validate order exists
+    const { data: orderCheck } = await supabase
+      .from("orders")
+      .select("id")
+      .eq("id", order_id)
+      .single();
+
+    if (!orderCheck) {
+      return new Response(
+        JSON.stringify({ error: "Invalid order" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
