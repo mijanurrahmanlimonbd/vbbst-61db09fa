@@ -53,7 +53,14 @@ const AdminFAQs = lazy(() => import("./pages/admin/AdminFAQs"));
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
 const AdminCustomers = lazy(() => import("./pages/admin/AdminCustomers"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 0,
+      refetchOnWindowFocus: true,
+    },
+  },
+});
 
 const PageFallback = () => (
   <div className="min-h-screen flex items-center justify-center">
