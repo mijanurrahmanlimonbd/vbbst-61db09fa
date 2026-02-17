@@ -100,6 +100,15 @@ const Checkout = () => {
       toast.error("Please enter your name and email.");
       return;
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    if (name.trim().length > 100) {
+      toast.error("Name must be under 100 characters.");
+      return;
+    }
     if (!selectedMethod) {
       toast.error("Please select a payment method.");
       return;
@@ -111,43 +120,38 @@ const Checkout = () => {
 
     setLoading(true);
     try {
-      const { data: order, error: orderErr } = await supabase
-        .from("orders")
-        .insert({
+      // Use server-side order creation with price verification
+      const { data: orderResult, error: orderErr } = await supabase.functions.invoke("create-order", {
+        body: {
           customer_name: name.trim(),
           customer_email: email.trim(),
-          payment_method: selectedMethod.slug,
-          total_amount: total,
-          status: "created",
-        })
-        .select("id")
-        .single();
+          payment_method_slug: selectedMethod.slug,
+          items: items.map((i) => ({
+            product_id: i.id,
+            quantity: i.quantity,
+          })),
+        },
+      });
 
-      if (orderErr || !order) throw orderErr;
+      if (orderErr) throw orderErr;
+      if (orderResult?.error) {
+        toast.error(orderResult.error);
+        setLoading(false);
+        return;
+      }
 
-      const orderItems = items.map((i) => ({
-        order_id: order.id,
-        product_id: i.id,
-        product_title: i.title,
-        unit_price: i.sale_price || i.price,
-        quantity: i.quantity,
-      }));
-
-      const { error: itemsErr } = await supabase.from("order_items").insert(orderItems);
-      if (itemsErr) throw itemsErr;
-
-      setOrderId(order.id);
+      const createdOrderId = orderResult.order_id;
+      setOrderId(createdOrderId);
 
       if (selectedMethod.type === "api" && selectedMethod.slug === "cryptomus") {
         try {
           const { data: fnData, error: fnErr } = await supabase.functions.invoke("create-cryptomus-invoice", {
-            body: { order_id: order.id, amount: total, currency: "USD" },
+            body: { order_id: createdOrderId, amount: orderResult.total_amount, currency: "USD" },
           });
           if (fnErr) throw fnErr;
           if (fnData?.url) {
             setCryptomusUrl(fnData.url);
-            // Update status to processing
-            await supabase.from("orders").update({ status: "processing" }).eq("id", order.id);
+            await supabase.from("orders").update({ status: "processing" }).eq("id", createdOrderId);
           } else if (fnData?.error) {
             toast.error(fnData.error);
           }

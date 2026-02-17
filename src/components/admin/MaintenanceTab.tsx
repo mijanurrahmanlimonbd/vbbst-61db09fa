@@ -55,10 +55,12 @@ const MaintenanceTab = () => {
     setExporting(true);
     try {
       let csvContent = "";
+      let recordCount = 0;
 
       if (type === "orders") {
         const { data } = await supabase.from("orders").select("id, customer_name, customer_email, total_amount, currency, payment_method, status, created_at").order("created_at", { ascending: false });
         if (!data || data.length === 0) { toast.info("No orders to export."); return; }
+        recordCount = data.length;
         csvContent = "ID,Customer Name,Email,Amount,Currency,Payment Method,Status,Date\n";
         csvContent += data.map((o) =>
           `"${o.id}","${o.customer_name}","${o.customer_email}",${o.total_amount},"${o.currency}","${o.payment_method}","${o.status}","${o.created_at}"`
@@ -66,13 +68,13 @@ const MaintenanceTab = () => {
       } else {
         const { data } = await supabase.from("orders").select("customer_name, customer_email").order("created_at", { ascending: false });
         if (!data || data.length === 0) { toast.info("No customers to export."); return; }
-        // Deduplicate by email
         const seen = new Set<string>();
         const unique = data.filter((c) => {
           if (seen.has(c.customer_email)) return false;
           seen.add(c.customer_email);
           return true;
         });
+        recordCount = unique.length;
         csvContent = "Name,Email\n";
         csvContent += unique.map((c) => `"${c.customer_name}","${c.customer_email}"`).join("\n");
       }
@@ -84,7 +86,7 @@ const MaintenanceTab = () => {
       link.download = `${type}-export-${new Date().toISOString().slice(0, 10)}.csv`;
       link.click();
       URL.revokeObjectURL(url);
-      await logAction(`Export ${type} CSV`, "Backup");
+      await logAction(`Export ${type} CSV`, "Backup", undefined, undefined, { record_count: recordCount });
       toast.success(`${type === "orders" ? "Orders" : "Customers"} exported!`);
     } catch {
       toast.error("Export failed.");
