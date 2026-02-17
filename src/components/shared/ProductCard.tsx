@@ -69,7 +69,9 @@ const ProductCard = ({ product }: { product: Product }) => {
       {/* Content */}
       <div className="p-5 flex flex-col flex-1 justify-between">
         <span className="text-xs font-semibold tracking-wide text-primary uppercase">{product.category}</span>
-        <h3 className="font-bold text-foreground mt-1.5 text-[15px] leading-snug line-clamp-2">{product.title}</h3>
+        <Link to={`/product/${product.slug}`} className="block mt-1.5" onClick={(e) => e.stopPropagation()}>
+          <h3 className="font-bold text-foreground text-[15px] leading-snug line-clamp-2 group-hover:text-primary transition-colors">{product.title}</h3>
+        </Link>
         {product.short_description && (
           <p className="text-xs text-muted-foreground mt-2 line-clamp-2 leading-relaxed">{product.short_description}</p>
         )}
