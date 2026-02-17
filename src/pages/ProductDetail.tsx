@@ -97,6 +97,7 @@ const ProductDetail = () => {
         description={product.meta_description || product.short_description || `Buy ${product.title} from Verified BM services. Instant delivery and 7-day guarantee.`}
         ogImage={product.image_url || undefined}
         ogType="product"
+        keywords={product.focus_keyword || undefined}
       />
       <JsonLdSchema
         pageTitle={product.meta_title || product.title}
