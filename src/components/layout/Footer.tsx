@@ -1,10 +1,24 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Home, ShoppingBag, FileText, Users, Headphones, Shield, RefreshCw, HelpCircle, Lock, MapPin, MessageCircle, Send, Mail, Clock } from "lucide-react";
 import NewsletterForm from "@/components/newsletter/NewsletterForm";
 import { useBranding } from "@/hooks/useBranding";
+import { supabase } from "@/integrations/supabase/client";
+
+interface FooterProduct {
+  slug: string;
+  title: string;
+}
 
 const Footer = () => {
   const { branding } = useBranding();
+  const [products, setProducts] = useState<FooterProduct[]>([]);
+
+  useEffect(() => {
+    supabase.from("products").select("slug,title").order("sort_order").then(({ data }) => {
+      if (data) setProducts(data);
+    });
+  }, []);
 
   const logoElement = branding.footer_logo ? (
     <img src={branding.footer_logo} alt={branding.site_title} className="h-8 max-w-[160px] object-contain" loading="lazy" />
@@ -121,6 +135,24 @@ const Footer = () => {
           </div>
         </div>
       </div>
+
+      {/* Products Site Map — crawlable links for SEO */}
+      {products.length > 0 && (
+        <div className="border-t border-border">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Our Products</h4>
+            <ul className="flex flex-wrap gap-x-6 gap-y-2">
+              {products.map((p) => (
+                <li key={p.slug}>
+                  <Link to={`/product/${p.slug}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    {p.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       {/* Copyright */}
       <div className="border-t border-border">

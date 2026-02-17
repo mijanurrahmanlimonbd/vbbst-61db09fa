@@ -32,9 +32,10 @@ const SEOHead = ({
       <meta name="robots" content={noIndex ? "noindex,nofollow" : "index,follow"} />
       <link rel="canonical" href={canonicalUrl} />
 
-      {/* Hreflang */}
+      {/* Hreflang — English only */}
       <link rel="alternate" hrefLang="en" href={canonicalUrl} />
       <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
+      <meta name="language" content="en" />
 
       {/* Open Graph */}
       <meta property="og:title" content={fullTitle} />
