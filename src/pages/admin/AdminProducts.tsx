@@ -470,12 +470,12 @@ const AdminProducts = () => {
 
       {/* Product Editor Dialog */}
       <Dialog open={editorOpen} onOpenChange={setEditorOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader className="shrink-0">
             <DialogTitle>{editProduct.id ? "Edit Product" : "New Product"}</DialogTitle>
           </DialogHeader>
-          <Tabs defaultValue="basic" className="pt-2">
-            <TabsList className="w-full">
+          <Tabs defaultValue="basic" className="pt-2 flex flex-col min-h-0 flex-1">
+            <TabsList className="w-full shrink-0 sticky top-0 z-10 bg-muted">
               <TabsTrigger value="basic" className="flex-1">Basic Info</TabsTrigger>
               <TabsTrigger value="pricing" className="flex-1">Pricing & Stock</TabsTrigger>
               <TabsTrigger value="attributes" className="flex-1">Attributes</TabsTrigger>
@@ -484,6 +484,7 @@ const AdminProducts = () => {
               <TabsTrigger value="faqs" className="flex-1">FAQs</TabsTrigger>
             </TabsList>
 
+            <div className="overflow-y-auto flex-1 min-h-0">
             <TabsContent value="basic" className="space-y-4 pt-4">
               <div>
                 <Label>Product Name *</Label>
@@ -833,6 +834,7 @@ const AdminProducts = () => {
                 </div>
               )}
             </TabsContent>
+          </div>
           </Tabs>
 
           <div className="flex justify-end gap-2 pt-4 border-t border-border">
