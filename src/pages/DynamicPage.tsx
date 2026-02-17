@@ -1,15 +1,13 @@
-import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
 import PageHeader from "@/components/layout/PageHeader";
 import EditableText from "@/components/editor/EditableText";
-import FloatingEditBar from "@/components/editor/FloatingEditBar";
 import { useEditMode } from "@/contexts/EditModeContext";
 import { WorkSamplesSection, TestimonialsSection, FAQsSection } from "@/components/shared/PageComponents";
 import { Loader2 } from "lucide-react";
-import DOMPurify from "dompurify";
 import NotFound from "./NotFound";
 
 interface PageData {
@@ -25,36 +23,32 @@ interface PageData {
 
 const DynamicPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [page, setPage] = useState<PageData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
   const { isEditMode } = useEditMode();
 
-  useEffect(() => {
-    if (!slug) { setNotFound(true); setLoading(false); return; }
+  const { data: page, isLoading, isError } = useQuery({
+    queryKey: ["dynamic-page", slug],
+    queryFn: async () => {
+      if (!slug) throw new Error("No slug");
+      const { data, error } = await supabase
+        .from("pages")
+        .select("title, slug, content, meta_title, meta_description, components, hero_image, hero_overlay")
+        .eq("slug", slug)
+        .single();
+      if (error || !data) throw new Error("Not found");
+      return {
+        ...data,
+        components: (data.components as Record<string, boolean>) || {},
+        hero_image: data.hero_image || null,
+        hero_overlay: data.hero_overlay ?? 50,
+      } as PageData;
+    },
+    enabled: !!slug,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: "always",
+  });
 
-    const load = async () => {
-      // Admins in edit mode can see drafts too
-      let query = supabase.from("pages").select("title, slug, content, meta_title, meta_description, components, hero_image, hero_overlay").eq("slug", slug);
-      
-      const { data, error } = await query.single();
-
-      if (error || !data) {
-        setNotFound(true);
-      } else {
-        setPage({
-          ...data,
-          components: (data.components as Record<string, boolean>) || {},
-          hero_image: data.hero_image || null,
-          hero_overlay: data.hero_overlay ?? 50,
-        });
-      }
-      setLoading(false);
-    };
-    load();
-  }, [slug]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <Layout>
         <div className="flex items-center justify-center py-32">
@@ -64,7 +58,7 @@ const DynamicPage = () => {
     );
   }
 
-  if (notFound || !page) return <NotFound />;
+  if (isError || !page) return <NotFound />;
 
   let content: Record<string, string> = {};
   try {
@@ -118,7 +112,6 @@ const DynamicPage = () => {
             />
           )}
 
-          {/* Render any other content fields */}
           {Object.entries(content)
             .filter(([k]) => !["page_title", "page_description", "body_content"].includes(k))
             .map(([key, value]) => (
@@ -134,12 +127,9 @@ const DynamicPage = () => {
         </div>
       </section>
 
-      {/* Dynamic Components */}
       {page.components.work_samples && <WorkSamplesSection />}
       {page.components.testimonials && <TestimonialsSection />}
       {page.components.faqs && <FAQsSection />}
-
-      
     </Layout>
   );
 };

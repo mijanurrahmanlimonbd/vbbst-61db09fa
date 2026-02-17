@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -187,6 +188,7 @@ const LivePreview = ({ fields, title, heroImage, heroOverlay }: { fields: Conten
 const AdminPageEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(!!id);
   const [saving, setSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
@@ -337,6 +339,8 @@ const AdminPageEditor = () => {
       if (pageData.id) {
         const { error } = await supabase.from("pages").update(payload).eq("id", pageData.id);
         if (error) throw error;
+        queryClient.invalidateQueries({ queryKey: ["dynamic-page"] });
+        queryClient.invalidateQueries({ queryKey: ["pages"] });
         toast.success("Page saved!");
       } else {
         const { data, error } = await supabase.from("pages").insert(payload).select().single();
@@ -347,6 +351,8 @@ const AdminPageEditor = () => {
           return;
         }
         toast.success("Page created!");
+        queryClient.invalidateQueries({ queryKey: ["dynamic-page"] });
+        queryClient.invalidateQueries({ queryKey: ["pages"] });
         navigate(`/admin/pages/${data.id}/edit`, { replace: true });
       }
       setLastSaved(new Date());

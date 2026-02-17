@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface PageContent {
@@ -6,51 +6,48 @@ export interface PageContent {
 }
 
 export const usePageContent = (slug: string) => {
-  const [content, setContent] = useState<PageContent>({});
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const load = async () => {
+  const { data: content = {}, isLoading: loading } = useQuery({
+    queryKey: ["page-content", slug],
+    queryFn: async () => {
       const { data } = await supabase
         .from("pages")
         .select("content, components")
         .eq("slug", slug)
         .eq("status", "published")
         .single();
-      
       if (data?.content) {
         try {
-          setContent(JSON.parse(data.content));
+          return JSON.parse(data.content) as PageContent;
         } catch {
-          setContent({});
+          return {} as PageContent;
         }
       }
-      setLoading(false);
-    };
-    load();
-  }, [slug]);
+      return {} as PageContent;
+    },
+    enabled: !!slug,
+    staleTime: 0,
+    refetchOnMount: "always",
+  });
 
   return { content, loading };
 };
 
 export const usePageComponents = (slug: string) => {
-  const [components, setComponents] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    const load = async () => {
+  const { data: components = {} } = useQuery({
+    queryKey: ["page-components", slug],
+    queryFn: async () => {
       const { data } = await supabase
         .from("pages")
         .select("components")
         .eq("slug", slug)
         .eq("status", "published")
         .single();
-      
-      if (data?.components) {
-        setComponents(data.components as Record<string, boolean>);
-      }
-    };
-    load();
-  }, [slug]);
+      return (data?.components as Record<string, boolean>) || {};
+    },
+    enabled: !!slug,
+    staleTime: 0,
+    refetchOnMount: "always",
+  });
 
   return components;
 };
