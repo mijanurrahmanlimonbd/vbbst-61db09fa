@@ -50,7 +50,7 @@ const HeroSection = () => {
             <div className="animate-hero-fade-right" style={{ animationDelay: "0.15s" }}>
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold text-primary">
                 <Star className="h-3.5 w-3.5 fill-primary" />
-                Best Verified Business Manager 2026 &gt; Verified BM Services
+                Verified BM Services
                 <span className="h-1.5 w-1.5 rounded-full bg-[hsl(142,70%,45%)] animate-pulse" />
               </div>
             </div>
