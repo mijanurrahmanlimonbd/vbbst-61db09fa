@@ -115,7 +115,7 @@ const Navbar = () => {
               ))}
             </div>
 
-            <div className="flex items-center gap-4 min-w-[120px] justify-end">
+            <div className="hidden lg:flex items-center gap-4 min-w-[120px] justify-end">
               <button
                 onClick={(e) => { e.stopPropagation(); setSearchOpen(!searchOpen); }}
                 className="text-foreground hover:text-primary transition-colors"
@@ -186,14 +186,6 @@ const Navbar = () => {
                   <User className="w-5 h-5" />
                 </button>
               )}
-
-              <button
-                data-menu-toggle
-                className="md:hidden text-foreground"
-                onClick={toggleMenu}
-              >
-                {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
             </div>
           </div>
         </div>
@@ -214,45 +206,6 @@ const Navbar = () => {
           </div>
         )}
 
-        {/* Mobile menu overlay + slide-out */}
-        {mobileOpen && (
-          <>
-            <div
-              className="fixed inset-0 z-[9998] bg-black/40 backdrop-blur-sm md:hidden"
-              onClick={() => setMobileOpen(false)}
-              aria-hidden="true"
-            />
-            <div
-              data-mobile-menu
-              className="fixed top-16 left-0 right-0 z-[9999] bg-background border-b border-border md:hidden"
-              style={{ animation: "hero-fade-up 0.2s ease-out" }}
-            >
-              <div className="px-4 py-4 space-y-3 max-h-[calc(100vh-120px)] overflow-y-auto">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    onClick={() => setMobileOpen(false)}
-                    className={`block text-sm font-medium transition-colors hover:text-primary ${
-                      location.pathname === link.path ? "text-primary" : "text-foreground"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-
-                {/* My Account link inside mobile menu */}
-                <button
-                  onClick={handleAccountClick}
-                  className="flex items-center gap-2 w-full text-left text-sm font-medium text-foreground hover:text-primary transition-colors pt-3 border-t border-border"
-                >
-                  <User className="w-4 h-4" />
-                  {user ? "My Account" : "Sign In / Register"}
-                </button>
-              </div>
-            </div>
-          </>
-        )}
       </nav>
 
       {/* Auth Modal */}
