@@ -24,7 +24,7 @@ const SEOHead = ({
   const siteUrl = getSiteUrl();
   const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
   const canonicalUrl = `${siteUrl}${location.pathname}`;
-  const defaultOgImage = `${siteUrl}/og-image.png`;
+  const defaultOgImage = `${siteUrl}/og-image.webp`;
   const resolvedOgImage = toBrandedUrl(ogImage || defaultOgImage);
 
   return (
@@ -49,7 +49,7 @@ const SEOHead = ({
       <meta property="og:image" content={resolvedOgImage} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
-      <meta property="og:image:type" content="image/png" />
+      <meta property="og:image:type" content="image/webp" />
       <meta property="og:image:alt" content={fullTitle} />
       <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:locale" content="en_US" />
