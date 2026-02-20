@@ -28,7 +28,7 @@ import { computeSEOScore, getScoreBadgeClasses, SEOScoreResult } from "@/lib/seo
 import SEOQuickFixPopup from "@/components/admin/SEOQuickFixPopup";
 import { toast as sonnerToast } from "sonner";
 
-const CATEGORIES = ["Verified BM", "WhatsApp API", "Facebook Accounts", "TikTok Ads", "Agency Accounts"];
+const DEFAULT_CATEGORIES = ["Verified BM", "WhatsApp API", "Facebook Accounts", "TikTok Ads", "Agency Accounts"];
 
 interface ProductAttribute {
   key: string;
@@ -103,6 +103,25 @@ const AdminProducts = () => {
   const [trustPoints, setTrustPoints] = useState<TrustPoint[]>([]);
   const [productFaqs, setProductFaqs] = useState<ProductFAQ[]>([]);
   const [globalFaqs, setGlobalFaqs] = useState<{ id: string; question: string; answer: string; faq_group: string }[]>([]);
+
+  const [customCategories, setCustomCategories] = useState<string[]>([]);
+  const [newCategoryInput, setNewCategoryInput] = useState("");
+
+  // Merge default + custom + categories from existing products
+  const CATEGORIES = useMemo(() => {
+    const fromProducts = products.map(p => p.category).filter(Boolean);
+    const all = new Set([...DEFAULT_CATEGORIES, ...customCategories, ...fromProducts]);
+    return Array.from(all).sort();
+  }, [products, customCategories]);
+
+  const addCustomCategory = () => {
+    const trimmed = newCategoryInput.trim();
+    if (!trimmed) return;
+    if (CATEGORIES.includes(trimmed)) { toast.info("Category already exists."); return; }
+    setCustomCategories(prev => [...prev, trimmed]);
+    setNewCategoryInput("");
+    toast.success(`Category "${trimmed}" added.`);
+  };
 
   // SEO scoring
   const [seoPopup, setSeoPopup] = useState<{ product: Product; result: SEOScoreResult } | null>(null);
@@ -519,6 +538,18 @@ const AdminProducts = () => {
                     {CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
                 </Select>
+                <div className="flex items-center gap-2 mt-2">
+                  <Input
+                    value={newCategoryInput}
+                    onChange={(e) => setNewCategoryInput(e.target.value)}
+                    placeholder="Add new category…"
+                    className="flex-1 h-8 text-sm"
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addCustomCategory(); } }}
+                  />
+                  <Button type="button" size="sm" variant="outline" onClick={addCustomCategory} className="h-8 gap-1">
+                    <PlusCircle className="w-3.5 h-3.5" /> Add
+                  </Button>
+                </div>
               </div>
               <div>
                 <Label>Short Description</Label>
