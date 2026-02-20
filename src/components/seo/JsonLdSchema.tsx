@@ -19,6 +19,7 @@ import {
   generateArticle,
   generateFAQPage,
   generateReadAction,
+  generateService,
   type BrandingData,
 } from "@/lib/jsonLdSchemas";
 import { getSiteUrl } from "@/lib/config";
@@ -74,6 +75,8 @@ const JsonLdSchema = ({
   // 1. Organization (global)
   if (config.organization) {
     schemas.push(generateOrganization(brandingData));
+    // Service schema for rich snippets
+    schemas.push(generateService(brandingData));
   }
 
   // 2. LocalBusiness (global, if enabled)

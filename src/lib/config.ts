@@ -4,7 +4,7 @@
  * in development, preview, and production.
  */
 
-export const SITE_NAME = "Verified BM Services";
+export const SITE_NAME = "Verified BM Services - Trusted Business Manager Solutions";
 
 /** Production domain — always used for canonical URLs, OG tags, invoices, etc. */
 const PRODUCTION_URL = "https://verifiedbmservices.com";
@@ -19,4 +19,4 @@ export const getSiteUrl = (): string => {
 };
 
 export const DEFAULT_DESCRIPTION =
-  "Secure, high-limit Verified Business Managers and WhatsApp Business API solutions for your advertising needs. Instant delivery at Verified BM Services.";
+  "Looking for reliable Facebook Business Managers? Verified BM Services offers secure, ready-to-use BMs to scale your advertising safely. Shop our verified solutions now!";

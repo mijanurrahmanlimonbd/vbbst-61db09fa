@@ -64,9 +64,9 @@ export interface BusinessInfo {
 }
 
 const DEFAULT_BUSINESS: BusinessInfo = {
-  name: "Verified BM services",
+  name: "Verified BM Services",
   description: DEFAULT_DESCRIPTION,
-  email: "support@verifiedbmservices.com",
+  email: "info@verifiedbmservices.com",
   phone: "+8801302669333",
   address: {
     street: "Madergonj, Pirgonj",
@@ -437,5 +437,27 @@ export function combineSchemas(...schemas: any[]) {
       const { "@context": _, ...rest } = s;
       return rest;
     }),
+  };
+}
+
+/** Service schema for rich snippets */
+export function generateService(branding: BrandingData, biz: BusinessInfo = DEFAULT_BUSINESS) {
+  const siteUrl = getSiteUrl();
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: "Verified Business Manager Solutions",
+    description: DEFAULT_DESCRIPTION,
+    provider: {
+      "@type": "Organization",
+      name: branding.site_title || biz.name,
+      url: siteUrl,
+      logo: branding.header_logo
+        ? { "@type": "ImageObject", url: branding.header_logo }
+        : undefined,
+    },
+    serviceType: "Digital Marketing Services",
+    areaServed: "Worldwide",
+    url: siteUrl,
   };
 }
