@@ -49,6 +49,23 @@ interface ProductFAQ {
   answer: string;
 }
 
+interface SectionHeading {
+  subtitle: string;
+  title: string;
+  description: string;
+}
+
+const DEFAULT_HEADINGS: Record<string, SectionHeading> = {
+  features: { subtitle: "What You Get", title: "Product Features & Inclusions", description: "Everything included with your purchase — no hidden fees, no surprises." },
+  specs: { subtitle: "Specifications", title: "Product Details", description: "" },
+  description: { subtitle: "Description", title: "About This Product", description: "" },
+  payment: { subtitle: "Payment", title: "How to Make Payment", description: "We accept cryptocurrency payments for secure, fast, and worldwide transactions." },
+  delivery: { subtitle: "Delivery", title: "How We Deliver Your Account", description: "A fully transparent, secure process from purchase to access." },
+  whyUs: { subtitle: "Why Verified BM Services", title: "Why Customers Choose Us", description: "Trusted by 1,000+ advertisers worldwide for verified Meta accounts." },
+  testimonials: { subtitle: "Testimonials", title: "What Our Customers Say", description: "Real reviews from verified buyers who trust Verified BM services." },
+  faq: { subtitle: "FAQ", title: "Frequently Asked Questions", description: "" },
+};
+
 interface Product {
   id: string;
   title: string;
@@ -102,6 +119,7 @@ const AdminProducts = () => {
   const [specGroups, setSpecGroups] = useState<SpecGroup[]>([]);
   const [trustPoints, setTrustPoints] = useState<TrustPoint[]>([]);
   const [productFaqs, setProductFaqs] = useState<ProductFAQ[]>([]);
+  const [sectionHeadings, setSectionHeadings] = useState<Record<string, SectionHeading>>({});
   const [globalFaqs, setGlobalFaqs] = useState<{ id: string; question: string; answer: string; faq_group: string }[]>([]);
 
   const [customCategories, setCustomCategories] = useState<string[]>([]);
@@ -196,7 +214,7 @@ const AdminProducts = () => {
     fetchGlobalFaqs();
   }, []);
 
-  const openNew = () => { setEditProduct(emptyProduct()); setSkuError(""); setSlugManual(false); setAttributes([]); setSpecGroups([]); setTrustPoints([]); setProductFaqs([]); setEditorOpen(true); };
+  const openNew = () => { setEditProduct(emptyProduct()); setSkuError(""); setSlugManual(false); setAttributes([]); setSpecGroups([]); setTrustPoints([]); setProductFaqs([]); setSectionHeadings({}); setEditorOpen(true); };
   const openEdit = (p: Product) => {
     setEditProduct({ ...p, gallery_images: p.gallery_images || [] });
     setSkuError("");
@@ -209,6 +227,7 @@ const AdminProducts = () => {
     setSpecGroups((attrs as any)._specs || []);
     setTrustPoints(((attrs as any)._trust_points || []).map((t: string) => ({ text: t })));
     setProductFaqs((attrs as any)._faqs || []);
+    setSectionHeadings((attrs as any)._headings || {});
     setEditorOpen(true);
   };
 
@@ -253,6 +272,7 @@ const AdminProducts = () => {
         _specs: specGroups.filter(g => g.title.trim() && g.items.some(i => i.trim())),
         _trust_points: trustPoints.map(t => t.text).filter(Boolean),
         _faqs: productFaqs.filter(f => f.question.trim() && f.answer.trim()),
+        _headings: Object.keys(sectionHeadings).length > 0 ? sectionHeadings : undefined,
       },
     };
 
@@ -510,6 +530,7 @@ const AdminProducts = () => {
               <TabsTrigger value="images" className="flex-1">Images</TabsTrigger>
               <TabsTrigger value="seo" className="flex-1">SEO</TabsTrigger>
               <TabsTrigger value="faqs" className="flex-1">FAQs</TabsTrigger>
+              <TabsTrigger value="headings" className="flex-1">Headings</TabsTrigger>
             </TabsList>
 
             <div className="overflow-y-auto flex-1 min-h-0">
@@ -908,6 +929,68 @@ const AdminProducts = () => {
                    })}
                  </div>
                </div>
+             </TabsContent>
+
+             <TabsContent value="headings" className="space-y-4 pt-4">
+               <div>
+                 <Label className="text-base font-semibold">Section Headings</Label>
+                 <p className="text-xs text-muted-foreground mt-0.5">Customize the h2 titles, subtitles, and descriptions for each section on the product page. Leave blank to use defaults.</p>
+               </div>
+               {Object.entries(DEFAULT_HEADINGS).map(([key, defaults]) => {
+                 const current = sectionHeadings[key] || {};
+                 const updateHeading = (field: keyof SectionHeading, value: string) => {
+                   setSectionHeadings(prev => ({
+                     ...prev,
+                     [key]: { ...defaults, ...prev[key], [field]: value }
+                   }));
+                 };
+                 return (
+                   <div key={key} className="rounded-lg border border-border p-4 space-y-3">
+                     <div className="flex items-center justify-between">
+                       <Label className="text-sm font-semibold capitalize">{key.replace(/([A-Z])/g, ' $1').trim()} Section</Label>
+                       {(current as any).title || (current as any).subtitle || (current as any).description ? (
+                         <button
+                           onClick={() => setSectionHeadings(prev => { const n = { ...prev }; delete n[key]; return n; })}
+                           className="text-xs text-muted-foreground hover:text-destructive transition-colors"
+                         >
+                           Reset to default
+                         </button>
+                       ) : null}
+                     </div>
+                     <div className="grid grid-cols-2 gap-3">
+                       <div>
+                         <Label className="text-xs text-muted-foreground">Subtitle (small text above h2)</Label>
+                         <Input
+                           value={(current as any).subtitle ?? ""}
+                           onChange={(e) => updateHeading("subtitle", e.target.value)}
+                           placeholder={defaults.subtitle}
+                           className="mt-1 h-8 text-sm"
+                         />
+                       </div>
+                       <div>
+                         <Label className="text-xs text-muted-foreground">H2 Title</Label>
+                         <Input
+                           value={(current as any).title ?? ""}
+                           onChange={(e) => updateHeading("title", e.target.value)}
+                           placeholder={defaults.title}
+                           className="mt-1 h-8 text-sm"
+                         />
+                       </div>
+                     </div>
+                     {defaults.description && (
+                       <div>
+                         <Label className="text-xs text-muted-foreground">Description</Label>
+                         <Input
+                           value={(current as any).description ?? ""}
+                           onChange={(e) => updateHeading("description", e.target.value)}
+                           placeholder={defaults.description}
+                           className="mt-1 h-8 text-sm"
+                         />
+                       </div>
+                     )}
+                   </div>
+                 );
+               })}
              </TabsContent>
            </div>
            </Tabs>
