@@ -84,6 +84,7 @@ const SETTING_KEYS = {
   twitterCard: "seo_twitter_card",
   twitterSite: "seo_twitter_site",
   searchConsoleTag: "seo_search_console_tag",
+  bingVerificationTag: "seo_bing_verification_tag",
   schemaArticle: "seo_schema_article",
   schemaProduct: "seo_schema_product",
   schemaLocalBiz: "seo_schema_local_business",
@@ -114,8 +115,9 @@ const AdminSEO = () => {
   const [twitterCard, setTwitterCard] = useState("summary_large_image");
   const [twitterSite, setTwitterSite] = useState("");
 
-  // Search Console
+  // Search Console / Bing
   const [searchConsoleTag, setSearchConsoleTag] = useState("");
+  const [bingVerificationTag, setBingVerificationTag] = useState("");
 
   // Schema toggles
   const [schemaArticle, setSchemaArticle] = useState(true);
@@ -151,6 +153,7 @@ const AdminSEO = () => {
         if (map[SETTING_KEYS.twitterCard]) setTwitterCard(map[SETTING_KEYS.twitterCard]);
         if (map[SETTING_KEYS.twitterSite]) setTwitterSite(map[SETTING_KEYS.twitterSite]);
         if (map[SETTING_KEYS.searchConsoleTag]) setSearchConsoleTag(map[SETTING_KEYS.searchConsoleTag]);
+        if (map[SETTING_KEYS.bingVerificationTag]) setBingVerificationTag(map[SETTING_KEYS.bingVerificationTag]);
         if (map[SETTING_KEYS.schemaArticle]) setSchemaArticle(map[SETTING_KEYS.schemaArticle] === "true");
         if (map[SETTING_KEYS.schemaProduct]) setSchemaProduct(map[SETTING_KEYS.schemaProduct] === "true");
         if (map[SETTING_KEYS.schemaLocalBiz]) setSchemaLocalBiz(map[SETTING_KEYS.schemaLocalBiz] === "true");
@@ -197,6 +200,7 @@ const AdminSEO = () => {
         saveSetting(SETTING_KEYS.twitterCard, twitterCard),
         saveSetting(SETTING_KEYS.twitterSite, twitterSite),
         saveSetting(SETTING_KEYS.searchConsoleTag, searchConsoleTag),
+        saveSetting(SETTING_KEYS.bingVerificationTag, bingVerificationTag),
         saveSetting(SETTING_KEYS.schemaArticle, String(schemaArticle)),
         saveSetting(SETTING_KEYS.schemaProduct, String(schemaProduct)),
         saveSetting(SETTING_KEYS.schemaLocalBiz, String(schemaLocalBiz)),
@@ -470,6 +474,31 @@ const AdminSEO = () => {
                 <p className="text-[11px] text-muted-foreground">
                   Go to <span className="font-medium text-foreground">Google Search Console → Settings → Ownership verification → HTML tag</span> and copy the full meta tag.
                 </p>
+              </div>
+            </div>
+
+            {/* Bing Webmaster Tools */}
+            <div className="border-t border-border pt-6">
+              <h3 className="text-base font-semibold text-foreground mb-1 flex items-center gap-2">
+                <Globe className="w-4 h-4 text-[hsl(200,100%,40%)]" /> Bing Webmaster Tools
+              </h3>
+              <p className="text-xs text-muted-foreground mb-4">
+                Paste your Bing verification content value below.
+              </p>
+              <div>
+                <Label>Bing Verification Code</Label>
+                <Input
+                  value={bingVerificationTag}
+                  onChange={(e) => setBingVerificationTag(e.target.value)}
+                  placeholder="e.g. ABC123DEF456..."
+                  className="mt-1.5 font-mono text-sm"
+                />
+                <div className="flex items-start gap-2 mt-2 p-3 bg-[hsl(200,100%,40%)]/5 rounded-lg border border-[hsl(200,100%,40%)]/15">
+                  <Info className="w-4 h-4 text-[hsl(200,100%,40%)] shrink-0 mt-0.5" />
+                  <p className="text-[11px] text-muted-foreground">
+                    Go to <span className="font-medium text-foreground">Bing Webmaster Tools → Add site → HTML Meta Tag</span> and copy just the <code className="bg-secondary px-1 py-0.5 rounded text-[11px]">content</code> value.
+                  </p>
+                </div>
               </div>
             </div>
 

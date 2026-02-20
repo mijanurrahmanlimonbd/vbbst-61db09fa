@@ -2,6 +2,8 @@ import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 import { SITE_NAME, getSiteUrl, DEFAULT_DESCRIPTION } from "@/lib/config";
 import { toBrandedUrl } from "@/lib/imageUtils";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SEOHeadProps {
   title?: string;
@@ -27,6 +29,28 @@ const SEOHead = ({
   const defaultOgImage = `${siteUrl}/og-image.webp`;
   const resolvedOgImage = toBrandedUrl(ogImage || defaultOgImage);
 
+  const [googleVerification, setGoogleVerification] = useState("");
+  const [bingVerification, setBingVerification] = useState("");
+
+  useEffect(() => {
+    supabase
+      .from("site_settings")
+      .select("key, value")
+      .in("key", ["seo_search_console_tag", "seo_bing_verification_tag"])
+      .then(({ data }) => {
+        data?.forEach((r) => {
+          if (r.key === "seo_search_console_tag" && r.value) {
+            // Extract content value from full meta tag or plain value
+            const match = r.value.match(/content="([^"]+)"/);
+            setGoogleVerification(match ? match[1] : r.value);
+          }
+          if (r.key === "seo_bing_verification_tag" && r.value) {
+            setBingVerification(r.value);
+          }
+        });
+      });
+  }, []);
+
   return (
     <Helmet>
       <html lang="en" />
@@ -35,6 +59,10 @@ const SEOHead = ({
       {keywords && <meta name="keywords" content={keywords} />}
       <meta name="robots" content={noIndex ? "noindex,nofollow" : "index,follow"} />
       <link rel="canonical" href={canonicalUrl} />
+
+      {/* Search engine verification */}
+      {googleVerification && <meta name="google-site-verification" content={googleVerification} />}
+      {bingVerification && <meta name="msvalidate.01" content={bingVerification} />}
 
       {/* Hreflang — English only */}
       <link rel="alternate" hrefLang="en" href={canonicalUrl} />
