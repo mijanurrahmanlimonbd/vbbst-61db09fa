@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-const PRODUCTION_DOMAINS = ["verifiedbmservices.com", "www.verifiedbmservices.com"];
+declare global {
+  interface Window {
+    dataLayer: Record<string, unknown>[];
+    fbq: (...args: unknown[]) => void;
+    gtag: (...args: unknown[]) => void;
+  }
+}
 
 const isProduction = () => {
   const hostname = window.location.hostname;
-  // Allow any non-localhost, non-preview domain as production
   return (
     !hostname.includes("localhost") &&
     !hostname.includes("lovable.app") &&
@@ -21,7 +26,6 @@ const injectScript = (content: string, target: "head" | "body") => {
 
   scripts.forEach((origScript) => {
     const script = document.createElement("script");
-    // Copy attributes
     Array.from(origScript.attributes).forEach((attr) => {
       script.setAttribute(attr.name, attr.value);
     });
@@ -30,12 +34,53 @@ const injectScript = (content: string, target: "head" | "body") => {
     parent.appendChild(script);
   });
 
-  // Also inject non-script elements (noscript, etc.)
   const nonScripts = container.querySelectorAll(":not(script)");
   nonScripts.forEach((el) => {
     const clone = el.cloneNode(true) as HTMLElement;
     clone.setAttribute("data-tracking", "custom");
     parent.appendChild(clone);
+  });
+};
+
+/* ── Standard event helpers (call from components) ── */
+
+export const trackEvent = (eventName: string, params?: Record<string, unknown>) => {
+  if (typeof window.fbq === "function") {
+    window.fbq("track", eventName, params);
+  }
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ event: eventName, ...params });
+};
+
+export const trackAddToCart = (product: { id: string; title: string; price: number; currency?: string }) => {
+  trackEvent("AddToCart", {
+    content_ids: [product.id],
+    content_name: product.title,
+    content_type: "product",
+    value: product.price,
+    currency: product.currency || "USD",
+  });
+};
+
+export const trackPurchase = (order: { id: string; total: number; currency?: string; items?: { id: string; title: string; price: number; qty: number }[] }) => {
+  trackEvent("Purchase", {
+    content_ids: order.items?.map((i) => i.id) || [],
+    content_type: "product",
+    value: order.total,
+    currency: order.currency || "USD",
+    order_id: order.id,
+    num_items: order.items?.length || 0,
+  });
+};
+
+export const trackViewContent = (product: { id: string; title: string; price: number; currency?: string; category?: string }) => {
+  trackEvent("ViewContent", {
+    content_ids: [product.id],
+    content_name: product.title,
+    content_category: product.category,
+    content_type: "product",
+    value: product.price,
+    currency: product.currency || "USD",
   });
 };
 
@@ -45,6 +90,9 @@ const TrackingScripts = () => {
   useEffect(() => {
     if (loaded) return;
     if (!isProduction()) return;
+
+    // Initialize dataLayer early
+    window.dataLayer = window.dataLayer || [];
 
     const load = async () => {
       const { data } = await supabase
@@ -76,7 +124,7 @@ const TrackingScripts = () => {
         document.head.appendChild(inline);
       }
 
-      // GTM
+      // GTM head + noscript body fallback
       if (settings.tracking_gtm_id) {
         const script = document.createElement("script");
         script.setAttribute("data-tracking", "gtm");
@@ -88,19 +136,29 @@ const TrackingScripts = () => {
           })(window,document,'script','dataLayer','${settings.tracking_gtm_id}');
         `;
         document.head.appendChild(script);
+
+        // GTM noscript fallback
+        const noscript = document.createElement("noscript");
+        noscript.setAttribute("data-tracking", "gtm-noscript");
+        const iframe = document.createElement("iframe");
+        iframe.src = `https://www.googletagmanager.com/ns.html?id=${settings.tracking_gtm_id}`;
+        iframe.height = "0";
+        iframe.width = "0";
+        iframe.style.display = "none";
+        iframe.style.visibility = "hidden";
+        noscript.appendChild(iframe);
+        document.body.insertBefore(noscript, document.body.firstChild);
       }
 
       // Google Ads
       if (settings.tracking_google_ads_id) {
         const inline = document.createElement("script");
         inline.setAttribute("data-tracking", "gads");
-        inline.textContent = `
-          gtag('config', '${settings.tracking_google_ads_id}');
-        `;
+        inline.textContent = `gtag('config', '${settings.tracking_google_ads_id}');`;
         document.head.appendChild(inline);
       }
 
-      // Facebook Pixel
+      // Facebook Pixel with PageView
       if (settings.tracking_fb_pixel_id) {
         const script = document.createElement("script");
         script.setAttribute("data-tracking", "fbpixel");
@@ -119,12 +177,9 @@ const TrackingScripts = () => {
         document.head.appendChild(script);
       }
 
-      // Custom header scripts
       if (settings.tracking_header_scripts) {
         injectScript(settings.tracking_header_scripts, "head");
       }
-
-      // Custom footer scripts
       if (settings.tracking_footer_scripts) {
         injectScript(settings.tracking_footer_scripts, "body");
       }
@@ -132,7 +187,6 @@ const TrackingScripts = () => {
       setLoaded(true);
     };
 
-    // Lazy load - wait for page to be idle
     if ("requestIdleCallback" in window) {
       (window as any).requestIdleCallback(load);
     } else {
