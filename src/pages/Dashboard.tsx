@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBranding } from "@/hooks/useBranding";
@@ -564,9 +564,9 @@ const SupportTab = () => (
           </a>
         </Button>
         <Button asChild variant="outline" className="gap-2">
-          <a href="/faq">
+          <Link to="/faq">
             <HelpCircle className="w-4 h-4" /> View FAQ
-          </a>
+          </Link>
         </Button>
       </div>
     </div>

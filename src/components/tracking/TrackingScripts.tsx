@@ -14,6 +14,7 @@ const isProduction = () => {
   return (
     !hostname.includes("localhost") &&
     !hostname.includes("lovable.app") &&
+    !hostname.includes("lovableproject.com") &&
     !hostname.includes("127.0.0.1")
   );
 };
