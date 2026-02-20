@@ -236,16 +236,18 @@ const AdminSEO = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-secondary/50 flex-wrap">
-          <TabsTrigger value="modules">Modules</TabsTrigger>
-          <TabsTrigger value="crawler">Crawler & Indexing</TabsTrigger>
-          <TabsTrigger value="international">International SEO</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="titles">Titles & Meta</TabsTrigger>
-          <TabsTrigger value="social">Social Meta</TabsTrigger>
-          <TabsTrigger value="search-console">Search Console</TabsTrigger>
-          <TabsTrigger value="health">Health Report</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-1 px-1">
+          <TabsList className="bg-secondary/50 w-max min-w-full justify-start">
+            <TabsTrigger value="modules">Modules</TabsTrigger>
+            <TabsTrigger value="crawler">Crawler & Indexing</TabsTrigger>
+            <TabsTrigger value="international">International SEO</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="titles">Titles & Meta</TabsTrigger>
+            <TabsTrigger value="social">Social Meta</TabsTrigger>
+            <TabsTrigger value="search-console">Search Console</TabsTrigger>
+            <TabsTrigger value="health">Health Report</TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* ────────── ANALYTICS TAB ────────── */}
         <TabsContent value="analytics">
