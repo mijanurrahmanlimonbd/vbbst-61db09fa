@@ -134,7 +134,7 @@ const AdminUsers = () => {
       created_at: p.created_at,
       email: p.email || "No email",
       role: roleMap.get(p.id) || "author",
-      provider: "email",
+      provider: p.provider || "email",
     }));
 
     setUsers(userRows);
