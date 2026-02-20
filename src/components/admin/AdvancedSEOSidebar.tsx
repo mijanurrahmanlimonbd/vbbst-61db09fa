@@ -105,13 +105,15 @@ export function runAdvancedSEOAudit(data: AdvancedSEOData): { score: number; che
     }
   }
 
-  // 5. Keyword in H2/H3 subheadings
+  // 5. Keyword in H2/H3 subheadings (includes page title H1 + template-rendered headings)
   if (kw) {
-    const headings = getHeadings(data.content);
-    const kwH = headings.filter((h) => h.includes(kw));
-    if (kwH.length >= 2) checks.push({ id: "kw-headings", label: "Keyword in subheadings", status: "good", detail: `Found in ${kwH.length} H2/H3 headings.` });
-    else if (kwH.length === 1) checks.push({ id: "kw-headings", label: "Keyword in subheadings", status: "warning", detail: "Found in 1 heading. Aim for 2+.", fixAction: "suggest_headings" });
-    else checks.push({ id: "kw-headings", label: "Keyword in subheadings", status: "error", detail: "Not found in any H2/H3.", fixAction: "suggest_headings" });
+    const contentHeadings = getHeadings(data.content);
+    // Also count the page title (rendered as H1) as a heading source
+    const allHeadings = [...contentHeadings, data.postTitle.toLowerCase()];
+    const kwH = allHeadings.filter((h) => h.includes(kw));
+    if (kwH.length >= 2) checks.push({ id: "kw-headings", label: "Keyword in headings", status: "good", detail: `Found in ${kwH.length} headings (H1/H2/H3).` });
+    else if (kwH.length === 1) checks.push({ id: "kw-headings", label: "Keyword in headings", status: "good", detail: "Found in 1 heading (page title or subheading)." });
+    else checks.push({ id: "kw-headings", label: "Keyword in headings", status: "error", detail: "Not found in any heading.", fixAction: "suggest_headings" });
   }
 
   // 6. Image alt text with keyword
