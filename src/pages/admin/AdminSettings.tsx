@@ -83,10 +83,11 @@ const AdminSettings = () => {
   useEffect(() => {
     const load = async () => {
       setPaymentLoading(true);
-      const [settingsRes, methodsRes, countRes] = await Promise.all([
+      const [settingsRes, methodsRes, countRes, generalRes] = await Promise.all([
         supabase.from("site_settings").select("key, value").in("key", ["cryptomus_api_key", "cryptomus_merchant_id", "binance_pay_id", "binance_qr_url"]),
         supabase.from("payment_methods").select("*").order("sort_order", { ascending: true }),
         supabase.from("site_settings").select("value").eq("key", "homepage_product_count").single(),
+        supabase.from("site_settings").select("key, value").in("key", ["site_title", "site_description", "contact_email", "whatsapp_number"]),
       ]);
 
       if (settingsRes.data) {
@@ -99,6 +100,14 @@ const AdminSettings = () => {
       }
       if (methodsRes.data) setPaymentMethods(methodsRes.data as PaymentMethod[]);
       if (countRes.data?.value) setHomepageProductCount(countRes.data.value);
+      if (generalRes.data) {
+        for (const row of generalRes.data) {
+          if (row.key === "site_title" && row.value) setSiteTitle(row.value);
+          if (row.key === "site_description" && row.value) setSiteDescription(row.value);
+          if (row.key === "contact_email" && row.value) setContactEmail(row.value);
+          if (row.key === "whatsapp_number" && row.value) setWhatsapp(row.value);
+        }
+      }
       setPaymentLoading(false);
     };
     load();
@@ -151,12 +160,21 @@ const AdminSettings = () => {
     if (Object.keys(fieldErrors).length > 0) { toast.error("Please fill in all required fields."); return; }
     setSaving(true);
     try {
-      // Save homepage product count
-      const { data: existing } = await supabase.from("site_settings").select("key").eq("key", "homepage_product_count").single();
-      if (existing) {
-        await supabase.from("site_settings").update({ value: homepageProductCount, updated_at: new Date().toISOString() }).eq("key", "homepage_product_count");
-      } else {
-        await supabase.from("site_settings").insert({ key: "homepage_product_count", value: homepageProductCount });
+      const settings = [
+        { key: "site_title", value: siteTitle.trim() },
+        { key: "site_description", value: siteDescription.trim() },
+        { key: "contact_email", value: contactEmail.trim() },
+        { key: "whatsapp_number", value: whatsapp.trim() },
+        { key: "homepage_product_count", value: homepageProductCount },
+      ].filter((s) => s.value);
+
+      for (const setting of settings) {
+        const { data: existing } = await supabase.from("site_settings").select("key").eq("key", setting.key).single();
+        if (existing) {
+          await supabase.from("site_settings").update({ value: setting.value, updated_at: new Date().toISOString() }).eq("key", setting.key);
+        } else {
+          await supabase.from("site_settings").insert(setting);
+        }
       }
       toast.success("Settings saved successfully.");
     } catch { toast.error("Failed to save settings."); }
