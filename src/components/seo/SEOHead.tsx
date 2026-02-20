@@ -4,6 +4,7 @@ import { SITE_NAME, getSiteUrl, DEFAULT_DESCRIPTION } from "@/lib/config";
 import { toBrandedUrl } from "@/lib/imageUtils";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useBranding } from "@/hooks/useBranding";
 
 interface SEOHeadProps {
   title?: string;
@@ -24,7 +25,9 @@ const SEOHead = ({
 }: SEOHeadProps) => {
   const location = useLocation();
   const siteUrl = getSiteUrl();
-  const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
+  const { branding } = useBranding();
+  const dynamicSiteName = branding.site_title || SITE_NAME;
+  const fullTitle = title ? `${title} | ${dynamicSiteName}` : dynamicSiteName;
   const canonicalUrl = `${siteUrl}${location.pathname}`;
   const defaultOgImage = `${siteUrl}/og-image.webp`;
   const resolvedOgImage = toBrandedUrl(ogImage || defaultOgImage);
@@ -79,7 +82,7 @@ const SEOHead = ({
       <meta property="og:image:height" content="630" />
       <meta property="og:image:type" content="image/webp" />
       <meta property="og:image:alt" content={fullTitle} />
-      <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:site_name" content={dynamicSiteName} />
       <meta property="og:locale" content="en_US" />
 
       {/* Twitter / X */}
