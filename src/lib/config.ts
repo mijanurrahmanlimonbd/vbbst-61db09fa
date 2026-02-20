@@ -4,7 +4,7 @@
  * in development, preview, and production.
  */
 
-export const SITE_NAME = "Verified BM Services - Trusted Business Manager Solutions";
+export const SITE_NAME = "Verified BM services";
 
 /** Production domain — always used for canonical URLs, OG tags, invoices, etc. */
 const PRODUCTION_URL = "https://verifiedbmservices.com";
