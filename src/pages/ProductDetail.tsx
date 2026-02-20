@@ -57,6 +57,9 @@ const ProductDetail = () => {
   const attrs = product.attributes && typeof product.attributes === "object" ? product.attributes : {};
   const attrEntries = Object.entries(attrs).filter(([key]) => !key.startsWith("_"));
   const productFaqs: { question: string; answer: string }[] = (attrs as any)._faqs || [];
+  const headings = (attrs as any)._headings || {};
+  const h = (section: string, field: "subtitle" | "title" | "description", fallback: string) =>
+    headings[section]?.[field] || fallback;
 
   // Fallback feature attributes when none are set in admin
   const defaultFeatures: [string, string][] = [
@@ -282,10 +285,10 @@ const ProductDetail = () => {
       {/* ─── 2. DYNAMIC ATTRIBUTES GRID ─── */}
       <section className="py-14 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">What You Get</p>
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Product Features & Inclusions</h2>
+          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">{h("features", "subtitle", "What You Get")}</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">{h("features", "title", "Product Features & Inclusions")}</h2>
           <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">
-            Everything included with your purchase — no hidden fees, no surprises.
+            {h("features", "description", "Everything included with your purchase — no hidden fees, no surprises.")}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-10">
@@ -307,8 +310,8 @@ const ProductDetail = () => {
       {/* ─── 3A. PRODUCT DETAILS (Specifications) ─── */}
       <section className="py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Specifications</p>
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Product Details</h2>
+          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">{h("specs", "subtitle", "Specifications")}</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">{h("specs", "title", "Product Details")}</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
             {specGroups.map((spec, i) => {
@@ -341,8 +344,8 @@ const ProductDetail = () => {
       {product.description && (
         <section className="py-14 bg-muted/30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Description</p>
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">About This Product</h2>
+            <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">{h("description", "subtitle", "Description")}</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">{h("description", "title", "About This Product")}</h2>
             <div
               className="prose prose-sm md:prose-base max-w-none mt-10 text-muted-foreground prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary"
               dangerouslySetInnerHTML={{
@@ -359,10 +362,10 @@ const ProductDetail = () => {
 
       <section className="py-14 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Payment</p>
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">How to Make Payment</h2>
+          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">{h("payment", "subtitle", "Payment")}</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">{h("payment", "title", "How to Make Payment")}</h2>
           <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">
-            We accept cryptocurrency payments for secure, fast, and worldwide transactions.
+            {h("payment", "description", "We accept cryptocurrency payments for secure, fast, and worldwide transactions.")}
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
@@ -396,10 +399,10 @@ const ProductDetail = () => {
       {/* ─── 3C. DELIVERY PROCESS ─── */}
       <section className="py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Delivery</p>
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">How We Deliver Your Account</h2>
+          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">{h("delivery", "subtitle", "Delivery")}</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">{h("delivery", "title", "How We Deliver Your Account")}</h2>
           <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">
-            A fully transparent, secure process from purchase to access.
+            {h("delivery", "description", "A fully transparent, secure process from purchase to access.")}
           </p>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mt-10">
@@ -425,10 +428,10 @@ const ProductDetail = () => {
       {/* ─── WHY CUSTOMERS CHOOSE VERIFIED BM SERVICES ─── */}
       <section className="py-14 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Why Verified BM Services</p>
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Why Customers Choose Us</h2>
+          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">{h("whyUs", "subtitle", "Why Verified BM Services")}</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">{h("whyUs", "title", "Why Customers Choose Us")}</h2>
           <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">
-            Trusted by 1,000+ advertisers worldwide for verified Meta accounts.
+            {h("whyUs", "description", "Trusted by 1,000+ advertisers worldwide for verified Meta accounts.")}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
@@ -456,10 +459,10 @@ const ProductDetail = () => {
       {testimonials.length > 0 && (
         <section className="py-14">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Testimonials</p>
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">What Our Customers Say</h2>
+            <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">{h("testimonials", "subtitle", "Testimonials")}</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">{h("testimonials", "title", "What Our Customers Say")}</h2>
             <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">
-              Real reviews from verified buyers who trust Verified BM services.
+              {h("testimonials", "description", "Real reviews from verified buyers who trust Verified BM services.")}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
@@ -495,8 +498,8 @@ const ProductDetail = () => {
       {(productFaqs.length > 0 || faqs.length > 0) && (
         <section className="py-14">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">FAQ</p>
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Frequently Asked Questions</h2>
+            <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">{h("faq", "subtitle", "FAQ")}</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">{h("faq", "title", "Frequently Asked Questions")}</h2>
             <p className="text-muted-foreground text-center mt-3">Common questions about {product.title}.</p>
 
             <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-4">
