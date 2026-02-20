@@ -867,7 +867,7 @@ const CrawlerIndexingPanel = ({ saveSetting }: { saveSetting: (key: string, valu
             {pinging ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
             Ping Google
           </Button>
-          <a href={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sitemap`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-primary hover:underline self-center">
+          <a href="https://verifiedbmservices.com/sitemap.xml" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-primary hover:underline self-center">
             <Eye className="w-4 h-4" /> View Live Sitemap
           </a>
         </div>
