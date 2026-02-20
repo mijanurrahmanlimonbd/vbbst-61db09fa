@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Star, Shield, Zap, Headphones, MessageCircle, Send, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +17,7 @@ interface Product {
   stock_status?: string;
 }
 
-const ProductCard = ({ product }: { product: Product }) => {
+const ProductCard = forwardRef<HTMLDivElement, { product: Product }>(({ product }, ref) => {
   const navigate = useNavigate();
   const discount = product.sale_price && product.price > 0
     ? Math.round(((product.price - product.sale_price) / product.price) * 100)
@@ -34,6 +35,7 @@ const ProductCard = ({ product }: { product: Product }) => {
 
   return (
     <div
+      ref={ref}
       onClick={() => navigate(`/product/${product.slug}`)}
       className="group bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 relative flex flex-col h-full cursor-pointer"
     >
@@ -167,6 +169,8 @@ const ProductCard = ({ product }: { product: Product }) => {
       </div>
     </div>
   );
-};
+});
+
+ProductCard.displayName = "ProductCard";
 
 export default ProductCard;

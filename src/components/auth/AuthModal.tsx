@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import headerFallback from "@/assets/verified-bm-services-header.png";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useBranding } from "@/hooks/useBranding";
@@ -18,7 +18,8 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
   const navigate = useNavigate();
   const [tab, setTab] = useState<"login" | "register">("login");
   const [loading, setLoading] = useState(false);
-  const [showPw, setShowPw] = useState(false);
+  const [showLoginPw, setShowLoginPw] = useState(false);
+  const [showRegPw, setShowRegPw] = useState(false);
   const { branding } = useBranding();
 
   // Login fields
@@ -233,7 +234,7 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
                   </div>
                   <div className="relative">
                     <Input
-                      type={showPw ? "text" : "password"}
+                      type={showLoginPw ? "text" : "password"}
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
                       placeholder="••••••••"
@@ -242,10 +243,11 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPw(!showPw)}
+                      onClick={() => setShowLoginPw(!showLoginPw)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      aria-label={showLoginPw ? "Hide password" : "Show password"}
                     >
-                      {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showLoginPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
@@ -279,7 +281,7 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
                   <label className="text-sm font-medium text-foreground mb-1.5 block">Password</label>
                   <div className="relative">
                     <Input
-                      type={showPw ? "text" : "password"}
+                      type={showRegPw ? "text" : "password"}
                       value={regPassword}
                       onChange={(e) => setRegPassword(e.target.value)}
                       placeholder="Min. 6 characters"
@@ -288,10 +290,11 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPw(!showPw)}
+                      onClick={() => setShowRegPw(!showRegPw)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      aria-label={showRegPw ? "Hide password" : "Show password"}
                     >
-                      {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showRegPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
@@ -314,8 +317,8 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
 
             <p className="text-xs text-center text-muted-foreground">
               By continuing, you agree to our{" "}
-              <a href="/terms" className="text-primary hover:underline">Terms</a> and{" "}
-              <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>.
+              <Link to="/terms" className="text-primary hover:underline" onClick={onClose}>Terms</Link> and{" "}
+              <Link to="/privacy" className="text-primary hover:underline" onClick={onClose}>Privacy Policy</Link>.
             </p>
           </div>
         </div>

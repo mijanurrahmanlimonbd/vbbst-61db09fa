@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import { Link2, Check } from "lucide-react";
 import { toast } from "sonner";
 import { logAction } from "@/lib/auditLog";
@@ -76,13 +76,13 @@ const SHARE_CHANNELS = [
   },
 ];
 
-const SocialShareButtons = ({
+const SocialShareButtons = forwardRef<HTMLDivElement, SocialShareButtonsProps>(({
   url,
   title,
   description,
   contentType,
   contentId,
-}: SocialShareButtonsProps) => {
+}, ref) => {
   const [copied, setCopied] = useState(false);
   const fullUrl = url.startsWith("http") ? url : `${window.location.origin}${url}`;
 
@@ -111,7 +111,7 @@ const SocialShareButtons = ({
   };
 
   return (
-    <>
+    <div ref={ref}>
       {/* Desktop/Tablet inline */}
       <div className="hidden sm:block">
         <p className="text-sm font-semibold text-foreground mb-3">Share</p>
@@ -160,8 +160,10 @@ const SocialShareButtons = ({
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
-};
+});
+
+SocialShareButtons.displayName = "SocialShareButtons";
 
 export default SocialShareButtons;
