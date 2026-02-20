@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
@@ -6,8 +7,38 @@ import JsonLdSchema from "@/components/seo/JsonLdSchema";
 import PageHeader from "@/components/layout/PageHeader";
 import ProductCard from "@/components/shared/ProductCard";
 import { usePageHeroBySlug } from "@/hooks/usePageHeroBySlug";
+import { getSiteUrl } from "@/lib/config";
 
 const categories = ["All", "Verified BM", "WhatsApp API", "Facebook Accounts", "TikTok Ads", "Reinstated Profiles"];
+
+/** AggregateOffer JSON-LD for shop page — shows price range in Google results */
+const AggregateOfferSchema = ({ products }: { products: any[] }) => {
+  const inStock = products.filter((p) => p.stock_status === "in_stock");
+  if (inStock.length === 0) return null;
+  const prices = inStock.map((p) => p.sale_price || p.price);
+  const siteUrl = getSiteUrl();
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: "Verified BM Services — Digital Marketing Accounts",
+    description: "Premium verified Facebook Business Managers, WhatsApp Business API, and advertising accounts.",
+    brand: { "@type": "Brand", name: "Verified BM Services" },
+    url: `${siteUrl}/shop`,
+    offers: {
+      "@type": "AggregateOffer",
+      lowPrice: Math.min(...prices),
+      highPrice: Math.max(...prices),
+      priceCurrency: "USD",
+      offerCount: inStock.length,
+      availability: "https://schema.org/InStock",
+    },
+  };
+  return (
+    <Helmet>
+      <script type="application/ld+json">{JSON.stringify(schema)}</script>
+    </Helmet>
+  );
+};
 
 const Shop = () => {
   const [activeCategory, setActiveCategory] = useState("All");
@@ -39,6 +70,7 @@ const Shop = () => {
         pageDescription="Browse and buy premium verified Meta accounts, WhatsApp Business API, Facebook Ads accounts."
         breadcrumbs={[{ name: "Home", url: "/" }, { name: "Shop", url: "/shop" }]}
       />
+      <AggregateOfferSchema products={products} />
       <PageHeader
         breadcrumb="Shop"
         subtitle="BROWSE & BUY"
