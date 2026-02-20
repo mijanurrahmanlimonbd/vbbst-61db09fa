@@ -145,41 +145,33 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Products Site Map — crawlable links for SEO */}
-      {products.length > 0 && (
-        <div className="border-t border-border">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Products Site Map</h4>
-            <ul className="flex flex-wrap gap-x-6 gap-y-2">
+      {/* SEO-only sitemap — visually hidden from users, fully crawlable by search engines */}
+      <div className="absolute w-px h-px overflow-hidden" style={{ clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>
+        {products.length > 0 && (
+          <nav aria-label="Products sitemap">
+            <h4>Products Site Map</h4>
+            <ul>
               {products.map((p) => (
                 <li key={p.slug}>
-                  <Link to={`/product/${p.slug}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                    {p.title}
-                  </Link>
+                  <Link to={`/product/${p.slug}`}>{p.title}</Link>
                 </li>
               ))}
             </ul>
-          </div>
-        </div>
-      )}
-
-      {/* Blog Site Map — crawlable links for SEO */}
-      {blogPosts.length > 0 && (
-        <div className="border-t border-border">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Blog Site Map</h4>
-            <ul className="flex flex-wrap gap-x-6 gap-y-2">
+          </nav>
+        )}
+        {blogPosts.length > 0 && (
+          <nav aria-label="Blog sitemap">
+            <h4>Blog Site Map</h4>
+            <ul>
               {blogPosts.map((p) => (
                 <li key={p.slug}>
-                  <Link to={`/blog/${p.slug}`} className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                    {p.title}
-                  </Link>
+                  <Link to={`/blog/${p.slug}`}>{p.title}</Link>
                 </li>
               ))}
             </ul>
-          </div>
-        </div>
-      )}
+          </nav>
+        )}
+      </div>
 
       {/* Copyright */}
       <div className="border-t border-border">
