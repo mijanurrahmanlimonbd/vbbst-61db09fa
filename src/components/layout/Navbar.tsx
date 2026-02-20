@@ -94,20 +94,21 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 bg-background border-b border-border">
+      <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm shadow-[0_1px_3px_rgba(0,0,0,0.05)]" role="navigation" aria-label="Main navigation">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center shrink-0">
+            <Link to="/" className="flex items-center shrink-0" aria-label="Go to homepage">
               {logoElement}
             </Link>
 
-            <div className="hidden md:flex items-center justify-center flex-1 gap-6">
+            <div className="hidden lg:flex items-center justify-center flex-1 gap-8">
               {navLinks.map((link) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`text-sm font-medium whitespace-nowrap transition-colors hover:text-primary ${
-                    location.pathname === link.path ? "text-primary" : "text-foreground"
+                  aria-label={`Navigate to ${link.label.toLowerCase()}`}
+                  className={`text-[13px] font-semibold tracking-wide whitespace-nowrap transition-colors hover:text-primary ${
+                    location.pathname === link.path ? "text-primary" : "text-foreground/80"
                   }`}
                 >
                   {link.label}
@@ -115,30 +116,32 @@ const Navbar = () => {
               ))}
             </div>
 
-            <div className="hidden lg:flex items-center gap-4 min-w-[120px] justify-end">
+            <div className="hidden lg:flex items-center gap-5 min-w-[120px] justify-end">
               <button
                 onClick={(e) => { e.stopPropagation(); setSearchOpen(!searchOpen); }}
-                className="text-foreground hover:text-primary transition-colors"
+                className="text-foreground/70 hover:text-primary transition-colors"
+                aria-label="Search"
               >
-                <Search className="w-5 h-5" />
+                <Search className="w-[18px] h-[18px]" strokeWidth={2.2} />
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); openCart(); }}
-                className="relative text-foreground hover:text-primary transition-colors"
+                className="relative text-foreground/70 hover:text-primary transition-colors"
+                aria-label={`Shopping cart with ${totalItems} items`}
               >
-                <ShoppingCart className="w-5 h-5" />
+                <ShoppingCart className="w-[18px] h-[18px]" strokeWidth={2.2} />
                 {totalItems > 0 && (
-                  <span className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 w-4 h-4 bg-primary text-primary-foreground text-[9px] font-bold rounded-full flex items-center justify-center">
                     {totalItems > 9 ? "9+" : totalItems}
                   </span>
                 )}
               </button>
 
-              {/* User button */}
+              {/* User avatar only */}
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
+                    <button className="focus:outline-none" aria-label="User menu">
                       {profile?.avatar_url ? (
                         <img
                           src={profile.avatar_url}
@@ -154,9 +157,6 @@ const Navbar = () => {
                           {userInitial}
                         </div>
                       )}
-                      <span className="hidden sm:inline text-sm font-medium max-w-[100px] truncate">
-                        {displayName}
-                      </span>
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
@@ -181,9 +181,10 @@ const Navbar = () => {
               ) : (
                 <button
                   onClick={(e) => { e.stopPropagation(); setAuthModalOpen(true); }}
-                  className="text-foreground hover:text-primary transition-colors"
+                  className="text-foreground/70 hover:text-primary transition-colors"
+                  aria-label="Sign in or register"
                 >
-                  <User className="w-5 h-5" />
+                  <User className="w-[18px] h-[18px]" strokeWidth={2.2} />
                 </button>
               )}
             </div>
@@ -192,14 +193,15 @@ const Navbar = () => {
 
         {/* Search Bar */}
         {searchOpen && (
-          <div className="border-t border-border bg-background px-4 py-3">
-            <form onSubmit={handleSearch} className="max-w-2xl mx-auto relative">
+          <div className="border-t border-border/50 bg-background px-4 py-3">
+            <form onSubmit={handleSearch} className="max-w-2xl mx-auto relative" role="search">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 autoFocus
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search products, blog posts…"
+                aria-label="Search products and blog posts"
                 className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </form>
