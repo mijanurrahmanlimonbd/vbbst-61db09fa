@@ -52,7 +52,6 @@ const PAGE_SCHEMAS: Record<string, ContentField[]> = {
     { key: "about_text", label: "About Section Text", type: "richtext", value: "" },
   ],
   about: [
-    { key: "page_title", label: "Page Title", type: "text", value: "" },
     { key: "page_subtitle", label: "Page Subtitle", type: "text", value: "" },
     { key: "page_description", label: "Header Description", type: "textarea", value: "" },
     { key: "about_heading", label: "About Heading", type: "text", value: "" },
@@ -67,7 +66,6 @@ const PAGE_SCHEMAS: Record<string, ContentField[]> = {
     { key: "cta_text", label: "CTA Text", type: "textarea", value: "" },
   ],
   contact: [
-    { key: "page_title", label: "Page Title", type: "text", value: "" },
     { key: "page_description", label: "Header Description", type: "textarea", value: "" },
     { key: "form_title", label: "Contact Form Title", type: "text", value: "" },
     { key: "address", label: "Address", type: "textarea", value: "" },
@@ -75,7 +73,6 @@ const PAGE_SCHEMAS: Record<string, ContentField[]> = {
     { key: "phone", label: "Phone", type: "text", value: "" },
   ],
   default: [
-    { key: "page_title", label: "Page Title", type: "text", value: "" },
     { key: "page_description", label: "Page Description", type: "textarea", value: "" },
     { key: "body_content", label: "Body Content", type: "richtext", value: "" },
   ],

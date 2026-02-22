@@ -84,10 +84,10 @@ const DynamicPage = () => {
 
       <section className="py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-          {content.page_title && (
+          {(content.page_title || page.title) && (
             <EditableText
               fieldKey="page_title"
-              value={content.page_title}
+              value={content.page_title || page.title}
               as="h1"
               className="text-3xl font-bold text-foreground text-center"
             />
