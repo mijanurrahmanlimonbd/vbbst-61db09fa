@@ -33,7 +33,7 @@ const Index = () => {
     <Layout>
       <SEOHead
         title="Buy Verified BM And WhatsApp API"
-        description="Buy verified BM, WhatsApp API, Facebook Ads accounts from Verified BM services. Instant delivery, 7-day guarantee, 24/7 support. Trusted by 10,000+ advertisers."
+        description="Buy verified BM and WhatsApp API from Verified BM Services. Instant delivery, 7-day guarantee, 24/7 support. Trusted by 10,000+ advertisers."
       />
       <JsonLdSchema
         pageTitle="Buy Verified Business Manager | Verified BM services"
