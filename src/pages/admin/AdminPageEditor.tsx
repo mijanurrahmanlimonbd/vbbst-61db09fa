@@ -338,6 +338,7 @@ const AdminPageEditor = () => {
         if (error) throw error;
         queryClient.invalidateQueries({ queryKey: ["dynamic-page"] });
         queryClient.invalidateQueries({ queryKey: ["pages"] });
+        queryClient.invalidateQueries({ queryKey: ["page-seo"] });
         toast.success("Page saved!");
       } else {
         const { data, error } = await supabase.from("pages").insert(payload).select().single();
@@ -350,6 +351,7 @@ const AdminPageEditor = () => {
         toast.success("Page created!");
         queryClient.invalidateQueries({ queryKey: ["dynamic-page"] });
         queryClient.invalidateQueries({ queryKey: ["pages"] });
+        queryClient.invalidateQueries({ queryKey: ["page-seo"] });
         navigate(`/admin/pages/${data.id}/edit`, { replace: true });
       }
       setLastSaved(new Date());

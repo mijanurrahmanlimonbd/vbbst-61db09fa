@@ -6,7 +6,7 @@ import SEOHead from "@/components/seo/SEOHead";
 import JsonLdSchema from "@/components/seo/JsonLdSchema";
 import PageHeader from "@/components/layout/PageHeader";
 import ProductCard from "@/components/shared/ProductCard";
-import { usePageHeroBySlug } from "@/hooks/usePageHeroBySlug";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { getSiteUrl } from "@/lib/config";
 
 const categories = ["All", "Verified BM", "WhatsApp API", "Facebook Accounts", "TikTok Ads", "Reinstated Profiles"];
@@ -45,7 +45,7 @@ const Shop = () => {
   const [search, setSearch] = useState("");
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { heroImage, heroOverlay } = usePageHeroBySlug("shop");
+  const { pageSEO } = usePageSEO("shop");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -64,23 +64,23 @@ const Shop = () => {
 
   return (
     <Layout>
-      <SEOHead title="Shop - Verified Accounts" description="Browse and buy premium verified Meta accounts, WhatsApp Business API, Facebook Ads accounts. Instant delivery and 7-day replacement guarantee." />
+      <SEOHead title={pageSEO?.meta_title || pageSEO?.title || "Shop - Verified Accounts"} description={pageSEO?.meta_description || "Browse and buy premium verified Meta accounts, WhatsApp Business API, Facebook Ads accounts. Instant delivery and 7-day replacement guarantee."} />
       <JsonLdSchema
-        pageTitle="Shop - Verified Accounts"
-        pageDescription="Browse and buy premium verified Meta accounts, WhatsApp Business API, Facebook Ads accounts."
+        pageTitle={pageSEO?.meta_title || pageSEO?.title || "Shop - Verified Accounts"}
+        pageDescription={pageSEO?.meta_description || "Browse and buy premium verified Meta accounts, WhatsApp Business API, Facebook Ads accounts."}
         breadcrumbs={[{ name: "Home", url: "/" }, { name: "Shop", url: "/shop" }]}
       />
       <AggregateOfferSchema products={products} />
       <PageHeader
         breadcrumb="Shop"
         subtitle="BROWSE & BUY"
-        title="Our Products"
-        description="Premium verified Meta accounts, WhatsApp API access, and more. All with instant delivery and 7-day replacement guarantee."
+        title={pageSEO?.title || "Our Products"}
+        description={pageSEO?.meta_description || "Premium verified Meta accounts, WhatsApp API access, and more. All with instant delivery and 7-day replacement guarantee."}
         showSearch
         searchValue={search}
         onSearchChange={setSearch}
-        heroImage={heroImage}
-        heroOverlay={heroOverlay}
+        heroImage={pageSEO?.hero_image}
+        heroOverlay={pageSEO?.hero_overlay}
       />
 
       <section className="py-12">

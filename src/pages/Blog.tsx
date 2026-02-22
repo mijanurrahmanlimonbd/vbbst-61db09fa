@@ -5,7 +5,7 @@ import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
 import PageHeader from "@/components/layout/PageHeader";
 import { Clock, ArrowRight } from "lucide-react";
-import { usePageHeroBySlug } from "@/hooks/usePageHeroBySlug";
+import { usePageSEO } from "@/hooks/usePageSEO";
 
 const categories = ["All", "Verified BM", "WhatsApp API", "Tips & Guides", "Guides"];
 
@@ -13,7 +13,7 @@ const Blog = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { heroImage, heroOverlay } = usePageHeroBySlug("blog");
+  const { pageSEO } = usePageSEO("blog");
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -28,14 +28,14 @@ const Blog = () => {
 
   return (
     <Layout>
-      <SEOHead title="Blog - Insights & Guides" description="Expert tips, industry insights, and guides on Meta advertising, verified Business Managers, WhatsApp API, and digital marketing strategies." />
+      <SEOHead title={pageSEO?.meta_title || pageSEO?.title || "Blog - Insights & Guides"} description={pageSEO?.meta_description || "Expert tips, industry insights, and guides on Meta advertising, verified Business Managers, WhatsApp API, and digital marketing strategies."} />
       <PageHeader
         breadcrumb="Blog"
         subtitle="Our Blog"
-        title="Insights & Guides"
-        description="Expert tips, industry insights, and guides on Meta advertising, verified Business Managers, and WhatsApp API."
-        heroImage={heroImage}
-        heroOverlay={heroOverlay}
+        title={pageSEO?.title || "Insights & Guides"}
+        description={pageSEO?.meta_description || "Expert tips, industry insights, and guides on Meta advertising, verified Business Managers, and WhatsApp API."}
+        heroImage={pageSEO?.hero_image}
+        heroOverlay={pageSEO?.hero_overlay}
       />
 
       <section className="py-12">
