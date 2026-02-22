@@ -8,13 +8,13 @@ import { MessageCircle, Send, Mail, Facebook, Users, Clock, Globe, Star, Headpho
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { usePageHeroBySlug } from "@/hooks/usePageHeroBySlug";
+import { usePageSEO } from "@/hooks/usePageSEO";
 
 const Contact = () => {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
-  const { heroImage, heroOverlay } = usePageHeroBySlug("contact");
+  const { pageSEO } = usePageSEO("contact");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,22 +63,22 @@ const Contact = () => {
 
   return (
     <Layout>
-       <SEOHead title="Contact Us - 24/7 Support" description="Get in touch with Verified BM services 24/7 via WhatsApp, Telegram, or email. Average response time under 2 minutes. Serving 50+ countries worldwide." />
+       <SEOHead title={pageSEO?.meta_title || pageSEO?.title || "Contact Us - 24/7 Support"} description={pageSEO?.meta_description || "Get in touch with Verified BM services 24/7 via WhatsApp, Telegram, or email. Average response time under 2 minutes. Serving 50+ countries worldwide."} />
       <JsonLdSchema
-        pageTitle="Contact Us - 24/7 Support"
-        pageDescription="Get in touch with Verified BM services 24/7 via WhatsApp, Telegram, or email."
+        pageTitle={pageSEO?.meta_title || pageSEO?.title || "Contact Us - 24/7 Support"}
+        pageDescription={pageSEO?.meta_description || "Get in touch with Verified BM services 24/7 via WhatsApp, Telegram, or email."}
         breadcrumbs={[{ name: "Home", url: "/" }, { name: "Contact", url: "/contact" }]}
         faqs={faqs.map((f) => ({ question: f.q, answer: f.a }))}
       />
       <PageHeader
         breadcrumb="Contact Us"
         subtitle="24/7 SUPPORT"
-        title="Get in Touch"
-        description="We're here to help 24/7. Reach out through any of our channels."
+        title={pageSEO?.title || "Get in Touch"}
+        description={pageSEO?.meta_description || "We're here to help 24/7. Reach out through any of our channels."}
         showCTAs
         showSocials
-        heroImage={heroImage}
-        heroOverlay={heroOverlay}
+        heroImage={pageSEO?.hero_image}
+        heroOverlay={pageSEO?.hero_overlay}
       />
 
       {/* Stats */}

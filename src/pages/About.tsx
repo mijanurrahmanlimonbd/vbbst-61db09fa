@@ -8,13 +8,13 @@ import { usePageContent, usePageComponents } from "@/hooks/usePageContent";
 import { WorkSamplesSection, TestimonialsSection, FAQsSection } from "@/components/shared/PageComponents";
 import EditableText from "@/components/editor/EditableText";
 import { useEditMode } from "@/contexts/EditModeContext";
-import { usePageHeroBySlug } from "@/hooks/usePageHeroBySlug";
+import { usePageSEO } from "@/hooks/usePageSEO";
 
 const About = () => {
   const { content: c } = usePageContent("about");
   const components = usePageComponents("about");
   const { isEditMode } = useEditMode();
-  const { heroImage, heroOverlay } = usePageHeroBySlug("about");
+  const { pageSEO } = usePageSEO("about");
 
   const features = [
     { icon: <Clock className="w-6 h-6 text-primary" />, title: "5+ Years of Experience", desc: "Providing verified Meta advertising accounts since 2019 with a proven track record." },
@@ -36,20 +36,20 @@ const About = () => {
 
   return (
     <Layout>
-      <SEOHead title="About Us" description="Learn about Verified BM services — trusted by 10,000+ advertisers in 50+ countries." />
+      <SEOHead title={pageSEO?.meta_title || pageSEO?.title || "About Us"} description={pageSEO?.meta_description || "Learn about Verified BM services — trusted by 10,000+ advertisers in 50+ countries."} />
       <JsonLdSchema
-        pageTitle="About Us"
-        pageDescription="Learn about Verified BM services — trusted by 10,000+ advertisers in 50+ countries."
+        pageTitle={pageSEO?.meta_title || pageSEO?.title || "About Us"}
+        pageDescription={pageSEO?.meta_description || "Learn about Verified BM services — trusted by 10,000+ advertisers in 50+ countries."}
         breadcrumbs={[{ name: "Home", url: "/" }, { name: "About Us", url: "/about" }]}
       />
       <PageHeader
         breadcrumb="About Us"
         subtitle="ABOUT US"
-        title={c.page_title || "Who We Are"}
-        description={c.page_description || "Trusted by advertisers worldwide since day one."}
+        title={c.page_title || pageSEO?.title || "Who We Are"}
+        description={c.page_description || pageSEO?.meta_description || "Trusted by advertisers worldwide since day one."}
         showSocials
-        heroImage={heroImage}
-        heroOverlay={heroOverlay}
+        heroImage={pageSEO?.hero_image}
+        heroOverlay={pageSEO?.hero_overlay}
       />
 
       {/* Stats */}

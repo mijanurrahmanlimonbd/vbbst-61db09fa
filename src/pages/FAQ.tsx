@@ -8,7 +8,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Search, Calendar, Printer, HelpCircle, MessageCircle, Send, ShoppingCart, Shield, CreditCard, Headphones } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { usePageHeroBySlug } from "@/hooks/usePageHeroBySlug";
+import { usePageSEO } from "@/hooks/usePageSEO";
 
 interface FaqItem {
   id: string;
@@ -30,7 +30,7 @@ const FAQ = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
-  const { heroImage, heroOverlay } = usePageHeroBySlug("faq");
+  const { pageSEO } = usePageSEO("faq");
 
   useEffect(() => {
     const load = async () => {
@@ -55,21 +55,21 @@ const FAQ = () => {
 
   return (
     <Layout>
-       <SEOHead title="FAQ - Frequently Asked Questions" description="Find answers to common questions about Verified BM services' products, payments, delivery, and support." />
+       <SEOHead title={pageSEO?.meta_title || pageSEO?.title || "FAQ - Frequently Asked Questions"} description={pageSEO?.meta_description || "Find answers to common questions about Verified BM services' products, payments, delivery, and support."} />
       <JsonLdSchema
-        pageTitle="FAQ - Frequently Asked Questions"
-        pageDescription="Find answers to common questions about Verified BM services."
+        pageTitle={pageSEO?.meta_title || pageSEO?.title || "FAQ - Frequently Asked Questions"}
+        pageDescription={pageSEO?.meta_description || "Find answers to common questions about Verified BM services."}
         faqs={filtered.map((f) => ({ question: f.question, answer: f.answer }))}
         breadcrumbs={[{ name: "Home", url: "/" }, { name: "FAQ", url: "/faq" }]}
       />
 
       <PageHeader
         breadcrumb="FAQ"
-        title="Frequently Asked Questions"
+        title={pageSEO?.title || "Frequently Asked Questions"}
         subtitle="HELP CENTER"
-        description="Find quick answers to common questions about our products, payments, and support."
-        heroImage={heroImage}
-        heroOverlay={heroOverlay}
+        description={pageSEO?.meta_description || "Find quick answers to common questions about our products, payments, and support."}
+        heroImage={pageSEO?.hero_image}
+        heroOverlay={pageSEO?.hero_overlay}
       />
 
       {/* Search & Meta bar */}
