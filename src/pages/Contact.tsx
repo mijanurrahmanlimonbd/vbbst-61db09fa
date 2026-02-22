@@ -14,7 +14,7 @@ const Contact = () => {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
-  const { pageSEO } = usePageSEO("contact");
+  const { pageSEO } = usePageSEO("/contact-us");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
