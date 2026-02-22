@@ -11,10 +11,11 @@ import { useEditMode } from "@/contexts/EditModeContext";
 import { usePageSEO } from "@/hooks/usePageSEO";
 
 const About = () => {
-  const { content: c } = usePageContent("about");
-  const components = usePageComponents("about");
+  const pageSlug = "about-verified-bm-services";
+  const { content: c } = usePageContent(pageSlug);
+  const components = usePageComponents(pageSlug);
   const { isEditMode } = useEditMode();
-  const { pageSEO } = usePageSEO("about");
+  const { pageSEO } = usePageSEO(pageSlug);
 
   const features = [
     { icon: <Clock className="w-6 h-6 text-primary" />, title: "5+ Years of Experience", desc: "Providing verified Meta advertising accounts since 2019 with a proven track record." },
