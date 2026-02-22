@@ -19,4 +19,4 @@ export const getSiteUrl = (): string => {
 };
 
 export const DEFAULT_DESCRIPTION =
-  "Looking for reliable Facebook Business Managers? Verified BM Services offers secure, ready-to-use BMs to scale your advertising safely. Shop our verified solutions now!";
+  "Buy verified BM and WhatsApp API from Verified BM Services. Instant delivery, 7-day guarantee, 24/7 support. Trusted by 10,000+ advertisers.";
