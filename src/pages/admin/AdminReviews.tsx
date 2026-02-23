@@ -43,6 +43,53 @@ const RatingStars = ({ rating }: { rating: number }) => (
   </div>
 );
 
+/**
+ * Synchronous Testimonial Sync Logic
+ *
+ * On APPROVE:
+ *   1. Update product_reviews.status = 'approved'
+ *   2. Check if testimonials row with review_id already exists (de-dup)
+ *   3. If not, INSERT into testimonials with strict field mapping:
+ *        customer_name  ->  client_name
+ *        review_text    ->  testimonial_text
+ *        rating         ->  rating
+ *        product_title  ->  job_title  (formatted as "Verified Buyer - [Product]")
+ *        review.id      ->  review_id  (foreign link for de-dup & cleanup)
+ *
+ * On REJECT / DELETE:
+ *   Delete from testimonials WHERE review_id = review.id
+ */
+
+const syncTestimonialInsert = async (review: Review) => {
+  // De-duplication: check if already synced
+  const { data: existing } = await (supabase
+    .from("testimonials")
+    .select("id") as any)
+    .eq("review_id", review.id)
+    .maybeSingle();
+
+  if (existing) return; // already synced, skip
+
+  const { error } = await (supabase.from("testimonials") as any).insert({
+    client_name: review.customer_name || "Verified Buyer",
+    job_title: `Verified Buyer - ${review.product_title || "Product"}`,
+    rating: review.rating,
+    testimonial_text: review.review_text,
+    status: "approved",
+    sort_order: 0,
+    review_id: review.id,
+  });
+
+  if (error) throw new Error(`Testimonial sync failed: ${error.message}`);
+};
+
+const syncTestimonialDelete = async (reviewId: string) => {
+  await (supabase
+    .from("testimonials")
+    .delete() as any)
+    .eq("review_id", reviewId);
+};
+
 const AdminReviews = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,27 +138,21 @@ const AdminReviews = () => {
 
   useEffect(() => { fetchReviews(); }, []);
 
+  /* ── APPROVE ── */
   const handleApprove = async (review: Review) => {
     setActionId(review.id);
     try {
+      // Action 1: Update review status
       const { error: updateErr } = await supabase
         .from("product_reviews")
         .update({ status: "approved" })
         .eq("id", review.id);
       if (updateErr) throw updateErr;
 
-      // Sync to testimonials
-      const { error: insertErr } = await supabase.from("testimonials").insert({
-        client_name: review.customer_name || "Verified Buyer",
-        job_title: `Verified Buyer of ${review.product_title || "Product"}`,
-        rating: review.rating,
-        testimonial_text: review.review_text,
-        status: "approved",
-        sort_order: 0,
-      });
-      if (insertErr) throw insertErr;
+      // Action 2: Sync to testimonials (with de-dup)
+      await syncTestimonialInsert(review);
 
-      toast.success("Review approved & added to testimonials!");
+      toast.success("Review approved & synced to testimonials!");
       fetchReviews();
     } catch (e: any) {
       toast.error(e.message || "Failed to approve review");
@@ -120,6 +161,7 @@ const AdminReviews = () => {
     }
   };
 
+  /* ── REJECT ── */
   const handleReject = async (review: Review) => {
     setActionId(review.id);
     try {
@@ -129,14 +171,10 @@ const AdminReviews = () => {
         .eq("id", review.id);
       if (error) throw error;
 
-      // Remove from testimonials if it was previously approved
-      await supabase
-        .from("testimonials")
-        .delete()
-        .eq("testimonial_text", review.review_text)
-        .eq("client_name", review.customer_name || "Verified Buyer");
+      // Remove linked testimonial
+      await syncTestimonialDelete(review.id);
 
-      toast.success("Review rejected.");
+      toast.success("Review rejected & testimonial removed.");
       fetchReviews();
     } catch (e: any) {
       toast.error(e.message || "Failed to reject review");
@@ -145,22 +183,16 @@ const AdminReviews = () => {
     }
   };
 
+  /* ── DELETE ── */
   const handleDelete = async () => {
     if (!deleteId) return;
-    const review = reviews.find((r) => r.id === deleteId);
 
-    // Remove from testimonials if it existed
-    if (review) {
-      await supabase
-        .from("testimonials")
-        .delete()
-        .eq("testimonial_text", review.review_text)
-        .eq("client_name", review.customer_name || "Verified Buyer");
-    }
+    // Remove linked testimonial first
+    await syncTestimonialDelete(deleteId);
 
     const { error } = await supabase.from("product_reviews").delete().eq("id", deleteId);
     if (error) toast.error(error.message);
-    else { toast.success("Review deleted."); fetchReviews(); }
+    else { toast.success("Review & testimonial deleted."); fetchReviews(); }
     setDeleteId(null);
   };
 
@@ -247,7 +279,7 @@ const AdminReviews = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Review</AlertDialogTitle>
-            <AlertDialogDescription>This will permanently remove this review and its testimonial (if any). This action cannot be undone.</AlertDialogDescription>
+            <AlertDialogDescription>This will permanently remove this review and its linked testimonial (if any). This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
