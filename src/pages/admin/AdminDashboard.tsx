@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { FileText, Mail, MessageSquare, Image, Clock, ArrowRight, Save, Trash2, Loader2 } from "lucide-react";
+import { FileText, Mail, MessageSquare, Image, Clock, ArrowRight, Save, Trash2, Loader2, Star } from "lucide-react";
 import SEOHealthWidget from "@/components/admin/SEOHealthWidget";
 import SalesAnalyticsWidget from "@/components/admin/SalesAnalyticsWidget";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ const AdminDashboard = () => {
   const [totalPosts, setTotalPosts] = useState(0);
   const [totalSubscribers, setTotalSubscribers] = useState(0);
   const [pendingComments, setPendingComments] = useState(0);
+  const [pendingReviews, setPendingReviews] = useState(0);
   const [totalMedia, setTotalMedia] = useState(0);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
 
@@ -53,10 +54,11 @@ const AdminDashboard = () => {
   };
   useEffect(() => {
     const load = async () => {
-      const [postsRes, subsRes, commentsRes, mediaRes, recentCommentsRes, recentSubsRes, recentPostsRes] = await Promise.all([
+      const [postsRes, subsRes, commentsRes, reviewsRes, mediaRes, recentCommentsRes, recentSubsRes, recentPostsRes] = await Promise.all([
         supabase.from("blog_posts").select("id", { count: "exact", head: true }),
         supabase.from("newsletter_subscribers").select("id", { count: "exact", head: true }),
         supabase.from("comments").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase.from("product_reviews").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("media_files").select("id", { count: "exact", head: true }),
         supabase.from("comments").select("author_name, created_at, blog_posts(title)").order("created_at", { ascending: false }).limit(5),
         supabase.from("newsletter_subscribers").select("email, created_at").order("created_at", { ascending: false }).limit(5),
@@ -66,6 +68,7 @@ const AdminDashboard = () => {
       setTotalPosts(postsRes.count || 0);
       setTotalSubscribers(subsRes.count || 0);
       setPendingComments(commentsRes.count || 0);
+      setPendingReviews(reviewsRes.count || 0);
       setTotalMedia(mediaRes.count || 0);
 
       const items: ActivityItem[] = [];
@@ -143,6 +146,7 @@ const AdminDashboard = () => {
     { label: "Total Posts", value: totalPosts, icon: FileText, color: "bg-primary/10 text-primary", link: "/admin/posts" },
     { label: "Total Subscribers", value: totalSubscribers, icon: Mail, color: "bg-[hsl(142,70%,45%)]/10 text-[hsl(142,70%,45%)]", link: "/admin/subscribers" },
     { label: "Pending Comments", value: pendingComments, icon: MessageSquare, color: "bg-[hsl(45,93%,47%)]/10 text-[hsl(45,93%,47%)]", link: "/admin/comments", glow: true },
+    { label: "Pending Reviews", value: pendingReviews, icon: Star, color: "bg-[hsl(25,90%,50%)]/10 text-[hsl(25,90%,50%)]", link: "/admin/reviews", glow: true },
     { label: "Total Media", value: totalMedia, icon: Image, color: "bg-[hsl(280,60%,50%)]/10 text-[hsl(280,60%,50%)]", link: "/admin/media" },
   ];
 
@@ -173,7 +177,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {statCards.map((stat, i) => (
           <Link
             key={i}
