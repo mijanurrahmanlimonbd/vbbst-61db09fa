@@ -32,7 +32,7 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { branding } = useBranding();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, role, signOut } = useAuth();
   const { openCart, totalItems } = useCart();
   const { data: dbMenuItems } = useMenuItems("header");
   const navLinks = dbMenuItems && dbMenuItems.length > 0
@@ -174,9 +174,11 @@ const Navbar = () => {
                     <DropdownMenuItem onClick={() => navigate("/dashboard")}>
                       My Dashboard
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/admin")}>
-                      Admin Panel
-                    </DropdownMenuItem>
+                    {role === "admin" && (
+                      <DropdownMenuItem onClick={() => navigate("/admin")}>
+                        Admin Panel
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => signOut()} className="text-destructive focus:text-destructive">
                       <LogOut className="w-4 h-4 mr-2" />
