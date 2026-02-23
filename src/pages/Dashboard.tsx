@@ -92,12 +92,12 @@ const Dashboard = () => {
       const orderList = data || [];
       setOrders(orderList);
 
-      // Fetch items for all orders
+      // Fetch items for all orders with product slugs
       if (orderList.length > 0) {
         const ids = orderList.map((o) => o.id);
         const { data: items } = await supabase
           .from("order_items")
-          .select("*")
+          .select("*, products(slug)")
           .in("order_id", ids);
         const grouped: Record<string, any[]> = {};
         (items || []).forEach((item) => {
@@ -382,7 +382,14 @@ const OverviewTab = ({
               <div key={order.id} className="px-5 py-4 flex items-center justify-between gap-4">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">
-                    {items.length > 0 ? items.map((i) => i.product_title).join(", ") : `Order #${order.id.slice(0, 8)}`}
+                    {items.length > 0 ? items.map((i, idx) => {
+                      const slug = i.products?.slug;
+                      return slug ? (
+                        <Link key={idx} to={`/product/${slug}`} className="text-primary hover:underline">
+                          {i.product_title}
+                        </Link>
+                      ) : i.product_title;
+                    }).reduce((prev: any, curr: any, idx: number) => idx === 0 ? [curr] : [...prev, ", ", curr], []) : `Order #${order.id.slice(0, 8)}`}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {new Date(order.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
@@ -433,9 +440,21 @@ const OrdersTab = ({
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div>
                   <p className="text-xs text-muted-foreground font-mono">#{order.id.slice(0, 8).toUpperCase()}</p>
-                  <p className="text-sm font-medium text-foreground mt-1">
-                    {items.map((i) => i.product_title).join(", ") || "Order"}
-                  </p>
+                  <div className="text-sm font-medium text-foreground mt-1">
+                    {items.length > 0 ? items.map((i, idx) => {
+                      const slug = i.products?.slug;
+                      return (
+                        <span key={idx}>
+                          {idx > 0 && ", "}
+                          {slug ? (
+                            <Link to={`/product/${slug}`} className="text-primary hover:underline">
+                              {i.product_title}
+                            </Link>
+                          ) : i.product_title}
+                        </span>
+                      );
+                    }) : "Order"}
+                  </div>
                 </div>
                 <Badge variant="outline" className={cn("text-xs gap-1 shrink-0", sc.className)}>
                   <sc.icon className="w-3 h-3" /> {sc.label}
