@@ -5,6 +5,7 @@ import AnnouncementBar from "./AnnouncementBar";
 import Footer from "./Footer";
 import MobileBottomNav from "./MobileBottomNav";
 import TrackingScripts from "@/components/tracking/TrackingScripts";
+import ScrollToTopButton from "./ScrollToTopButton";
 import { useEditMode } from "@/contexts/EditModeContext";
 
 // Defer heavy widgets — not needed for initial paint / LCP
@@ -137,6 +138,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
         {slug && <FloatingEditBar slug={slug} />}
       </Suspense>
       <TrackingScripts />
+      <ScrollToTopButton />
     </div>
   );
 };
