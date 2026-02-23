@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Trash2, Search, Mail, Download, Send, Megaphone, ToggleLeft, ToggleRight } from "lucide-react";
+import { Trash2, Search, Mail, Download, Send, Megaphone, ToggleLeft, ToggleRight, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -67,6 +67,8 @@ const AdminSubscribers = () => {
   const [noticeMsg, setNoticeMsg] = useState("");
   const [noticeType, setNoticeType] = useState("bar");
   const [savingNotice, setSavingNotice] = useState(false);
+  const [editNoticeId, setEditNoticeId] = useState<string | null>(null);
+  const [editNoticeMsg, setEditNoticeMsg] = useState("");
 
   // History
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
@@ -144,50 +146,38 @@ const AdminSubscribers = () => {
     }
     setSending(true);
     try {
-      // Gather recipient emails based on target
-      let emails: string[] = [];
-
-      if (nlTarget === "subscribers" || nlTarget === "both") {
-        const { data } = await supabase
-          .from("newsletter_subscribers")
-          .select("email")
-          .eq("status", "subscribed");
-        if (data) emails.push(...data.map((d) => d.email));
-      }
-
-      if (nlTarget === "customers" || nlTarget === "both") {
-        const { data } = await supabase.from("profiles").select("email");
-        if (data) {
-          const customerEmails = data.map((d) => d.email).filter(Boolean) as string[];
-          emails.push(...customerEmails);
-        }
-      }
-
-      // Deduplicate
-      emails = [...new Set(emails)];
-
-      if (emails.length === 0) {
-        toast.error("No recipients found for the selected audience.");
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      if (!token) {
+        toast.error("You must be logged in.");
         setSending(false);
         return;
       }
 
-      // Log the newsletter
-      const { error } = await supabase.from("newsletters").insert({
-        subject: nlSubject,
-        content: nlContent,
-        target_audience: nlTarget,
-        recipient_count: emails.length,
+      const res = await supabase.functions.invoke("send-newsletter", {
+        body: {
+          subject: nlSubject,
+          content: nlContent,
+          target_audience: nlTarget,
+        },
       });
 
-      if (error) throw error;
-
-      toast.success(`Newsletter logged! ${emails.length} recipient(s) queued.`);
-      setShowSendModal(false);
-      setNlSubject("");
-      setNlContent("");
-      setNlTarget("subscribers");
-      fetchNewsletters();
+      if (res.error) {
+        const msg = res.error.message || "Failed to send newsletter.";
+        toast.error(msg);
+      } else {
+        const result = res.data;
+        if (result?.error) {
+          toast.error(result.error);
+        } else {
+          toast.success(`Newsletter sent! ${result.sent}/${result.total} delivered.`);
+          setShowSendModal(false);
+          setNlSubject("");
+          setNlContent("");
+          setNlTarget("subscribers");
+          fetchNewsletters();
+        }
+      }
     } catch {
       toast.error("Failed to send newsletter.");
     }
@@ -228,6 +218,24 @@ const AdminSubscribers = () => {
   const deleteNotice = async (id: string) => {
     await supabase.from("site_notices").delete().eq("id", id);
     toast.success("Notice deleted.");
+    fetchNotices();
+  };
+
+  const startEditNotice = (n: SiteNotice) => {
+    setEditNoticeId(n.id);
+    setEditNoticeMsg(n.message);
+  };
+
+  const saveEditNotice = async () => {
+    if (!editNoticeId || !editNoticeMsg.trim()) return;
+    const { error } = await supabase
+      .from("site_notices")
+      .update({ message: editNoticeMsg.trim() })
+      .eq("id", editNoticeId);
+    if (error) toast.error("Failed to update notice.");
+    else toast.success("Notice updated.");
+    setEditNoticeId(null);
+    setEditNoticeMsg("");
     fetchNotices();
   };
 
@@ -374,6 +382,9 @@ const AdminSubscribers = () => {
                           {n.is_active ? <ToggleRight className="w-6 h-6 text-primary" /> : <ToggleLeft className="w-6 h-6 text-muted-foreground" />}
                         </button>
                       )}
+                      <button onClick={() => startEditNotice(n)} className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
+                        <Edit className="w-4 h-4" />
+                      </button>
                       <button onClick={() => deleteNotice(n.id)} className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -383,6 +394,27 @@ const AdminSubscribers = () => {
               </div>
             </div>
           )}
+
+          {/* Edit Notice Dialog */}
+          <Dialog open={!!editNoticeId} onOpenChange={(open) => { if (!open) setEditNoticeId(null); }}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Edit Notice</DialogTitle>
+                <DialogDescription>Update the notice message. Changes apply immediately to the live announcement bar.</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <Textarea
+                  value={editNoticeMsg}
+                  onChange={(e) => setEditNoticeMsg(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setEditNoticeId(null)}>Cancel</Button>
+                <Button onClick={saveEditNotice} disabled={!editNoticeMsg.trim()}>Save Changes</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
 
         {/* === SENT HISTORY TAB === */}
