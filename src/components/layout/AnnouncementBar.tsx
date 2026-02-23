@@ -8,25 +8,26 @@ const AnnouncementBar = () => {
     const fetchNotice = async () => {
       const { data } = await supabase
         .from("site_notices")
-        .select("id, message")
+        .select("id, message, created_at")
         .eq("is_active", true)
         .eq("type", "bar")
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
       if (data) {
-        const dismissedId = sessionStorage.getItem("dismissed_notice");
-        if (dismissedId !== data.id) {
+        const storageKey = `has_seen_notice_${data.id}_${btoa(data.message).slice(0, 12)}`;
+        if (!sessionStorage.getItem(storageKey)) {
           toast(data.message, {
             icon: <Megaphone className="w-4 h-4 text-primary" />,
             duration: 10000,
             onDismiss: () => {
-              sessionStorage.setItem("dismissed_notice", data.id);
+              sessionStorage.setItem(storageKey, "true");
             },
             onAutoClose: () => {
-              sessionStorage.setItem("dismissed_notice", data.id);
+              sessionStorage.setItem(storageKey, "true");
             },
           });
+          sessionStorage.setItem(storageKey, "true");
         }
       }
     };
