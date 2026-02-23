@@ -32,6 +32,7 @@ import {
   HelpCircle,
   ExternalLink,
   RefreshCw,
+  Star,
 } from "lucide-react";
 import {
   Tooltip,
@@ -54,6 +55,7 @@ const navItems = [
   { title: "Customers", path: "/admin/customers", icon: UserCheck, section: "users" },
   { title: "Users", path: "/admin/users", icon: Users, section: "users" },
   { title: "Work Samples", path: "/admin/work-samples", icon: Briefcase, section: "dashboard" },
+  { title: "Reviews", path: "/admin/reviews", icon: Star, section: "dashboard" },
   { title: "Testimonials", path: "/admin/testimonials", icon: MessageCircle, section: "dashboard" },
   { title: "FAQs", path: "/admin/faqs", icon: HelpCircle, section: "dashboard" },
   { title: "Navigation", path: "/admin/menus", icon: Menu, section: "settings" },
