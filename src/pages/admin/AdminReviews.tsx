@@ -19,9 +19,11 @@ interface Review {
   order_id: string;
   rating: number;
   review_text: string;
+  comment?: string;
   status: string;
   created_at: string;
   product_title?: string;
+  product_name?: string;
   customer_name?: string;
 }
 
@@ -60,21 +62,26 @@ const RatingStars = ({ rating }: { rating: number }) => (
  *   Delete from testimonials WHERE review_id = review.id
  */
 
+const getReviewComment = (review: Review) => review.review_text || review.comment || "";
+
+const getProductName = (review: Review) => review.product_title || review.product_name || "Product";
+
 const syncTestimonialInsert = async (review: Review) => {
   // De-duplication: check if already synced
-  const { data: existing } = await (supabase
+  const { data: existing, error: existingError } = await (supabase
     .from("testimonials")
     .select("id") as any)
     .eq("review_id", review.id)
     .maybeSingle();
 
+  if (existingError) throw new Error(`Testimonial lookup failed: ${existingError.message}`);
   if (existing) return; // already synced, skip
 
   const { error } = await (supabase.from("testimonials") as any).insert({
     client_name: review.customer_name || "Verified Buyer",
-    job_title: `Verified Buyer - ${review.product_title || "Product"}`,
+    job_title: `Verified Buyer - ${getProductName(review)}`,
     rating: review.rating,
-    testimonial_text: review.review_text,
+    testimonial_text: getReviewComment(review),
     status: "approved",
     sort_order: 0,
     review_id: review.id,
@@ -148,6 +155,7 @@ const AdminReviews = () => {
       revData.map((r) => ({
         ...r,
         product_title: productMap.get(r.product_id) || "Unknown Product",
+        product_name: productMap.get(r.product_id) || "Unknown Product",
         customer_name: profileMap.get(r.user_id) || "Unknown User",
       }))
     );
