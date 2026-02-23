@@ -8,10 +8,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Upload, CheckCircle, Copy, AlertCircle, Download } from "lucide-react";
+import { ArrowLeft, Loader2, Upload, CheckCircle, Copy, AlertCircle, Download, Plus, Minus } from "lucide-react";
 import { generateInvoicePDF } from "@/lib/invoiceGenerator";
 import DOMPurify from "dompurify";
 import { triggerOrderThankYou } from "@/components/layout/OrderThankYouPopup";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface CartItem {
   id: string;
@@ -42,7 +52,8 @@ const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
-  const items: CartItem[] = location.state?.items || [];
+  const initialItems: CartItem[] = location.state?.items || [];
+  const [checkoutItems, setCheckoutItems] = useState<CartItem[]>(initialItems);
 
   const [step, setStep] = useState<"info" | "payment" | "done">("info");
   const [name, setName] = useState("");
@@ -65,7 +76,19 @@ const Checkout = () => {
   const [binanceQrUrl, setBinanceQrUrl] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const total = items.reduce((sum, i) => sum + (i.sale_price || i.price) * i.quantity, 0);
+  // Duplicate order dialog
+  const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
+
+  const total = checkoutItems.reduce((sum, i) => sum + (i.sale_price || i.price) * i.quantity, 0);
+
+  const updateItemQuantity = (id: string, delta: number) => {
+    setCheckoutItems((prev) =>
+      prev
+        .map((item) =>
+          item.id === id ? { ...item, quantity: Math.max(1, Math.min(100, item.quantity + delta)) } : item
+        )
+    );
+  };
 
   // Load active payment methods from DB
   useEffect(() => {
@@ -91,7 +114,7 @@ const Checkout = () => {
     load();
   }, []);
 
-  if (items.length === 0) {
+  if (checkoutItems.length === 0) {
     return (
       <Layout>
         <div className="py-24 text-center">
@@ -104,7 +127,29 @@ const Checkout = () => {
     );
   }
 
-  const createOrder = async () => {
+  const checkForDuplicateOrders = async (): Promise<boolean> => {
+    if (!email.trim()) return false;
+    const productIds = checkoutItems.map((i) => i.id);
+    // Check if user has pending/processing orders
+    const { data: pendingOrders } = await supabase
+      .from("orders")
+      .select("id")
+      .eq("customer_email", email.trim().toLowerCase())
+      .in("status", ["pending", "processing", "created"]);
+
+    if (!pendingOrders || pendingOrders.length === 0) return false;
+
+    const orderIds = pendingOrders.map((o) => o.id);
+    const { data: existingItems } = await supabase
+      .from("order_items")
+      .select("product_id")
+      .in("order_id", orderIds)
+      .in("product_id", productIds);
+
+    return !!(existingItems && existingItems.length > 0);
+  };
+
+  const createOrder = async (skipDuplicateCheck = false) => {
     if (!name.trim() || !email.trim()) {
       toast.error("Please enter your name and email.");
       return;
@@ -127,6 +172,19 @@ const Checkout = () => {
       return;
     }
 
+    // Check for duplicate orders
+    if (!skipDuplicateCheck) {
+      try {
+        const hasDuplicate = await checkForDuplicateOrders();
+        if (hasDuplicate) {
+          setDuplicateDialogOpen(true);
+          return;
+        }
+      } catch {
+        // If check fails, proceed anyway
+      }
+    }
+
     setLoading(true);
     try {
       // Use server-side order creation with price verification
@@ -135,16 +193,23 @@ const Checkout = () => {
           customer_name: name.trim(),
           customer_email: email.trim(),
           payment_method_slug: selectedMethod.slug,
-          items: items.map((i) => ({
+          items: checkoutItems.map((i) => ({
             product_id: i.id,
             quantity: i.quantity,
           })),
         },
       });
 
-      if (orderErr) throw orderErr;
+      // Handle edge function errors with friendly messages
+      if (orderErr) {
+        // The data may contain the actual error message from the function
+        const friendlyMessage = orderResult?.error || "Something went wrong while placing your order. Please try again.";
+        toast.error("Order could not be placed", { description: friendlyMessage });
+        setLoading(false);
+        return;
+      }
       if (orderResult?.error) {
-        toast.error(orderResult.error);
+        toast.error("Order could not be placed", { description: orderResult.error });
         setLoading(false);
         return;
       }
@@ -174,8 +239,11 @@ const Checkout = () => {
         triggerOrderThankYou();
       }
     } catch (err: any) {
-      const reason = err?.message || err?.error || "An unexpected error occurred.";
-      toast.error("Failed to create order", { description: reason });
+      // Catch-all: never show raw technical errors
+      const reason = typeof err?.message === "string" && !err.message.includes("Edge Function")
+        ? err.message
+        : "Something went wrong. Please try again or contact support.";
+      toast.error("Order could not be placed", { description: reason });
       console.error(err);
     } finally {
       setLoading(false);
@@ -224,6 +292,27 @@ const Checkout = () => {
   return (
     <Layout>
       <SEOHead title="Checkout - Verified BM services" description="Complete your purchase" />
+
+      {/* Duplicate Order Confirmation Dialog */}
+      <AlertDialog open={duplicateDialogOpen} onOpenChange={setDuplicateDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>You already have a pending order</AlertDialogTitle>
+            <AlertDialogDescription>
+              You already have a pending order for this product. Would you like to place an additional order, or view your current order?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => navigate("/dashboard")}>
+              View My Orders
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setDuplicateDialogOpen(false); createOrder(true); }}>
+              Place New Order
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <section className="py-12">
         <div className="max-w-2xl mx-auto px-4">
           <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary mb-8">
@@ -232,21 +321,44 @@ const Checkout = () => {
 
           <h1 className="text-2xl font-bold text-foreground mb-8">Checkout</h1>
 
-          {/* Order Summary */}
+          {/* Order Summary with Quantity Controls */}
           <div className="bg-secondary/30 rounded-xl border border-border p-4 mb-8">
             <h3 className="text-sm font-semibold text-foreground mb-3">Order Summary</h3>
-            {items.map((item) => (
+            {checkoutItems.map((item) => (
               <div key={item.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
                 <div className="flex items-center gap-3">
                   {item.image_url && <img src={item.image_url} alt={item.title} className="w-10 h-10 rounded object-cover" />}
                   <div>
                     <span className="text-sm font-medium text-foreground">{item.title}</span>
-                    <span className="text-xs text-muted-foreground ml-2">×{item.quantity}</span>
                   </div>
                 </div>
-                <span className="text-sm font-semibold text-foreground">
-                  ${((item.sale_price || item.price) * item.quantity).toFixed(2)}
-                </span>
+                <div className="flex items-center gap-3">
+                  {step === "info" && (
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => updateItemQuantity(item.id, -1)}
+                        className="w-7 h-7 rounded-md border border-border flex items-center justify-center hover:bg-accent transition-colors"
+                        disabled={item.quantity <= 1}
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
+                      <span className="text-sm font-medium w-8 text-center">{item.quantity}</span>
+                      <button
+                        onClick={() => updateItemQuantity(item.id, 1)}
+                        className="w-7 h-7 rounded-md border border-border flex items-center justify-center hover:bg-accent transition-colors"
+                        disabled={item.quantity >= 100}
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+                  {step !== "info" && (
+                    <span className="text-xs text-muted-foreground">×{item.quantity}</span>
+                  )}
+                  <span className="text-sm font-semibold text-foreground min-w-[60px] text-right">
+                    ${((item.sale_price || item.price) * item.quantity).toFixed(2)}
+                  </span>
+                </div>
               </div>
             ))}
             <div className="flex justify-between pt-3 mt-2 border-t border-border">
@@ -315,7 +427,7 @@ const Checkout = () => {
               )}
 
               <Button
-                onClick={createOrder}
+                onClick={() => createOrder()}
                 disabled={loading || !selectedMethod || selectedMethod.type === "placeholder"}
                 className="w-full gap-2"
                 size="lg"

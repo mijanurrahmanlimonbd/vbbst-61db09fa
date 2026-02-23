@@ -24,6 +24,7 @@ const ProductDetail = () => {
   const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState("");
+  const [quantity, setQuantity] = useState(1);
   const [testimonials, setTestimonials] = useState<any[]>([]);
   const [faqs, setFaqs] = useState<any[]>([]);
   const [openFaq, setOpenFaq] = useState<string | null>(null);
@@ -58,6 +59,15 @@ const ProductDetail = () => {
     };
     if (slug) fetchData();
   }, [slug]);
+
+  // Scroll to #reviews hash when page loads
+  useEffect(() => {
+    if (!loading && window.location.hash === "#reviews") {
+      setTimeout(() => {
+        document.getElementById("reviews")?.scrollIntoView({ behavior: "smooth" });
+      }, 300);
+    }
+  }, [loading]);
 
   // Check if current user is a verified buyer
   useEffect(() => {
@@ -321,14 +331,36 @@ const ProductDetail = () => {
                 </p>
               )}
 
-              {/* Primary CTA Buttons */}
+              {/* Quantity Selector & Primary CTA */}
               <div className="flex flex-col gap-3 mt-6">
+                {inStock && (
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-foreground">Quantity:</span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                        className="w-9 h-9 rounded-lg border border-border flex items-center justify-center hover:bg-accent transition-colors"
+                        disabled={quantity <= 1}
+                      >
+                        <span className="text-lg font-bold">−</span>
+                      </button>
+                      <span className="text-base font-semibold w-10 text-center">{quantity}</span>
+                      <button
+                        onClick={() => setQuantity((q) => Math.min(100, q + 1))}
+                        className="w-9 h-9 rounded-lg border border-border flex items-center justify-center hover:bg-accent transition-colors"
+                        disabled={quantity >= 100}
+                      >
+                        <span className="text-lg font-bold">+</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <button
-                  onClick={() => inStock && navigate("/checkout", { state: { items: [{ id: product.id, title: product.title, price: product.price, sale_price: product.sale_price, quantity: 1, image_url: product.image_url }] } })}
+                  onClick={() => inStock && navigate("/checkout", { state: { items: [{ id: product.id, title: product.title, price: product.price, sale_price: product.sale_price, quantity, image_url: product.image_url }] } })}
                   className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-[hsl(25,95%,55%)] text-white text-lg font-bold hover:bg-[hsl(25,95%,48%)] transition-colors disabled:opacity-50 shadow-lg shadow-[hsl(25,95%,55%)]/20"
                   disabled={!inStock}
                 >
-                  {inStock ? `Buy Now — $${finalPrice.toFixed(2)}` : "Sold Out"} {inStock && <ArrowRight className="w-5 h-5" />}
+                  {inStock ? `Buy Now — $${(finalPrice * quantity).toFixed(2)}` : "Sold Out"} {inStock && <ArrowRight className="w-5 h-5" />}
                 </button>
                 <div className="grid grid-cols-2 gap-3">
                   <a href="https://wa.me/8801302669333" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 rounded-xl bg-[hsl(142,70%,45%)] text-white font-semibold hover:bg-[hsl(142,70%,40%)] transition-colors">
@@ -532,7 +564,7 @@ const ProductDetail = () => {
       </section>
 
       {/* ─── VERIFIED BUYER REVIEWS ─── */}
-      <section className="py-14 bg-muted/30">
+      <section id="reviews" className="py-14 bg-muted/30 scroll-mt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Reviews</p>
           <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Verified Buyer Reviews</h2>
