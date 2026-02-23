@@ -7,20 +7,19 @@ import { useMenuItems } from "@/hooks/useMenuItems";
 import { supabase } from "@/integrations/supabase/client";
 import DynamicIcon from "@/components/shared/DynamicIcon";
 
-interface FooterProduct {
-  slug: string;
-  title: string;
-}
+interface FooterProduct { slug: string; title: string; }
+interface FooterBlogPost { slug: string; title: string; }
 
-interface FooterBlogPost {
-  slug: string;
-  title: string;
-}
+const FOOTER_KEYS = [
+  "footer_description", "contact_address", "contact_phone",
+  "contact_telegram", "contact_email", "footer_copyright_text",
+];
 
 const Footer = () => {
   const { branding } = useBranding();
   const [products, setProducts] = useState<FooterProduct[]>([]);
   const [blogPosts, setBlogPosts] = useState<FooterBlogPost[]>([]);
+  const [footerSettings, setFooterSettings] = useState<Record<string, string>>({});
   const { data: dbQuickLinks } = useMenuItems("footer-quick");
   const { data: dbTrustLinks } = useMenuItems("footer-trust");
 
@@ -31,7 +30,22 @@ const Footer = () => {
     supabase.from("blog_posts").select("slug,title").eq("status", "published").order("published_at", { ascending: false }).then(({ data }) => {
       if (data) setBlogPosts(data);
     });
+    supabase.from("site_settings").select("key, value").in("key", FOOTER_KEYS).then(({ data }) => {
+      if (data) {
+        const map: Record<string, string> = {};
+        data.forEach((r) => { map[r.key] = r.value; });
+        setFooterSettings(map);
+      }
+    });
   }, []);
+
+  const desc = footerSettings.footer_description || "Trusted provider of verified Meta Business Managers and WhatsApp Business API accounts since 2020. Serving 10,000+ advertisers globally.";
+  const address = footerSettings.contact_address || "Madergonj, Pirgonj, Rangpur, Bangladesh\u00a0-\u00a05470";
+  const phone = footerSettings.contact_phone || "+880 1302 669333";
+  const telegram = footerSettings.contact_telegram || "Verifiedbmbuy";
+  const email = footerSettings.contact_email || "info@verifiedbmservices.com";
+  const copyrightRaw = footerSettings.footer_copyright_text || `© {year} ${branding.site_title || "Verified BM services"}. All rights reserved. | Verified BM & WhatsApp API Provider`;
+  const copyright = copyrightRaw.replace(/\{year\}/g, String(new Date().getFullYear()));
 
   const logoElement = branding.footer_logo ? (
     <img src={branding.footer_logo} alt={branding.site_title} className="h-8 max-w-[160px] object-contain" loading="lazy" />
@@ -45,25 +59,19 @@ const Footer = () => {
   );
 
   const defaultQuickLinks = [
-    { to: "/", label: "Homepage" },
-    { to: "/shop", label: "All Products" },
-    { to: "/blog", label: "Latest Articles" },
-    { to: "/about", label: "About Us" },
+    { to: "/", label: "Homepage" }, { to: "/shop", label: "All Products" },
+    { to: "/blog", label: "Latest Articles" }, { to: "/about", label: "About Us" },
     { to: "/contact", label: "Support & Contact" },
   ];
-
   const defaultTrustLinks = [
-    { to: "/terms", label: "Terms of Service" },
-    { to: "/privacy", label: "Privacy Policy" },
-    { to: "/refund-policy", label: "Refund Policy" },
-    { to: "/replacement-guarantee", label: "Replacement Guarantee" },
+    { to: "/terms", label: "Terms of Service" }, { to: "/privacy", label: "Privacy Policy" },
+    { to: "/refund-policy", label: "Refund Policy" }, { to: "/replacement-guarantee", label: "Replacement Guarantee" },
     { to: "/faq", label: "FAQ" },
   ];
 
   const quickLinks = dbQuickLinks && dbQuickLinks.length > 0
     ? dbQuickLinks.map(m => ({ to: m.url, label: m.label, iconName: m.icon_name }))
     : defaultQuickLinks.map(l => ({ ...l, iconName: null as string | null }));
-
   const trustLinks = dbTrustLinks && dbTrustLinks.length > 0
     ? dbTrustLinks.map(m => ({ to: m.url, label: m.label, iconName: m.icon_name }))
     : defaultTrustLinks.map(l => ({ ...l, iconName: null as string | null }));
@@ -87,9 +95,7 @@ const Footer = () => {
           {/* Col 1: Brand */}
           <div>
             <div className="mb-4">{logoElement}</div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Trusted provider of verified Meta Business Managers and WhatsApp Business API accounts since 2020. Serving 10,000+ advertisers globally.
-            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
           </div>
 
           {/* Col 2: Quick Links */}
@@ -98,10 +104,7 @@ const Footer = () => {
             <ul className="space-y-1">
               {quickLinks.map((l) => (
                 <li key={l.to}>
-                  <Link
-                    to={l.to}
-                    className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors"
-                  >
+                  <Link to={l.to} className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
                     {l.iconName && <DynamicIcon name={l.iconName} className="w-4 h-4 text-muted-foreground shrink-0" />}
                     {l.label}
                   </Link>
@@ -116,10 +119,7 @@ const Footer = () => {
             <ul className="space-y-1">
               {trustLinks.map((l) => (
                 <li key={l.to}>
-                  <Link
-                    to={l.to}
-                    className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors"
-                  >
+                  <Link to={l.to} className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
                     {l.iconName && <DynamicIcon name={l.iconName} className="w-4 h-4 text-muted-foreground shrink-0" />}
                     {l.label}
                   </Link>
@@ -134,19 +134,19 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-start gap-2.5 text-sm text-muted-foreground">
                 <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-primary" />
-                <span>Madergonj, Pirgonj, Rangpur, Bangladesh&nbsp;-&nbsp;5470</span>
+                <span>{address}</span>
               </div>
-              <a href="https://wa.me/8801302669333" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
+              <a href={`https://wa.me/${phone.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
                 <MessageCircle className="w-4 h-4 text-[hsl(142,70%,45%)]" />
-                +880 1302 669333
+                {phone}
               </a>
-              <a href="https://t.me/Verifiedbmbuy" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
+              <a href={`https://t.me/${telegram}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
                 <Send className="w-4 h-4 text-[hsl(200,100%,40%)]" />
-                @Verifiedbmbuy
+                @{telegram}
               </a>
-              <a href="mailto:info@verifiedbmservices.com" className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
+              <a href={`mailto:${email}`} className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
                 <Mail className="w-4 h-4 text-primary" />
-                info@verifiedbmservices.com
+                {email}
               </a>
               <div className="inline-flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-full mt-1">
                 <Clock className="w-3.5 h-3.5" />
@@ -157,30 +157,18 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* SEO-only sitemap — visually hidden from users, fully crawlable by search engines */}
+      {/* SEO-only sitemap */}
       <div className="absolute w-px h-px overflow-hidden" style={{ clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>
         {products.length > 0 && (
           <nav aria-label="Products sitemap">
             <h4>Products Site Map</h4>
-            <ul>
-              {products.map((p) => (
-                <li key={p.slug}>
-                  <Link to={`/product/${p.slug}`}>{p.title}</Link>
-                </li>
-              ))}
-            </ul>
+            <ul>{products.map((p) => (<li key={p.slug}><Link to={`/product/${p.slug}`}>{p.title}</Link></li>))}</ul>
           </nav>
         )}
         {blogPosts.length > 0 && (
           <nav aria-label="Blog sitemap">
             <h4>Blog Site Map</h4>
-            <ul>
-              {blogPosts.map((p) => (
-                <li key={p.slug}>
-                  <Link to={`/blog/${p.slug}`}>{p.title}</Link>
-                </li>
-              ))}
-            </ul>
+            <ul>{blogPosts.map((p) => (<li key={p.slug}><Link to={`/blog/${p.slug}`}>{p.title}</Link></li>))}</ul>
           </nav>
         )}
       </div>
@@ -188,7 +176,7 @@ const Footer = () => {
       {/* Copyright */}
       <div className="border-t border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} {branding.site_title || "Verified BM services"}. All rights reserved. | Verified BM &amp; WhatsApp API Provider
+          {copyright}
         </div>
       </div>
     </footer>
