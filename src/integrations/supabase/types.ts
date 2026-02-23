@@ -383,6 +383,36 @@ export type Database = {
         }
         Relationships: []
       }
+      newsletters: {
+        Row: {
+          content: string
+          id: string
+          recipient_count: number
+          sent_at: string
+          sent_by: string | null
+          subject: string
+          target_audience: string
+        }
+        Insert: {
+          content: string
+          id?: string
+          recipient_count?: number
+          sent_at?: string
+          sent_by?: string | null
+          subject: string
+          target_audience?: string
+        }
+        Update: {
+          content?: string
+          id?: string
+          recipient_count?: number
+          sent_at?: string
+          sent_by?: string | null
+          subject?: string
+          target_audience?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -713,6 +743,36 @@ export type Database = {
           last_login?: string | null
           provider?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      site_notices: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          message: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          message: string
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          message?: string
+          type?: string
         }
         Relationships: []
       }

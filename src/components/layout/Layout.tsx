@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
+import AnnouncementBar from "./AnnouncementBar";
 import Footer from "./Footer";
 import MobileBottomNav from "./MobileBottomNav";
 import TrackingScripts from "@/components/tracking/TrackingScripts";
@@ -123,6 +124,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <AnnouncementBar />
       <Navbar />
       <main ref={mainRef} className="flex-1">{children}</main>
       <Footer />
