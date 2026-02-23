@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Upload, CheckCircle, Copy, AlertCircle } from "lucide-react";
+import { ArrowLeft, Loader2, Upload, CheckCircle, Copy, AlertCircle, Download } from "lucide-react";
+import { generateInvoicePDF } from "@/lib/invoiceGenerator";
 import DOMPurify from "dompurify";
 import { triggerOrderThankYou } from "@/components/layout/OrderThankYouPopup";
 
@@ -431,26 +432,60 @@ const Checkout = () => {
                 Our team is verifying your transaction. You will receive an update within 24 hours.
               </p>
 
-              {/* Invoice gating — prompt registration */}
-              <div className="bg-secondary/40 border border-border rounded-xl p-5 max-w-md mx-auto text-left space-y-3">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">Download Your Official Invoice</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Register or login to your account to download a professional PDF invoice for this order.
-                    </p>
+              {user ? (
+                <div className="flex flex-col gap-3 max-w-xs mx-auto">
+                  <Button
+                    size="lg"
+                    onClick={async () => {
+                      if (!orderId) return;
+                      try {
+                        const { data: orderData } = await supabase
+                          .from("orders")
+                          .select("*")
+                          .eq("id", orderId)
+                          .single();
+                        const { data: orderItems } = await supabase
+                          .from("order_items")
+                          .select("product_title, unit_price, quantity")
+                          .eq("order_id", orderId);
+                        if (orderData && orderItems) {
+                          await generateInvoicePDF(orderData as any, orderItems);
+                        } else {
+                          toast.error("Could not load invoice data.");
+                        }
+                      } catch {
+                        toast.error("Failed to generate invoice.");
+                      }
+                    }}
+                    className="gap-2"
+                  >
+                    <Download className="w-4 h-4" /> Download Your Official Invoice
+                  </Button>
+                  <Button size="lg" variant="secondary" onClick={() => navigate("/dashboard")}>
+                    Go to My Dashboard
+                  </Button>
+                </div>
+              ) : (
+                <div className="bg-secondary/40 border border-border rounded-xl p-5 max-w-md mx-auto text-left space-y-3">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">Download Your Official Invoice</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Register or login to your account to download a professional PDF invoice for this order.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="default" onClick={() => navigate("/dashboard")}>
+                      Login / Register
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => navigate("/shop")}>
+                      Back to Shop
+                    </Button>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="default" onClick={() => navigate("/dashboard")}>
-                    Login / Register
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => navigate("/shop")}>
-                    Back to Shop
-                  </Button>
-                </div>
-              </div>
+              )}
             </div>
           )}
         </div>
