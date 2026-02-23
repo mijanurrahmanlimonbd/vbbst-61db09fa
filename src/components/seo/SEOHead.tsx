@@ -97,6 +97,9 @@ const SEOHead = ({
       {/* Pinterest */}
       <meta property="pin:media" content={resolvedOgImage} />
       <meta property="pin:description" content={description.slice(0, 160)} />
+
+      {/* Dynamic favicon from branding settings */}
+      {branding.favicon && <link rel="icon" href={branding.favicon} type="image/webp" />}
     </Helmet>
   );
 };
