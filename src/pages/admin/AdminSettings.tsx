@@ -21,6 +21,7 @@ import BrandingSection from "@/components/admin/BrandingSection";
 import ActivityLogsTab from "@/components/admin/ActivityLogsTab";
 import MaintenanceTab from "@/components/admin/MaintenanceTab";
 import FooterSettingsTab from "@/components/admin/FooterSettingsTab";
+import EmailSettingsSection from "@/components/admin/EmailSettingsSection";
 
 
 interface FieldErrors { [key: string]: boolean; }
@@ -320,6 +321,8 @@ const AdminSettings = () => {
             <Button onClick={() => handleSaveGeneral()} disabled={saving} className="gap-2">
               {saving && <Loader2 className="w-4 h-4 animate-spin" />} Save Changes
             </Button>
+
+            <EmailSettingsSection />
           </div>
         </TabsContent>
 
