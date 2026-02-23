@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
 import JsonLdSchema from "@/components/seo/JsonLdSchema";
@@ -17,6 +19,7 @@ import {
 const ProductDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [product, setProduct] = useState<any>(null);
   const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,25 +28,98 @@ const ProductDetail = () => {
   const [faqs, setFaqs] = useState<any[]>([]);
   const [openFaq, setOpenFaq] = useState<string | null>(null);
 
+  // Review state
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [canReview, setCanReview] = useState(false);
+  const [completedOrderId, setCompletedOrderId] = useState<string | null>(null);
+  const [existingReview, setExistingReview] = useState<any>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewText, setReviewText] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       const { data } = await supabase.from("products").select("*").eq("slug", slug).single();
       setProduct(data);
       if (data) {
         setActiveImage(data.image_url || "");
-        const [relRes, testRes, faqRes] = await Promise.all([
+        const [relRes, testRes, faqRes, reviewsRes] = await Promise.all([
           supabase.from("products").select("*").eq("category", data.category).neq("id", data.id).limit(4),
           supabase.from("testimonials").select("*").eq("status", "approved").order("sort_order").limit(6),
           supabase.from("faqs").select("*").order("sort_order").limit(8),
+          supabase.from("product_reviews").select("*").eq("product_id", data.id).eq("status", "approved").order("created_at", { ascending: false }),
         ]);
         setRelated(relRes.data || []);
         setTestimonials(testRes.data || []);
         setFaqs(faqRes.data || []);
+        setReviews(reviewsRes.data || []);
       }
       setLoading(false);
     };
     if (slug) fetchData();
   }, [slug]);
+
+  // Check if current user is a verified buyer
+  useEffect(() => {
+    const checkBuyerStatus = async () => {
+      if (!user?.email || !product?.id) return;
+      // Find completed orders for this user containing this product
+      const { data: orders } = await supabase
+        .from("orders")
+        .select("id")
+        .eq("customer_email", user.email)
+        .eq("status", "completed");
+      if (orders && orders.length > 0) {
+        const orderIds = orders.map((o) => o.id);
+        const { data: items } = await supabase
+          .from("order_items")
+          .select("order_id")
+          .eq("product_id", product.id)
+          .in("order_id", orderIds)
+          .limit(1);
+        if (items && items.length > 0) {
+          setCanReview(true);
+          setCompletedOrderId(items[0].order_id);
+        }
+      }
+      // Check for existing review
+      const { data: existing } = await supabase
+        .from("product_reviews")
+        .select("*")
+        .eq("product_id", product.id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (existing) setExistingReview(existing);
+    };
+    checkBuyerStatus();
+  }, [user, product]);
+
+  const handleSubmitReview = async () => {
+    if (!user || !product || !completedOrderId || !reviewText.trim()) return;
+    setSubmittingReview(true);
+    const { error } = await supabase.from("product_reviews").insert({
+      product_id: product.id,
+      user_id: user.id,
+      order_id: completedOrderId,
+      rating: reviewRating,
+      review_text: reviewText.trim(),
+    });
+    if (error) {
+      if (error.message?.includes("duplicate")) {
+        toast.error("You've already reviewed this product.");
+      } else {
+        toast.error("Failed to submit review.");
+      }
+    } else {
+      toast.success("Review submitted! Thank you.");
+      setReviewText("");
+      setExistingReview({ rating: reviewRating, review_text: reviewText });
+      // Refresh reviews
+      const { data } = await supabase.from("product_reviews").select("*").eq("product_id", product.id).eq("status", "approved").order("created_at", { ascending: false });
+      setReviews(data || []);
+    }
+    setSubmittingReview(false);
+  };
 
   if (loading) return <Layout><div className="py-24 text-center text-muted-foreground">Loading...</div></Layout>;
   if (!product) return <Layout><div className="py-24 text-center text-muted-foreground">Product not found.</div></Layout>;
@@ -452,6 +528,90 @@ const ProductDetail = () => {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ─── VERIFIED BUYER REVIEWS ─── */}
+      <section className="py-14 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">Reviews</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">Verified Buyer Reviews</h2>
+          <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">
+            Only customers who purchased this product can leave a review.
+          </p>
+
+          {/* Review Form or Gate */}
+          <div className="mt-10 max-w-2xl mx-auto">
+            {user && canReview && !existingReview ? (
+              <div className="rounded-xl border border-border bg-card p-6 space-y-4">
+                <h3 className="font-semibold text-foreground flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-primary" /> Write Your Review
+                </h3>
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <button key={s} onClick={() => setReviewRating(s)} className="p-0.5">
+                      <Star className={`w-6 h-6 ${s <= reviewRating ? "fill-[hsl(45,93%,47%)] text-[hsl(45,93%,47%)]" : "text-muted-foreground"}`} />
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  placeholder="Share your experience with this product…"
+                  rows={4}
+                  className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+                <button
+                  onClick={handleSubmitReview}
+                  disabled={submittingReview || !reviewText.trim()}
+                  className="px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-50"
+                >
+                  {submittingReview ? "Submitting…" : "Submit Review"}
+                </button>
+              </div>
+            ) : existingReview ? (
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center">
+                <CheckCircle className="w-8 h-8 text-primary mx-auto mb-2" />
+                <p className="font-semibold text-foreground">You've already reviewed this product</p>
+                <p className="text-sm text-muted-foreground mt-1">Thank you for your feedback!</p>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-border bg-card p-6 text-center">
+                <Lock className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                <p className="font-semibold text-foreground">Only verified buyers can leave a review</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {user ? "Purchase this product and receive it to leave a review." : "Log in and purchase this product to leave a review."}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Existing Reviews */}
+          {reviews.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+              {reviews.map((r) => (
+                <div key={r.id} className="rounded-xl border border-border bg-card p-6">
+                  <div className="flex gap-0.5 mb-2">
+                    {[...Array(r.rating)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-[hsl(45,93%,47%)] text-[hsl(45,93%,47%)]" />
+                    ))}
+                  </div>
+                  <p className="text-sm text-muted-foreground italic leading-relaxed">"{r.review_text}"</p>
+                  <div className="mt-3 flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-medium text-primary">Verified Buyer</span>
+                    <span className="text-xs text-muted-foreground ml-auto">
+                      {new Date(r.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {reviews.length === 0 && (
+            <p className="text-center text-sm text-muted-foreground mt-8">No reviews yet. Be the first to review this product!</p>
+          )}
         </div>
       </section>
 
