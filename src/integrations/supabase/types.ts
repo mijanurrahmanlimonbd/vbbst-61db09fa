@@ -850,6 +850,7 @@ export type Database = {
           id: string
           job_title: string | null
           rating: number
+          review_id: string | null
           sort_order: number | null
           status: string
           testimonial_text: string
@@ -861,6 +862,7 @@ export type Database = {
           id?: string
           job_title?: string | null
           rating?: number
+          review_id?: string | null
           sort_order?: number | null
           status?: string
           testimonial_text: string
@@ -872,6 +874,7 @@ export type Database = {
           id?: string
           job_title?: string | null
           rating?: number
+          review_id?: string | null
           sort_order?: number | null
           status?: string
           testimonial_text?: string
