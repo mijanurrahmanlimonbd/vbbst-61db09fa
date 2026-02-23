@@ -56,6 +56,7 @@ const navItems = [
   { title: "Work Samples", path: "/admin/work-samples", icon: Briefcase, section: "dashboard" },
   { title: "Testimonials", path: "/admin/testimonials", icon: MessageCircle, section: "dashboard" },
   { title: "FAQs", path: "/admin/faqs", icon: HelpCircle, section: "dashboard" },
+  { title: "Navigation", path: "/admin/menus", icon: Menu, section: "settings" },
   { title: "SEO", path: "/admin/seo", icon: Search, section: "settings" },
   { title: "Auth Config", path: "/admin/auth-config", icon: Lock, section: "settings" },
   { title: "Settings", path: "/admin/settings", icon: Settings, section: "settings" },

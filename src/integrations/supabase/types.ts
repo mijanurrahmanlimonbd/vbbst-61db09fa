@@ -329,6 +329,36 @@ export type Database = {
         }
         Relationships: []
       }
+      menus: {
+        Row: {
+          created_at: string
+          icon: string | null
+          id: string
+          label: string
+          position: string
+          sort_order: number
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          label: string
+          position?: string
+          sort_order?: number
+          url: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string | null
+          id?: string
+          label?: string
+          position?: string
+          sort_order?: number
+          url?: string
+        }
+        Relationships: []
+      }
       newsletter_subscribers: {
         Row: {
           created_at: string

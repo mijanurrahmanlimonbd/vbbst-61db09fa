@@ -53,6 +53,7 @@ const AdminFAQs = lazy(() => import("./pages/admin/AdminFAQs"));
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
 const AdminCustomers = lazy(() => import("./pages/admin/AdminCustomers"));
 const AdminAuthConfig = lazy(() => import("./pages/admin/AdminAuthConfig"));
+const AdminMenus = lazy(() => import("./pages/admin/AdminMenus"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -122,6 +123,7 @@ const App = () => (
               <Route path="messages" element={<AdminMessages />} />
               <Route path="customers" element={<AdminCustomers />} />
               <Route path="auth-config" element={<AdminAuthConfig />} />
+              <Route path="menus" element={<AdminMenus />} />
             </Route>
             <Route path="/page/:slug" element={<DynamicPage />} />
             <Route path="*" element={<NotFound />} />
