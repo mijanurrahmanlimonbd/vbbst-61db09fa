@@ -10,7 +10,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Loader2, Star, Trash2, CheckCircle, MessageCircle } from "lucide-react";
+import { Loader2, Star, Trash2, CheckCircle, XCircle, MessageCircle } from "lucide-react";
 
 interface Review {
   id: string;
@@ -25,6 +25,24 @@ interface Review {
   customer_name?: string;
 }
 
+const StatusBadge = ({ status }: { status: string }) => {
+  const map: Record<string, { label: string; className: string }> = {
+    pending: { label: "Pending", className: "bg-orange-500/15 text-orange-600 border-orange-500/30" },
+    approved: { label: "Approved", className: "bg-green-500/15 text-green-600 border-green-500/30" },
+    rejected: { label: "Rejected", className: "bg-red-500/15 text-red-600 border-red-500/30" },
+  };
+  const s = map[status] || map.pending;
+  return <Badge variant="outline" className={`capitalize text-xs ${s.className}`}>{s.label}</Badge>;
+};
+
+const RatingStars = ({ rating }: { rating: number }) => (
+  <div className="flex gap-0.5">
+    {[1, 2, 3, 4, 5].map((i) => (
+      <Star key={i} className={`w-3.5 h-3.5 ${i <= rating ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/20"}`} />
+    ))}
+  </div>
+);
+
 const AdminReviews = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +51,6 @@ const AdminReviews = () => {
 
   const fetchReviews = async () => {
     setLoading(true);
-    // Fetch reviews
     const { data: revData, error } = await supabase
       .from("product_reviews")
       .select("*")
@@ -51,7 +68,6 @@ const AdminReviews = () => {
       return;
     }
 
-    // Enrich with product titles and customer names
     const productIds = [...new Set(revData.map((r) => r.product_id))];
     const userIds = [...new Set(revData.map((r) => r.user_id))];
 
@@ -78,14 +94,13 @@ const AdminReviews = () => {
   const handleApprove = async (review: Review) => {
     setActionId(review.id);
     try {
-      // 1. Update review status
       const { error: updateErr } = await supabase
         .from("product_reviews")
         .update({ status: "approved" })
         .eq("id", review.id);
       if (updateErr) throw updateErr;
 
-      // 2. Copy to testimonials table
+      // Sync to testimonials
       const { error: insertErr } = await supabase.from("testimonials").insert({
         client_name: review.customer_name || "Verified Buyer",
         job_title: `Verified Buyer of ${review.product_title || "Product"}`,
@@ -105,29 +120,55 @@ const AdminReviews = () => {
     }
   };
 
+  const handleReject = async (review: Review) => {
+    setActionId(review.id);
+    try {
+      const { error } = await supabase
+        .from("product_reviews")
+        .update({ status: "rejected" })
+        .eq("id", review.id);
+      if (error) throw error;
+
+      // Remove from testimonials if it was previously approved
+      await supabase
+        .from("testimonials")
+        .delete()
+        .eq("testimonial_text", review.review_text)
+        .eq("client_name", review.customer_name || "Verified Buyer");
+
+      toast.success("Review rejected.");
+      fetchReviews();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to reject review");
+    } finally {
+      setActionId(null);
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleteId) return;
+    const review = reviews.find((r) => r.id === deleteId);
+
+    // Remove from testimonials if it existed
+    if (review) {
+      await supabase
+        .from("testimonials")
+        .delete()
+        .eq("testimonial_text", review.review_text)
+        .eq("client_name", review.customer_name || "Verified Buyer");
+    }
+
     const { error } = await supabase.from("product_reviews").delete().eq("id", deleteId);
     if (error) toast.error(error.message);
     else { toast.success("Review deleted."); fetchReviews(); }
     setDeleteId(null);
   };
 
-  const RatingStars = ({ rating }: { rating: number }) => (
-    <div className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Star key={i} className={`w-3.5 h-3.5 ${i <= rating ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/20"}`} />
-      ))}
-    </div>
-  );
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-foreground">Product Reviews</h2>
-        <Badge variant="secondary" className="text-xs">
-          {reviews.length} total
-        </Badge>
+        <Badge variant="secondary" className="text-xs">{reviews.length} total</Badge>
       </div>
 
       <div className="bg-background rounded-xl border border-border overflow-hidden">
@@ -158,23 +199,31 @@ const AdminReviews = () => {
                   <TableCell className="text-sm text-muted-foreground">{r.product_title}</TableCell>
                   <TableCell><RatingStars rating={r.rating} /></TableCell>
                   <TableCell className="max-w-[300px] text-sm text-muted-foreground truncate">{r.review_text}</TableCell>
-                  <TableCell>
-                    <Badge variant={r.status === "approved" ? "default" : "secondary"} className="capitalize text-xs">
-                      {r.status}
-                    </Badge>
-                  </TableCell>
+                  <TableCell><StatusBadge status={r.status} /></TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
                       {r.status !== "approved" && (
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="gap-1 text-primary hover:text-primary"
+                          className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-500/10"
                           disabled={actionId === r.id}
                           onClick={() => handleApprove(r)}
                         >
                           {actionId === r.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                           Approve
+                        </Button>
+                      )}
+                      {r.status !== "rejected" && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="gap-1 text-orange-600 hover:text-orange-700 hover:bg-orange-500/10"
+                          disabled={actionId === r.id}
+                          onClick={() => handleReject(r)}
+                        >
+                          {actionId === r.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                          Reject
                         </Button>
                       )}
                       <Button
@@ -198,7 +247,7 @@ const AdminReviews = () => {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Review</AlertDialogTitle>
-            <AlertDialogDescription>This will permanently remove this review. This action cannot be undone.</AlertDialogDescription>
+            <AlertDialogDescription>This will permanently remove this review and its testimonial (if any). This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
