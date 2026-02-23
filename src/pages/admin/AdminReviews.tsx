@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,13 +29,16 @@ interface Review {
 }
 
 const StatusBadge = ({ status }: { status: string }) => {
-  const map: Record<string, { label: string; className: string }> = {
-    pending: { label: "Pending", className: "bg-orange-500/15 text-orange-600 border-orange-500/30" },
-    approved: { label: "Approved", className: "bg-green-500/15 text-green-600 border-green-500/30" },
-    rejected: { label: "Rejected", className: "bg-red-500/15 text-red-600 border-red-500/30" },
-  };
-  const s = map[status] || map.pending;
-  return <Badge variant="outline" className={`capitalize text-xs ${s.className}`}>{s.label}</Badge>;
+  const normalized = (status || "pending").toLowerCase();
+  const label = normalized === "approved" ? "Approved" : normalized === "rejected" ? "Rejected" : "Pending";
+  const className =
+    normalized === "approved"
+      ? "bg-green-500/15 text-green-600 border-green-500/30"
+      : normalized === "rejected"
+        ? "bg-red-500/15 text-red-600 border-red-500/30"
+        : "bg-yellow-500/15 text-yellow-700 border-yellow-500/30";
+
+  return <Badge variant="outline" className={`capitalize text-xs ${className}`}>{label}</Badge>;
 };
 
 const RatingStars = ({ rating }: { rating: number }) => (
@@ -65,6 +69,21 @@ const RatingStars = ({ rating }: { rating: number }) => (
 const getReviewComment = (review: Review) => review.review_text || review.comment || "";
 
 const getProductName = (review: Review) => review.product_title || review.product_name || "Product";
+
+const logReviewStatusFromDb = async (reviewId: string) => {
+  const { data, error } = await supabase
+    .from("product_reviews")
+    .select("id, status")
+    .eq("id", reviewId)
+    .single();
+
+  if (error) {
+    console.error("Failed to verify review status after mutation:", error);
+    return;
+  }
+
+  console.log("New status from DB:", data);
+};
 
 const syncTestimonialInsert = async (review: Review) => {
   // De-duplication: check if already synced
@@ -120,6 +139,7 @@ const AdminReviews = () => {
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const fetchReviews = async () => {
     setLoading(true);
@@ -174,10 +194,14 @@ const AdminReviews = () => {
         .eq("id", review.id);
       if (updateErr) throw updateErr;
 
+      setReviews((prev) => prev.map((r) => (r.id === review.id ? { ...r, status: "approved" } : r)));
+      await logReviewStatusFromDb(review.id);
+
       await syncTestimonialInsert(review);
+      await queryClient.invalidateQueries({ queryKey: ["product_reviews"] });
+      await fetchReviews();
 
       toast.success("Review approved & synced to testimonials!");
-      await fetchReviews();
     } catch (error) {
       showAdminSyncError("Approve sync", error);
     } finally {
@@ -195,10 +219,14 @@ const AdminReviews = () => {
         .eq("id", review.id);
       if (updateErr) throw updateErr;
 
+      setReviews((prev) => prev.map((r) => (r.id === review.id ? { ...r, status: "rejected" } : r)));
+      await logReviewStatusFromDb(review.id);
+
       await syncTestimonialDelete(review.id);
+      await queryClient.invalidateQueries({ queryKey: ["product_reviews"] });
+      await fetchReviews();
 
       toast.success("Review rejected & testimonial removed.");
-      await fetchReviews();
     } catch (error) {
       showAdminSyncError("Reject sync", error);
     } finally {
@@ -217,8 +245,9 @@ const AdminReviews = () => {
       const { error } = await supabase.from("product_reviews").delete().eq("id", deleteId);
       if (error) throw error;
 
-      toast.success("Review & testimonial deleted.");
+      await queryClient.invalidateQueries({ queryKey: ["product_reviews"] });
       await fetchReviews();
+      toast.success("Review & testimonial deleted.");
     } catch (error) {
       showAdminSyncError("Delete sync", error);
     } finally {
