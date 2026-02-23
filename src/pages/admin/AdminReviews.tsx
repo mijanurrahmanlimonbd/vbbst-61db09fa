@@ -84,10 +84,28 @@ const syncTestimonialInsert = async (review: Review) => {
 };
 
 const syncTestimonialDelete = async (reviewId: string) => {
-  await (supabase
+  const { error } = await (supabase
     .from("testimonials")
     .delete() as any)
     .eq("review_id", reviewId);
+
+  if (error) throw new Error(`Testimonial cleanup failed: ${error.message}`);
+};
+
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return "Unknown database error";
+  }
+};
+
+const showAdminSyncError = (action: string, error: unknown) => {
+  const message = `${action} failed: ${getErrorMessage(error)}`;
+  toast.error(message);
+  window.alert(message);
 };
 
 const AdminReviews = () => {
@@ -142,20 +160,18 @@ const AdminReviews = () => {
   const handleApprove = async (review: Review) => {
     setActionId(review.id);
     try {
-      // Action 1: Update review status
       const { error: updateErr } = await supabase
         .from("product_reviews")
         .update({ status: "approved" })
         .eq("id", review.id);
       if (updateErr) throw updateErr;
 
-      // Action 2: Sync to testimonials (with de-dup)
       await syncTestimonialInsert(review);
 
       toast.success("Review approved & synced to testimonials!");
-      fetchReviews();
-    } catch (e: any) {
-      toast.error(e.message || "Failed to approve review");
+      await fetchReviews();
+    } catch (error) {
+      showAdminSyncError("Approve sync", error);
     } finally {
       setActionId(null);
     }
@@ -165,19 +181,18 @@ const AdminReviews = () => {
   const handleReject = async (review: Review) => {
     setActionId(review.id);
     try {
-      const { error } = await supabase
+      const { error: updateErr } = await supabase
         .from("product_reviews")
         .update({ status: "rejected" })
         .eq("id", review.id);
-      if (error) throw error;
+      if (updateErr) throw updateErr;
 
-      // Remove linked testimonial
       await syncTestimonialDelete(review.id);
 
       toast.success("Review rejected & testimonial removed.");
-      fetchReviews();
-    } catch (e: any) {
-      toast.error(e.message || "Failed to reject review");
+      await fetchReviews();
+    } catch (error) {
+      showAdminSyncError("Reject sync", error);
     } finally {
       setActionId(null);
     }
@@ -187,13 +202,21 @@ const AdminReviews = () => {
   const handleDelete = async () => {
     if (!deleteId) return;
 
-    // Remove linked testimonial first
-    await syncTestimonialDelete(deleteId);
+    setActionId(deleteId);
+    try {
+      await syncTestimonialDelete(deleteId);
 
-    const { error } = await supabase.from("product_reviews").delete().eq("id", deleteId);
-    if (error) toast.error(error.message);
-    else { toast.success("Review & testimonial deleted."); fetchReviews(); }
-    setDeleteId(null);
+      const { error } = await supabase.from("product_reviews").delete().eq("id", deleteId);
+      if (error) throw error;
+
+      toast.success("Review & testimonial deleted.");
+      await fetchReviews();
+    } catch (error) {
+      showAdminSyncError("Delete sync", error);
+    } finally {
+      setDeleteId(null);
+      setActionId(null);
+    }
   };
 
   return (
@@ -234,37 +257,35 @@ const AdminReviews = () => {
                   <TableCell><StatusBadge status={r.status} /></TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
-                      {r.status !== "approved" && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-500/10"
-                          disabled={actionId === r.id}
-                          onClick={() => handleApprove(r)}
-                        >
-                          {actionId === r.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
-                          Approve
-                        </Button>
-                      )}
-                      {r.status !== "rejected" && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="gap-1 text-orange-600 hover:text-orange-700 hover:bg-orange-500/10"
-                          disabled={actionId === r.id}
-                          onClick={() => handleReject(r)}
-                        >
-                          {actionId === r.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
-                          Reject
-                        </Button>
-                      )}
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="gap-1"
+                        disabled={actionId === r.id}
+                        onClick={() => handleApprove(r)}
+                      >
+                        {actionId === r.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1"
+                        disabled={actionId === r.id}
+                        onClick={() => handleReject(r)}
+                      >
+                        {actionId === r.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                        Reject
+                      </Button>
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="text-muted-foreground hover:text-destructive"
+                        className="gap-1 text-muted-foreground hover:text-destructive"
+                        disabled={actionId === r.id}
                         onClick={() => setDeleteId(r.id)}
                       >
                         <Trash2 className="w-4 h-4" />
+                        Delete
                       </Button>
                     </div>
                   </TableCell>
