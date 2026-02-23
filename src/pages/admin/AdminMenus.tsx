@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import IconPicker from "@/components/admin/IconPicker";
+import DynamicIcon from "@/components/shared/DynamicIcon";
 
 interface MenuItem {
   id: string;
@@ -16,6 +18,7 @@ interface MenuItem {
   position: string;
   sort_order: number;
   icon: string | null;
+  icon_name: string | null;
 }
 
 const positions = [
@@ -28,7 +31,7 @@ const AdminMenus = () => {
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<MenuItem | null>(null);
-  const [form, setForm] = useState({ label: "", url: "", position: "header", icon: "" });
+  const [form, setForm] = useState({ label: "", url: "", position: "header", icon: "", icon_name: null as string | null });
 
   const { data: pages } = useQuery({
     queryKey: ["admin-pages-list"],
@@ -49,11 +52,11 @@ const AdminMenus = () => {
   const saveMutation = useMutation({
     mutationFn: async (item: Partial<MenuItem> & { id?: string }) => {
       if (item.id) {
-        const { error } = await supabase.from("menus").update({ label: item.label, url: item.url, position: item.position, icon: item.icon, sort_order: item.sort_order }).eq("id", item.id);
+        const { error } = await supabase.from("menus").update({ label: item.label, url: item.url, position: item.position, icon: item.icon, icon_name: item.icon_name, sort_order: item.sort_order }).eq("id", item.id);
         if (error) throw error;
       } else {
         const maxOrder = items.filter(i => i.position === item.position).length;
-        const { error } = await supabase.from("menus").insert({ label: item.label!, url: item.url!, position: item.position!, icon: item.icon || null, sort_order: maxOrder });
+        const { error } = await supabase.from("menus").insert({ label: item.label!, url: item.url!, position: item.position!, icon: item.icon || null, icon_name: item.icon_name || null, sort_order: maxOrder });
         if (error) throw error;
       }
     },
@@ -81,18 +84,18 @@ const AdminMenus = () => {
   const closeDialog = () => {
     setDialogOpen(false);
     setEditing(null);
-    setForm({ label: "", url: "", position: "header", icon: "" });
+    setForm({ label: "", url: "", position: "header", icon: "", icon_name: null });
   };
 
   const openAdd = (position: string) => {
     setEditing(null);
-    setForm({ label: "", url: "", position, icon: "" });
+    setForm({ label: "", url: "", position, icon: "", icon_name: null });
     setDialogOpen(true);
   };
 
   const openEdit = (item: MenuItem) => {
     setEditing(item);
-    setForm({ label: item.label, url: item.url, position: item.position, icon: item.icon || "" });
+    setForm({ label: item.label, url: item.url, position: item.position, icon: item.icon || "", icon_name: item.icon_name || null });
     setDialogOpen(true);
   };
 
@@ -104,6 +107,7 @@ const AdminMenus = () => {
       url: form.url.trim(),
       position: form.position,
       icon: form.icon.trim() || null,
+      icon_name: form.icon_name || null,
       sort_order: editing?.sort_order ?? 0,
     });
   };
@@ -118,6 +122,7 @@ const AdminMenus = () => {
         {filtered.map((item) => (
           <div key={item.id} className="flex items-center gap-3 px-4 py-3 bg-background border border-border rounded-lg">
             <GripVertical className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+            {item.icon_name && <DynamicIcon name={item.icon_name} className="w-4 h-4 text-muted-foreground shrink-0" />}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-foreground truncate">{item.label}</p>
               <p className="text-xs text-muted-foreground truncate">{item.url}</p>
@@ -202,6 +207,10 @@ const AdminMenus = () => {
                   {positions.map(p => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground">Icon (optional)</label>
+              <IconPicker value={form.icon_name} onChange={(v) => setForm(f => ({ ...f, icon_name: v }))} />
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={closeDialog}>Cancel</Button>

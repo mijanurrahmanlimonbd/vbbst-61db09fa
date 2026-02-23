@@ -333,6 +333,7 @@ export type Database = {
         Row: {
           created_at: string
           icon: string | null
+          icon_name: string | null
           id: string
           label: string
           position: string
@@ -342,6 +343,7 @@ export type Database = {
         Insert: {
           created_at?: string
           icon?: string | null
+          icon_name?: string | null
           id?: string
           label: string
           position?: string
@@ -351,6 +353,7 @@ export type Database = {
         Update: {
           created_at?: string
           icon?: string | null
+          icon_name?: string | null
           id?: string
           label?: string
           position?: string
