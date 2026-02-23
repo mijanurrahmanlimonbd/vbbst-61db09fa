@@ -5,6 +5,7 @@ import NewsletterForm from "@/components/newsletter/NewsletterForm";
 import { useBranding } from "@/hooks/useBranding";
 import { useMenuItems } from "@/hooks/useMenuItems";
 import { supabase } from "@/integrations/supabase/client";
+import DynamicIcon from "@/components/shared/DynamicIcon";
 
 interface FooterProduct {
   slug: string;
@@ -60,12 +61,12 @@ const Footer = () => {
   ];
 
   const quickLinks = dbQuickLinks && dbQuickLinks.length > 0
-    ? dbQuickLinks.map(m => ({ to: m.url, label: m.label }))
-    : defaultQuickLinks;
+    ? dbQuickLinks.map(m => ({ to: m.url, label: m.label, iconName: m.icon_name }))
+    : defaultQuickLinks.map(l => ({ ...l, iconName: null as string | null }));
 
   const trustLinks = dbTrustLinks && dbTrustLinks.length > 0
-    ? dbTrustLinks.map(m => ({ to: m.url, label: m.label }))
-    : defaultTrustLinks;
+    ? dbTrustLinks.map(m => ({ to: m.url, label: m.label, iconName: m.icon_name }))
+    : defaultTrustLinks.map(l => ({ ...l, iconName: null as string | null }));
 
   return (
     <footer className="bg-secondary/40 border-t border-border relative">
@@ -101,6 +102,7 @@ const Footer = () => {
                     to={l.to}
                     className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors"
                   >
+                    {l.iconName && <DynamicIcon name={l.iconName} className="w-4 h-4 text-muted-foreground shrink-0" />}
                     {l.label}
                   </Link>
                 </li>
@@ -118,6 +120,7 @@ const Footer = () => {
                     to={l.to}
                     className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors"
                   >
+                    {l.iconName && <DynamicIcon name={l.iconName} className="w-4 h-4 text-muted-foreground shrink-0" />}
                     {l.label}
                   </Link>
                 </li>

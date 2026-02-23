@@ -8,6 +8,7 @@ interface MenuItem {
   position: string;
   sort_order: number;
   icon: string | null;
+  icon_name: string | null;
 }
 
 export const useMenuItems = (position: string) => {
