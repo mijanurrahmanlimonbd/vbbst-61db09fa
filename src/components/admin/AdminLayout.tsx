@@ -145,8 +145,17 @@ const AdminLayout = () => {
     return <Navigate to="/admin/login" replace />;
   }
 
+  // Still fetching role — show spinner instead of Access Denied
+  if (!role) {
+    return (
+      <div className="min-h-screen bg-[hsl(210,20%,96%)] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   // Must have admin or editor role to access admin panel
-  if (!role || (role !== "admin" && role !== "editor")) {
+  if (role !== "admin" && role !== "editor") {
     return (
       <div className="min-h-screen bg-[hsl(210,20%,96%)] flex items-center justify-center">
         <div className="bg-background border border-border rounded-xl p-8 max-w-md text-center space-y-4">
