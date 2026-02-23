@@ -174,7 +174,8 @@ const Checkout = () => {
         triggerOrderThankYou();
       }
     } catch (err: any) {
-      toast.error("Failed to create order. Please try again.");
+      const reason = err?.message || err?.error || "An unexpected error occurred.";
+      toast.error("Failed to create order", { description: reason });
       console.error(err);
     } finally {
       setLoading(false);
@@ -211,7 +212,7 @@ const Checkout = () => {
       triggerOrderThankYou();
       toast.success("Proof uploaded successfully!");
     } catch (err: any) {
-      toast.error("Failed to upload proof. Please try again.");
+      toast.error("Failed to upload proof", { description: err?.message || "Please try again." });
       console.error(err);
     } finally {
       setUploading(false);
