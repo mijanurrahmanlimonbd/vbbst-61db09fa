@@ -202,8 +202,19 @@ const Checkout = () => {
 
       // Handle edge function errors with friendly messages
       if (orderErr) {
-        // The data may contain the actual error message from the function
-        const friendlyMessage = orderResult?.error || "Something went wrong while placing your order. Please try again.";
+        let friendlyMessage = "Something went wrong while placing your order. Please try again.";
+        try {
+          // Try to extract the actual error from the response context
+          const ctx = (orderErr as any)?.context;
+          if (ctx && typeof ctx.json === "function") {
+            const body = await ctx.json();
+            if (body?.error) friendlyMessage = body.error;
+          } else if (orderResult?.error) {
+            friendlyMessage = orderResult.error;
+          }
+        } catch {
+          // fallback to default message
+        }
         toast.error("Order could not be placed", { description: friendlyMessage });
         setLoading(false);
         return;
