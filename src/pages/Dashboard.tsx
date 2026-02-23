@@ -30,6 +30,7 @@ import {
   Clock,
   XCircle,
   AlertCircle,
+  Star,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -455,6 +456,24 @@ const OrdersTab = ({
                       );
                     }) : "Order"}
                   </div>
+                  {/* Write a Review button for completed orders */}
+                  {order.status === "completed" && items.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-1.5">
+                      {items.map((i, idx) => {
+                        const slug = i.products?.slug;
+                        if (!slug) return null;
+                        return (
+                          <Link
+                            key={idx}
+                            to={`/product/${slug}#reviews`}
+                            className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium"
+                          >
+                            <Star className="w-3 h-3" /> Write a Review
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
                 <Badge variant="outline" className={cn("text-xs gap-1 shrink-0", sc.className)}>
                   <sc.icon className="w-3 h-3" /> {sc.label}
