@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/layout/Layout";
 import SEOHead from "@/components/seo/SEOHead";
 import { Button } from "@/components/ui/button";
@@ -39,11 +40,18 @@ const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/jpg"];
 const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const items: CartItem[] = location.state?.items || [];
 
   const [step, setStep] = useState<"info" | "payment" | "done">("info");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+
+  // Auto-fill from auth session
+  useEffect(() => {
+    if (profile?.full_name) setName(profile.full_name);
+    if (user?.email) setEmail(user.email);
+  }, [user, profile]);
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [methodsLoading, setMethodsLoading] = useState(true);
@@ -251,11 +259,11 @@ const Checkout = () => {
                 <h3 className="text-lg font-semibold text-foreground">Customer Info</h3>
                 <div>
                   <Label>Full Name *</Label>
-                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className="mt-1.5" />
+                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className="mt-1.5" readOnly={!!user} />
                 </div>
                 <div>
                   <Label>Email *</Label>
-                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" className="mt-1.5" />
+                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" className="mt-1.5" readOnly={!!user} />
                 </div>
               </div>
 
