@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Home, ShoppingBag, FileText, Users, Headphones, Shield, RefreshCw, HelpCircle, Lock, MapPin, MessageCircle, Send, Mail, Clock } from "lucide-react";
+import { MapPin, MessageCircle, Send, Mail, Clock } from "lucide-react";
 import NewsletterForm from "@/components/newsletter/NewsletterForm";
 import { useBranding } from "@/hooks/useBranding";
+import { useMenuItems } from "@/hooks/useMenuItems";
 import { supabase } from "@/integrations/supabase/client";
 
 interface FooterProduct {
@@ -19,6 +20,8 @@ const Footer = () => {
   const { branding } = useBranding();
   const [products, setProducts] = useState<FooterProduct[]>([]);
   const [blogPosts, setBlogPosts] = useState<FooterBlogPost[]>([]);
+  const { data: dbQuickLinks } = useMenuItems("footer-quick");
+  const { data: dbTrustLinks } = useMenuItems("footer-trust");
 
   useEffect(() => {
     supabase.from("products").select("slug,title").order("sort_order").then(({ data }) => {
@@ -40,21 +43,29 @@ const Footer = () => {
     </div>
   );
 
-  const quickLinks = [
-    { to: "/", label: "Homepage", icon: <Home className="w-4 h-4" /> },
-    { to: "/shop", label: "All Products", icon: <ShoppingBag className="w-4 h-4" /> },
-    { to: "/blog", label: "Latest Articles", icon: <FileText className="w-4 h-4" /> },
-    { to: "/about", label: "About Us", icon: <Users className="w-4 h-4" /> },
-    { to: "/contact", label: "Support & Contact", icon: <Headphones className="w-4 h-4" /> },
+  const defaultQuickLinks = [
+    { to: "/", label: "Homepage" },
+    { to: "/shop", label: "All Products" },
+    { to: "/blog", label: "Latest Articles" },
+    { to: "/about", label: "About Us" },
+    { to: "/contact", label: "Support & Contact" },
   ];
 
-  const trustLinks = [
-    { to: "/terms", label: "Terms of Service", icon: <Shield className="w-4 h-4" /> },
-    { to: "/privacy", label: "Privacy Policy", icon: <Lock className="w-4 h-4" /> },
-    { to: "/refund-policy", label: "Refund Policy", icon: <RefreshCw className="w-4 h-4" /> },
-    { to: "/replacement-guarantee", label: "Replacement Guarantee", icon: <Shield className="w-4 h-4" /> },
-    { to: "/faq", label: "FAQ", icon: <HelpCircle className="w-4 h-4" /> },
+  const defaultTrustLinks = [
+    { to: "/terms", label: "Terms of Service" },
+    { to: "/privacy", label: "Privacy Policy" },
+    { to: "/refund-policy", label: "Refund Policy" },
+    { to: "/replacement-guarantee", label: "Replacement Guarantee" },
+    { to: "/faq", label: "FAQ" },
   ];
+
+  const quickLinks = dbQuickLinks && dbQuickLinks.length > 0
+    ? dbQuickLinks.map(m => ({ to: m.url, label: m.label }))
+    : defaultQuickLinks;
+
+  const trustLinks = dbTrustLinks && dbTrustLinks.length > 0
+    ? dbTrustLinks.map(m => ({ to: m.url, label: m.label }))
+    : defaultTrustLinks;
 
   return (
     <footer className="bg-secondary/40 border-t border-border relative">
@@ -90,7 +101,6 @@ const Footer = () => {
                     to={l.to}
                     className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors"
                   >
-                    {l.icon}
                     {l.label}
                   </Link>
                 </li>
@@ -108,7 +118,6 @@ const Footer = () => {
                     to={l.to}
                     className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors"
                   >
-                    {l.icon}
                     {l.label}
                   </Link>
                 </li>

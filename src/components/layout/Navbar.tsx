@@ -14,7 +14,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const navLinks = [
+import { useMenuItems } from "@/hooks/useMenuItems";
+
+const defaultNavLinks = [
   { label: "HOME", path: "/" },
   { label: "SHOP", path: "/shop" },
   { label: "BLOG", path: "/blog" },
@@ -32,6 +34,10 @@ const Navbar = () => {
   const { branding } = useBranding();
   const { user, profile, signOut } = useAuth();
   const { openCart, totalItems } = useCart();
+  const { data: dbMenuItems } = useMenuItems("header");
+  const navLinks = dbMenuItems && dbMenuItems.length > 0
+    ? dbMenuItems.map(m => ({ label: m.label.toUpperCase(), path: m.url }))
+    : defaultNavLinks;
 
   // Close mobile menu on route change (state syncing)
   useEffect(() => {
