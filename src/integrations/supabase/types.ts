@@ -547,6 +547,7 @@ export type Database = {
           components: Json | null
           content: string | null
           created_at: string
+          focus_keyword: string | null
           hero_image: string | null
           hero_overlay: number | null
           id: string
@@ -561,6 +562,7 @@ export type Database = {
           components?: Json | null
           content?: string | null
           created_at?: string
+          focus_keyword?: string | null
           hero_image?: string | null
           hero_overlay?: number | null
           id?: string
@@ -575,6 +577,7 @@ export type Database = {
           components?: Json | null
           content?: string | null
           created_at?: string
+          focus_keyword?: string | null
           hero_image?: string | null
           hero_overlay?: number | null
           id?: string

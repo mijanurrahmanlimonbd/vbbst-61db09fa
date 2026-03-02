@@ -19,7 +19,22 @@ interface Page {
   meta_title: string | null;
   meta_description: string | null;
   content: string | null;
+  focus_keyword: string | null;
 }
+
+const PAGE_ROUTE_MAP: Record<string, string> = {
+  "verified-bm": "/",
+  "verifiedbm": "/",
+  "about-us": "/about",
+  "contact-us": "/contact",
+  "shop": "/shop",
+  "faq": "/faq",
+  "verified-business-manager-blog": "/blog",
+  "privacy-policy": "/privacy",
+  "refund-policy": "/refund-policy",
+  "replacement-guarantee": "/replacement-guarantee",
+  "terms-of-service": "/terms",
+};
 
 const AdminPages = () => {
   const [pages, setPages] = useState<Page[]>([]);
@@ -31,7 +46,7 @@ const AdminPages = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("pages")
-      .select("id, title, slug, status, updated_at, meta_title, meta_description, content")
+      .select("id, title, slug, status, updated_at, meta_title, meta_description, content, focus_keyword")
       .order("created_at", { ascending: true });
     if (error) toast.error(`Failed to load pages: ${error.message}`);
     else setPages((data || []) as Page[]);
@@ -47,15 +62,18 @@ const AdminPages = () => {
   const seoScores = useMemo(() => {
     const map = new Map<string, SEOScoreResult>();
     pages.forEach((p) => {
-      const knownRoutes: Record<string, string> = { home: "/", about: "/about", contact: "/contact", shop: "/shop", faq: "/faq", blog: "/blog" };
-      const prefix = knownRoutes[p.slug] || `/page/${p.slug}`;
+      const route = PAGE_ROUTE_MAP[p.slug];
+      const pageFullUrl = route ? `https://verifiedbmservices.com${route}` : undefined;
+      const prefix = route ? (route === "/" ? "/" : `${route}/`) : `/page/${p.slug}/`;
       map.set(p.id, computeSEOScore({
         title: p.title,
         slug: p.slug,
         metaTitle: p.meta_title,
         metaDescription: p.meta_description,
+        focusKeyword: p.focus_keyword,
         content: p.content,
-        urlPrefix: prefix === "/" ? "/" : `${prefix}/`.replace(/\/\//g, "/"),
+        urlPrefix: prefix,
+        fullUrl: pageFullUrl,
       }));
     });
     return map;
@@ -189,8 +207,7 @@ const AdminPages = () => {
                   </button>
                   <button
                     onClick={() => {
-                      const knownRoutes: Record<string, string> = { home: "/", about: "/about", contact: "/contact", shop: "/shop", "terms-of-service": "/terms", "privacy-policy": "/privacy", "refund-policy": "/refund-policy", "replacement-guarantee": "/replacement-guarantee", faq: "/faq", blog: "/blog" };
-                      const basePath = knownRoutes[page.slug] || `/page/${page.slug}`;
+                      const basePath = PAGE_ROUTE_MAP[page.slug] || `/page/${page.slug}`;
                       navigate(`${basePath}?edit=true`);
                     }}
                     className="p-2 rounded text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"

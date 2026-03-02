@@ -30,6 +30,7 @@ interface ScoringInput {
   focusKeyword?: string | null;
   content?: string | null;
   urlPrefix?: string;
+  fullUrl?: string;
 }
 
 export function computeSEOScore(input: ScoringInput): SEOScoreResult {
@@ -39,7 +40,7 @@ export function computeSEOScore(input: ScoringInput): SEOScoreResult {
   const fullTitle = input.metaTitle || input.title || "";
   const desc = input.metaDescription || "";
   const prefix = input.urlPrefix || "/";
-  const fullUrl = `https://verifiedbmservices.com${prefix}${input.slug}`;
+  const fullUrl = input.fullUrl || `https://verifiedbmservices.com${prefix}${input.slug}`;
   const plainText = stripHtml(input.content || "");
   const wordCount = countWords(input.content || "");
 
