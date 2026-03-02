@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { runSEOAudit, type SEOAuditData } from "@/components/admin/SEOScoreWidget";
+import { computeSEOScore } from "@/lib/seoScoring";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -64,7 +64,7 @@ const SEOHealthWidget = () => {
       // Fetch all posts and products in parallel
       const [postsRes, productsRes, mediaRes] = await Promise.all([
         supabase.from("blog_posts").select("id, title, slug, content, meta_title, meta_description, focus_keyword, featured_image"),
-        supabase.from("products").select("id, title, slug, description, meta_title, meta_description, short_description, image_url"),
+        supabase.from("products").select("id, title, slug, description, meta_title, meta_description, short_description, image_url, focus_keyword"),
         supabase.from("media_files").select("alt_text"),
       ]);
 
@@ -72,16 +72,15 @@ const SEOHealthWidget = () => {
 
       // Score posts
       for (const post of (postsRes.data || []) as any[]) {
-        const data: SEOAuditData = {
-          focusKeyword: post.focus_keyword || "",
-          metaTitle: post.meta_title || "",
-          metaDescription: post.meta_description || "",
-          slug: post.slug || "",
-          content: post.content || "",
-          postTitle: post.title || "",
-        };
-        const result = runSEOAudit(data);
-        const errors = result.checks.filter((c) => c.status === "error");
+        const result = computeSEOScore({
+          title: post.title,
+          slug: post.slug,
+          metaTitle: post.meta_title,
+          metaDescription: post.meta_description,
+          focusKeyword: post.focus_keyword,
+          content: post.content,
+          urlPrefix: "/blog/",
+        });
         scores.push({
           id: post.id,
           title: post.title,
@@ -89,30 +88,29 @@ const SEOHealthWidget = () => {
           type: "post",
           focusKeyword: post.focus_keyword || "—",
           score: result.score,
-          topIssue: errors[0]?.label || result.checks.find((c) => c.status === "warning")?.label || "All good",
+          topIssue: result.issues[0] || "All good",
         });
       }
 
-      // Score products (simplified audit)
+      // Score products
       for (const prod of (productsRes.data || []) as any[]) {
-        const data: SEOAuditData = {
-          focusKeyword: "",
-          metaTitle: prod.meta_title || "",
-          metaDescription: prod.meta_description || "",
-          slug: prod.slug || "",
+        const result = computeSEOScore({
+          title: prod.title,
+          slug: prod.slug,
+          metaTitle: prod.meta_title,
+          metaDescription: prod.meta_description,
+          focusKeyword: prod.focus_keyword,
           content: prod.description || prod.short_description || "",
-          postTitle: prod.title || "",
-        };
-        const result = runSEOAudit(data);
-        const errors = result.checks.filter((c) => c.status === "error");
+          urlPrefix: "/product/",
+        });
         scores.push({
           id: prod.id,
           title: prod.title,
           slug: prod.slug,
           type: "product",
-          focusKeyword: "—",
+          focusKeyword: prod.focus_keyword || "—",
           score: result.score,
-          topIssue: errors[0]?.label || result.checks.find((c) => c.status === "warning")?.label || "All good",
+          topIssue: result.issues[0] || "All good",
         });
       }
 
