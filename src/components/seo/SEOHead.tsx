@@ -5,6 +5,7 @@ import { toBrandedUrl } from "@/lib/imageUtils";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useBranding } from "@/hooks/useBranding";
+import { useInternationalSEO } from "@/hooks/useInternationalSEO";
 
 interface SEOHeadProps {
   title?: string;
@@ -26,11 +27,17 @@ const SEOHead = ({
   const location = useLocation();
   const siteUrl = getSiteUrl();
   const { branding } = useBranding();
+  const intlSEO = useInternationalSEO();
   const dynamicSiteName = branding.site_title || SITE_NAME;
-  const fullTitle = title ? `${title} | ${dynamicSiteName}` : dynamicSiteName;
+
+  // Build full title, then cap at 60 characters for SEO
+  const rawTitle = title ? `${title} | ${dynamicSiteName}` : dynamicSiteName;
+  const fullTitle = rawTitle.length > 60 ? rawTitle.slice(0, 57) + "..." : rawTitle;
+
   const canonicalUrl = `${siteUrl}${location.pathname}`;
   const defaultOgImage = `${siteUrl}/og-image.webp`;
   const resolvedOgImage = toBrandedUrl(ogImage || defaultOgImage);
+  const lang = intlSEO.targetLang || "en";
 
   const [googleVerification, setGoogleVerification] = useState("");
   const [bingVerification, setBingVerification] = useState("");
@@ -43,7 +50,6 @@ const SEOHead = ({
       .then(({ data }) => {
         data?.forEach((r) => {
           if (r.key === "seo_search_console_tag" && r.value) {
-            // Extract content value from full meta tag or plain value
             const match = r.value.match(/content="([^"]+)"/);
             setGoogleVerification(match ? match[1] : r.value);
           }
@@ -56,7 +62,7 @@ const SEOHead = ({
 
   return (
     <Helmet>
-      <html lang="en" />
+      <html lang={lang} />
       <title>{fullTitle}</title>
       <meta name="description" content={description.slice(0, 160)} />
       {keywords && <meta name="keywords" content={keywords} />}
@@ -67,12 +73,16 @@ const SEOHead = ({
       {googleVerification && <meta name="google-site-verification" content={googleVerification} />}
       {bingVerification && <meta name="msvalidate.01" content={bingVerification} />}
 
-      {/* Hreflang — English only */}
-      <link rel="alternate" hrefLang="en" href={canonicalUrl} />
+      {/* Hreflang — single declaration, no duplicates */}
+      <link rel="alternate" hrefLang={lang} href={canonicalUrl} />
       <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
-      <meta name="language" content="en" />
+      <meta name="language" content={lang} />
 
-      {/* Open Graph (Facebook, LinkedIn, WhatsApp, Telegram, Discord) */}
+      {/* Geo targeting */}
+      {intlSEO.geoRegion && <meta name="geo.region" content={intlSEO.geoRegion} />}
+      {intlSEO.geoPlacename && <meta name="geo.placename" content={intlSEO.geoPlacename} />}
+
+      {/* Open Graph */}
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description.slice(0, 160)} />
       <meta property="og:type" content={ogType} />
@@ -83,7 +93,7 @@ const SEOHead = ({
       <meta property="og:image:type" content="image/webp" />
       <meta property="og:image:alt" content={fullTitle} />
       <meta property="og:site_name" content={dynamicSiteName} />
-      <meta property="og:locale" content="en_US" />
+      <meta property="og:locale" content={`${lang}_${(intlSEO.geoRegion || "US").toUpperCase()}`} />
 
       {/* Twitter / X */}
       <meta name="twitter:card" content="summary_large_image" />
@@ -98,7 +108,7 @@ const SEOHead = ({
       <meta property="pin:media" content={resolvedOgImage} />
       <meta property="pin:description" content={description.slice(0, 160)} />
 
-      {/* Dynamic favicon from branding settings */}
+      {/* Dynamic favicon */}
       {branding.favicon && <link rel="icon" href={branding.favicon} type="image/webp" />}
     </Helmet>
   );
