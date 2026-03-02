@@ -34,10 +34,17 @@ const SEOHead = ({
   const rawTitle = title ? `${title} | ${dynamicSiteName}` : dynamicSiteName;
   const fullTitle = rawTitle.length > 60 ? rawTitle.slice(0, 57) + "..." : rawTitle;
 
-  const canonicalUrl = `${siteUrl}${location.pathname}`;
+  // Normalize locale/canonical values to prevent duplicate SEO tags across routes
+  const normalizedPath = location.pathname === "/" ? "/" : location.pathname.replace(/\/+$/, "");
+  const canonicalUrl = `${siteUrl}${normalizedPath}`;
+  const rawLang = (intlSEO.targetLang || "en").trim().replace("_", "-").toLowerCase();
+  const lang = rawLang || "en";
+  const xDefaultUrl = `${siteUrl}/`;
+  const ogRegion = (intlSEO.geoRegion || "US").trim().toUpperCase().replace(/[^A-Z]/g, "").slice(0, 2) || "US";
+  const ogLocale = `${lang.split("-")[0]}_${ogRegion}`;
+
   const defaultOgImage = `${siteUrl}/og-image.webp`;
   const resolvedOgImage = toBrandedUrl(ogImage || defaultOgImage);
-  const lang = intlSEO.targetLang || "en";
 
   const [googleVerification, setGoogleVerification] = useState("");
   const [bingVerification, setBingVerification] = useState("");
@@ -61,22 +68,22 @@ const SEOHead = ({
   }, []);
 
   return (
-    <Helmet>
+    <Helmet prioritizeSeoTags>
       <html lang={lang} />
       <title>{fullTitle}</title>
       <meta name="description" content={description.slice(0, 160)} />
       {keywords && <meta name="keywords" content={keywords} />}
       <meta name="robots" content={noIndex ? "noindex,nofollow" : "index,follow"} />
-      <link rel="canonical" href={canonicalUrl} />
+      <link key="canonical" rel="canonical" href={canonicalUrl} />
 
       {/* Search engine verification */}
-      {googleVerification && <meta name="google-site-verification" content={googleVerification} />}
-      {bingVerification && <meta name="msvalidate.01" content={bingVerification} />}
+      {googleVerification && <meta key="google-site-verification" name="google-site-verification" content={googleVerification} />}
+      {bingVerification && <meta key="bing-site-verification" name="msvalidate.01" content={bingVerification} />}
 
       {/* Hreflang — single declaration, no duplicates */}
-      <link rel="alternate" hrefLang={lang} href={canonicalUrl} />
-      <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
-      <meta name="language" content={lang} />
+      <link key={`alternate-${lang}`} rel="alternate" hrefLang={lang} href={canonicalUrl} />
+      <link key="alternate-x-default" rel="alternate" hrefLang="x-default" href={xDefaultUrl} />
+      <meta key="meta-language" name="language" content={lang} />
 
       {/* Geo targeting */}
       {intlSEO.geoRegion && <meta name="geo.region" content={intlSEO.geoRegion} />}
@@ -93,7 +100,7 @@ const SEOHead = ({
       <meta property="og:image:type" content="image/webp" />
       <meta property="og:image:alt" content={fullTitle} />
       <meta property="og:site_name" content={dynamicSiteName} />
-      <meta property="og:locale" content={`${lang}_${(intlSEO.geoRegion || "US").toUpperCase()}`} />
+      <meta property="og:locale" content={ogLocale} />
 
       {/* Twitter / X */}
       <meta name="twitter:card" content="summary_large_image" />
