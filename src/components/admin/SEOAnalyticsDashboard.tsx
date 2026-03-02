@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { runSEOAudit, type SEOAuditData } from "@/components/admin/SEOScoreWidget";
+import { computeSEOScore } from "@/lib/seoScoring";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -128,7 +128,7 @@ const SEOAnalyticsDashboard = () => {
     const analyze = async () => {
       const [postsRes, productsRes] = await Promise.all([
         supabase.from("blog_posts").select("id, title, slug, content, meta_title, meta_description, focus_keyword, featured_image, status"),
-        supabase.from("products").select("id, title, slug, description, meta_title, meta_description, short_description, image_url"),
+        supabase.from("products").select("id, title, slug, description, meta_title, meta_description, short_description, image_url, focus_keyword"),
       ]);
 
       const scores: number[] = [];
@@ -137,15 +137,15 @@ const SEOAnalyticsDashboard = () => {
       // Audit posts
       for (const post of (postsRes.data || []) as any[]) {
         if (post.status === "draft") { noData++; continue; }
-        const data: SEOAuditData = {
-          focusKeyword: post.focus_keyword || "",
-          metaTitle: post.meta_title || "",
-          metaDescription: post.meta_description || "",
-          slug: post.slug || "",
-          content: post.content || "",
-          postTitle: post.title || "",
-        };
-        const result = runSEOAudit(data);
+        const result = computeSEOScore({
+          title: post.title,
+          slug: post.slug,
+          metaTitle: post.meta_title,
+          metaDescription: post.meta_description,
+          focusKeyword: post.focus_keyword,
+          content: post.content,
+          urlPrefix: "/blog/",
+        });
         scores.push(result.score);
         if (result.score >= 80) good++;
         else if (result.score >= 50) fair++;
@@ -154,15 +154,15 @@ const SEOAnalyticsDashboard = () => {
 
       // Audit products
       for (const prod of (productsRes.data || []) as any[]) {
-        const data: SEOAuditData = {
-          focusKeyword: "",
-          metaTitle: prod.meta_title || "",
-          metaDescription: prod.meta_description || "",
-          slug: prod.slug || "",
+        const result = computeSEOScore({
+          title: prod.title,
+          slug: prod.slug,
+          metaTitle: prod.meta_title,
+          metaDescription: prod.meta_description,
+          focusKeyword: prod.focus_keyword,
           content: prod.description || prod.short_description || "",
-          postTitle: prod.title || "",
-        };
-        const result = runSEOAudit(data);
+          urlPrefix: "/product/",
+        });
         scores.push(result.score);
         if (result.score >= 80) good++;
         else if (result.score >= 50) fair++;
