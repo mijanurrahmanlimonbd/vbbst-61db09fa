@@ -91,9 +91,9 @@ const Footer = () => {
 
       {/* Main columns */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10">
           {/* Col 1: Brand */}
-          <div>
+          <div className="lg:col-span-1">
             <div className="mb-4">{logoElement}</div>
             <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
           </div>
@@ -113,7 +113,23 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Col 3: Trust Center */}
+          {/* Col 3: Products */}
+          {products.length > 0 && (
+            <div>
+              <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Our Products</h4>
+              <ul className="space-y-1">
+                {products.slice(0, 8).map((p) => (
+                  <li key={p.slug}>
+                    <Link to={`/product/${p.slug}`} className="text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors block truncate">
+                      {p.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Col 4: Trust Center */}
           <div>
             <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Trust Center</h4>
             <ul className="space-y-1">
@@ -128,7 +144,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Col 4: Contact */}
+          {/* Col 5: Contact */}
           <div>
             <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Contact Us</h4>
             <div className="space-y-3">
@@ -155,23 +171,22 @@ const Footer = () => {
             </div>
           </div>
         </div>
+
+        {/* Blog links row for internal linking */}
+        {blogPosts.length > 0 && (
+          <div className="mt-10 pt-8 border-t border-border">
+            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Latest Articles</h4>
+            <div className="flex flex-wrap gap-2">
+              {blogPosts.slice(0, 10).map((p) => (
+                <Link key={p.slug} to={`/blog/${p.slug}`} className="text-xs text-muted-foreground bg-secondary/60 px-3 py-1.5 rounded-full hover:bg-primary/10 hover:text-primary transition-colors">
+                  {p.title}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* SEO-only sitemap */}
-      <div className="absolute w-px h-px overflow-hidden" style={{ clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>
-        {products.length > 0 && (
-          <nav aria-label="Products sitemap">
-            <h4>Products Site Map</h4>
-            <ul>{products.map((p) => (<li key={p.slug}><Link to={`/product/${p.slug}`}>{p.title}</Link></li>))}</ul>
-          </nav>
-        )}
-        {blogPosts.length > 0 && (
-          <nav aria-label="Blog sitemap">
-            <h4>Blog Site Map</h4>
-            <ul>{blogPosts.map((p) => (<li key={p.slug}><Link to={`/blog/${p.slug}`}>{p.title}</Link></li>))}</ul>
-          </nav>
-        )}
-      </div>
 
       {/* Copyright */}
       <div className="border-t border-border">
