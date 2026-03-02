@@ -38,10 +38,14 @@ const AdminDashboard = () => {
   const handlePurgeCache = async () => {
     setPurging(true);
     try {
-    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/purge-cache`, {
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      if (!accessToken) throw new Error("Not authenticated");
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/purge-cache`, {
         headers: {
-          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          "Authorization": `Bearer ${accessToken}`,
           "Content-Type": "application/json",
+          "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
         },
       });
       if (!res.ok) throw new Error("Purge failed");
