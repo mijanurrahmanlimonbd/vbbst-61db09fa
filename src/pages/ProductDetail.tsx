@@ -171,15 +171,6 @@ const ProductDetail = () => {
         { title: "Delivery & Support", items: ["Same-day delivery (1–4 hrs)", "Setup assistance included", "7-day replacement guarantee", "Priority customer support"] },
       ];
 
-  // Dynamic trust points from admin or fallback defaults
-  const trustPoints: string[] = (attrs as any)._trust_points?.length > 0
-    ? (attrs as any)._trust_points
-    : [
-        "Instant delivery — usually within 1-4 hours",
-        "7-day replacement guarantee included",
-        "Setup guide & compliance documentation",
-        "SSL encrypted, secure credential handover",
-      ];
 
   return (
     <Layout>
