@@ -22,11 +22,26 @@ const COLORS: Record<string, string> = {
 };
 
 const AdminFinancialOverview = () => {
+  const { role, canAccess } = useAuth();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [animated, setAnimated] = useState(false);
   const [generating, setGenerating] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
+
+  if (!canAccess("finance")) {
+    return (
+      <div className="min-h-[400px] flex items-center justify-center">
+        <div className="text-center space-y-3 animate-in fade-in duration-300">
+          <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto">
+            <Lock className="w-7 h-7 text-red-500" />
+          </div>
+          <h2 className="text-lg font-bold text-gray-900">Admin Only</h2>
+          <p className="text-sm text-gray-500 max-w-xs">The Financial Overview is restricted to administrators.</p>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     const fetchAssets = async () => {
