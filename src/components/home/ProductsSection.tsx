@@ -66,7 +66,7 @@ const ProductsSection = () => {
   const displayed = filtered.slice(0, displayCount);
 
   return (
-    <section className="py-16 bg-secondary/30">
+    <section className="pt-16 pb-8 bg-secondary/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <p className="text-sm font-semibold tracking-widest uppercase text-primary text-center">Our Products</p>
         <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mt-2">Buy Verified BM & Premium Accounts</h2>
