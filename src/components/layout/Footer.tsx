@@ -157,19 +157,6 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Blog links row for internal linking */}
-        {blogPosts.length > 0 && (
-          <div className="mt-10 pt-8 border-t border-border">
-            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Latest Articles</h4>
-            <div className="flex flex-wrap gap-2">
-              {blogPosts.slice(0, 10).map((p) => (
-                <Link key={p.slug} to={`/blog/${p.slug}`} className="text-xs text-muted-foreground bg-secondary/60 px-3 py-1.5 rounded-full hover:bg-primary/10 hover:text-primary transition-colors">
-                  {p.title}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
 
