@@ -193,10 +193,6 @@ const Footer = () => {
                 {email}
               </a>
 
-              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-[hsl(142,70%,45%)] bg-[hsl(142,70%,45%)]/10 px-3.5 py-1.5 rounded-full mt-2 border border-[hsl(142,70%,45%)]/20">
-                <Clock className="w-3.5 h-3.5" />
-                Available 24/7
-              </div>
             </div>
           </div>
         </div>
