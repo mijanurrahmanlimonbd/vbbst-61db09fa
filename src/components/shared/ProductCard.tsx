@@ -87,7 +87,7 @@ const ProductCard = forwardRef<HTMLDivElement, { product: Product }>(({ product 
         </div>
 
         {/* Price Box */}
-        <div className="mt-4 rounded-lg border border-border bg-[hsl(0,60%,97%)] p-3 min-h-[96px] flex flex-col justify-center">
+        <div className="mt-4 rounded-lg border border-border bg-[hsl(0,60%,97%)] p-3 min-h-[82px] flex flex-col justify-center">
           {product.sale_price ? (
             <div>
               <div className="flex items-baseline gap-2 flex-wrap">
@@ -108,7 +108,7 @@ const ProductCard = forwardRef<HTMLDivElement, { product: Product }>(({ product 
         </div>
 
         {/* Trust Icons */}
-        <div className="grid grid-cols-3 gap-3 mt-4">
+        <div className="grid grid-cols-3 gap-3 mt-auto pt-4">
           <div className="flex flex-col items-center gap-1.5 rounded-lg bg-muted/50 border border-border py-2.5">
             <Shield className="w-5 h-5 text-primary" />
             <span className="text-[10px] font-medium text-muted-foreground">100% Safe</span>
@@ -124,7 +124,7 @@ const ProductCard = forwardRef<HTMLDivElement, { product: Product }>(({ product 
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col gap-2 mt-auto pt-4">
+        <div className="flex flex-col gap-2 pt-4">
           <a
             href="https://wa.me/8801302669333"
             target="_blank"
