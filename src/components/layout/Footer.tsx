@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, MessageCircle, Send, Mail, Clock } from "lucide-react";
+import { MapPin, MessageCircle, Send, Mail, Clock, ArrowRight, ChevronRight } from "lucide-react";
 import NewsletterForm from "@/components/newsletter/NewsletterForm";
 import { useBranding } from "@/hooks/useBranding";
 import { useMenuItems } from "@/hooks/useMenuItems";
@@ -40,32 +40,35 @@ const Footer = () => {
   }, []);
 
   const desc = footerSettings.footer_description || "Trusted provider of verified Meta Business Managers and WhatsApp Business API accounts since 2020. Serving 10,000+ advertisers globally.";
-  const address = footerSettings.contact_address || "Madergonj, Pirgonj, Rangpur, Bangladesh\u00a0-\u00a05470";
-  const phone = footerSettings.contact_phone || "+880 1302 669333";
+  const address = footerSettings.contact_address || "20 Madargonj, Pirgonj, Rangpur, Bangladesh\u00a0-\u00a05470";
+  const phone = footerSettings.contact_phone || "+8801302669333";
   const telegram = footerSettings.contact_telegram || "Verifiedbmbuy";
   const email = footerSettings.contact_email || "info@verifiedbmservices.com";
   const copyrightRaw = footerSettings.footer_copyright_text || `© {year} ${branding.site_title || "Verified BM services"}. All rights reserved. | Verified BM & WhatsApp API Provider`;
   const copyright = copyrightRaw.replace(/\{year\}/g, String(new Date().getFullYear()));
 
   const logoElement = branding.footer_logo ? (
-    <img src={branding.footer_logo} alt={branding.site_title} className="h-8 max-w-[160px] object-contain" loading="lazy" />
+    <img src={branding.footer_logo} alt={branding.site_title} className="h-9 max-w-[180px] object-contain" loading="lazy" />
   ) : branding.header_logo ? (
-    <img src={branding.header_logo} alt={branding.site_title} className="h-8 max-w-[160px] object-contain" loading="lazy" />
+    <img src={branding.header_logo} alt={branding.site_title} className="h-9 max-w-[180px] object-contain" loading="lazy" />
   ) : (
-    <div className="flex items-center gap-2">
-      <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-bold text-sm">V</div>
-      <span className="text-lg font-bold text-foreground">Verified BM <span className="text-primary">services</span></span>
+    <div className="flex items-center gap-2.5">
+      <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-sm shadow-sm">V</div>
+      <span className="text-lg font-bold text-foreground tracking-tight">Verified BM <span className="text-primary">services</span></span>
     </div>
   );
 
   const defaultQuickLinks = [
-    { to: "/", label: "Homepage" }, { to: "/shop", label: "All Products" },
-    { to: "/blog", label: "Latest Articles" }, { to: "/about", label: "About Us" },
-    { to: "/contact", label: "Support & Contact" },
+    { to: "/shop", label: "All Products" },
+    { to: "/blog", label: "All Post" },
+    { to: "/about", label: "About Us" },
+    { to: "/contact", label: "Contact & Support" },
   ];
   const defaultTrustLinks = [
-    { to: "/terms", label: "Terms of Service" }, { to: "/privacy", label: "Privacy Policy" },
-    { to: "/refund-policy", label: "Refund Policy" }, { to: "/replacement-guarantee", label: "Replacement Guarantee" },
+    { to: "/terms", label: "Terms of Service" },
+    { to: "/privacy", label: "Privacy Policy" },
+    { to: "/refund-policy", label: "Refund Policy" },
+    { to: "/replacement-guarantee", label: "Replacement Guarantee" },
     { to: "/faq", label: "FAQ" },
   ];
 
@@ -77,9 +80,10 @@ const Footer = () => {
     : defaultTrustLinks.map(l => ({ ...l, iconName: null as string | null }));
 
   return (
-    <footer className="bg-secondary/40 border-t border-border relative">
-      {/* Newsletter */}
-      <div className="border-b border-border">
+    <footer className="relative bg-gradient-to-b from-secondary/30 via-secondary/50 to-secondary/70 border-t border-border print:hidden">
+      {/* Newsletter Band */}
+      <div className="relative overflow-hidden border-b border-border/60">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="max-w-xl mx-auto text-center">
             <h3 className="text-lg font-bold text-foreground mb-1">Join our Newsletter</h3>
@@ -89,23 +93,36 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Main columns */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Col 1: Brand */}
-          <div className="lg:col-span-1">
-            <div className="mb-4">{logoElement}</div>
-            <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+      {/* Main Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
+
+          {/* Col 1 — Brand */}
+          <div className="sm:col-span-2 lg:col-span-1">
+            <div className="mb-5">{logoElement}</div>
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
+              {desc}
+            </p>
           </div>
 
-          {/* Col 2: Quick Links */}
+          {/* Col 2 — Quick Links */}
           <div>
-            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Quick Links</h4>
-            <ul className="space-y-1">
+            <h4 className="text-xs font-bold text-foreground uppercase tracking-[0.15em] mb-5 flex items-center gap-2">
+              <span className="w-6 h-px bg-primary/60 rounded-full" />
+              Quick Links
+            </h4>
+            <ul className="space-y-0.5">
               {quickLinks.map((l) => (
                 <li key={l.to}>
-                  <Link to={l.to} className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
-                    {l.iconName && <DynamicIcon name={l.iconName} className="w-4 h-4 text-muted-foreground shrink-0" />}
+                  <Link
+                    to={l.to}
+                    className="group flex items-center gap-2 text-sm text-muted-foreground py-1.5 hover:text-primary transition-colors"
+                  >
+                    {l.iconName ? (
+                      <DynamicIcon name={l.iconName} className="w-4 h-4 shrink-0 text-muted-foreground/60 group-hover:text-primary transition-colors" />
+                    ) : (
+                      <ChevronRight className="w-3.5 h-3.5 shrink-0 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                    )}
                     {l.label}
                   </Link>
                 </li>
@@ -113,15 +130,24 @@ const Footer = () => {
             </ul>
           </div>
 
-
-          {/* Col 4: Trust Center */}
+          {/* Col 3 — Trust Center */}
           <div>
-            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Trust Center</h4>
-            <ul className="space-y-1">
+            <h4 className="text-xs font-bold text-foreground uppercase tracking-[0.15em] mb-5 flex items-center gap-2">
+              <span className="w-6 h-px bg-primary/60 rounded-full" />
+              Trust Center
+            </h4>
+            <ul className="space-y-0.5">
               {trustLinks.map((l) => (
                 <li key={l.to}>
-                  <Link to={l.to} className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
-                    {l.iconName && <DynamicIcon name={l.iconName} className="w-4 h-4 text-muted-foreground shrink-0" />}
+                  <Link
+                    to={l.to}
+                    className="group flex items-center gap-2 text-sm text-muted-foreground py-1.5 hover:text-primary transition-colors"
+                  >
+                    {l.iconName ? (
+                      <DynamicIcon name={l.iconName} className="w-4 h-4 shrink-0 text-muted-foreground/60 group-hover:text-primary transition-colors" />
+                    ) : (
+                      <ChevronRight className="w-3.5 h-3.5 shrink-0 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                    )}
                     {l.label}
                   </Link>
                 </li>
@@ -129,39 +155,55 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Col 5: Contact */}
+          {/* Col 4 — Contact */}
           <div>
-            <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">Contact Us</h4>
+            <h4 className="text-xs font-bold text-foreground uppercase tracking-[0.15em] mb-5 flex items-center gap-2">
+              <span className="w-6 h-px bg-primary/60 rounded-full" />
+              Contact Us
+            </h4>
             <div className="space-y-3">
-              <div className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                <MapPin className="w-4 h-4 mt-0.5 shrink-0 text-primary" />
-                <span>{address}</span>
+              <div className="flex items-start gap-3 text-sm text-muted-foreground">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <MapPin className="w-4 h-4 text-primary" />
+                </div>
+                <span className="leading-relaxed">{address}</span>
               </div>
-              <a href={`https://wa.me/${phone.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
-                <MessageCircle className="w-4 h-4 text-[hsl(142,70%,45%)]" />
+
+              <a href={`https://wa.me/${phone.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer"
+                className="group flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-[hsl(142,70%,45%)]/10 flex items-center justify-center shrink-0">
+                  <MessageCircle className="w-4 h-4 text-[hsl(142,70%,45%)]" />
+                </div>
                 {phone}
               </a>
-              <a href={`https://t.me/${telegram}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
-                <Send className="w-4 h-4 text-[hsl(200,100%,40%)]" />
+
+              <a href={`https://t.me/${telegram}`} target="_blank" rel="noopener noreferrer"
+                className="group flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-[hsl(200,100%,40%)]/10 flex items-center justify-center shrink-0">
+                  <Send className="w-4 h-4 text-[hsl(200,100%,40%)]" />
+                </div>
                 @{telegram}
               </a>
-              <a href={`mailto:${email}`} className="flex items-center gap-2.5 text-sm text-muted-foreground px-2.5 py-2 rounded-lg hover:bg-primary/5 hover:text-primary transition-colors">
-                <Mail className="w-4 h-4 text-primary" />
+
+              <a href={`mailto:${email}`}
+                className="group flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Mail className="w-4 h-4 text-primary" />
+                </div>
                 {email}
               </a>
-              <div className="inline-flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-full mt-1">
+
+              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-[hsl(142,70%,45%)] bg-[hsl(142,70%,45%)]/10 px-3.5 py-1.5 rounded-full mt-2 border border-[hsl(142,70%,45%)]/20">
                 <Clock className="w-3.5 h-3.5" />
                 Available 24/7
               </div>
             </div>
           </div>
         </div>
-
       </div>
 
-
       {/* Copyright */}
-      <div className="border-t border-border">
+      <div className="border-t border-border/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 text-center text-xs text-muted-foreground">
           {copyright}
         </div>
