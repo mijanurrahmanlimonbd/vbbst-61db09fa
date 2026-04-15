@@ -49,13 +49,13 @@ const AdminSettings = () => {
   // General
   const [siteTitle, setSiteTitle] = useState("Verified BM Shop");
   const [siteDescription, setSiteDescription] = useState("Your trusted source for verified Facebook Business Managers");
-  const [contactEmail, setContactEmail] = useState("info@verifiedbmservices.com");
+  const [contactEmail, setContactEmail] = useState("info@verifiedbm.shop");
   const [whatsapp, setWhatsapp] = useState("+1 234 567 890");
   const [homepageProductCount, setHomepageProductCount] = useState("6");
 
   // Profile
   const [displayName, setDisplayName] = useState("Admin");
-  const [profileEmail, setProfileEmail] = useState("admin@verifiedbmservices.com");
+  const [profileEmail, setProfileEmail] = useState("admin@verifiedbm.shop");
   const [bio, setBio] = useState("");
 
   // Security

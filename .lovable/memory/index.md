@@ -1,0 +1,76 @@
+# Project Memory
+
+## Core
+- Strict English-only platform. No internationalization (i18n).
+- Light SaaS theme: white background, blue accents (HSL 217 91% 60%). CTA colors: WhatsApp Green, Telegram Blue, Buy Orange.
+- Exclusively support Google and Apple OAuth. No Facebook.
+- Supabase backend with RLS. 'admin' or 'editor' role required for /admin and /dashboard routes.
+- StaleTime: 0 in global QueryClient for immediate cache invalidation.
+- Primary title: "Buy Verified BM And WhatsApp API | Verified BM services".
+- Production domain: https://verifiedbm.shop/ — all SEO metadata, canonical URLs, and external links use this domain.
+- Media/branding assets use domain-masked paths (/media/, /branding/) handled via Edge Functions.
+
+## Memories
+- [Project Vision](mem://project/vision) — Professional e-commerce site for digital ad products
+- [Visual Identity](mem://style/visual-identity) — Clean SaaS aesthetic, Inter/Montserrat, Sonner toasts
+- [Color Palette](mem://style/color-palette) — Standardized CTA colors for WhatsApp, Telegram, Buy Now
+- [Hero Design](mem://style/hero-design) — Framer Motion animations, h1 SEO styling, two-tone color
+- [Homepage Layout](mem://style/homepage-layout) — Responsive 3-column grid, dynamic sections via TanStack Query
+- [Page Hero](mem://features/page-hero) — Slim hero (200px max mobile) for all non-home pages
+- [Product Template](mem://features/product-template) — 11-section layout, Buy Box, rich-text description
+- [Blog Template](mem://features/blog-template) — SEO-first two-column layout, dynamic ToC, FAQ JSON-LD
+- [Public Site Footer](mem://features/public-site) — 4-column responsive layout managed via Admin Settings
+- [Navigation Layout](mem://features/navigation-layout) — Responsive navbar, minimal top bar on mobile
+- [Mobile Navigation](mem://features/mobile-navigation) — Sticky bottom bar, 280px left sidebar
+- [Navigation Behavior](mem://ux/navigation-behavior) — Global ScrollToTop excludes 'POP' back/forward navigation
+- [Scroll To Top](mem://features/scroll-to-top) — Triggered at 300px, stacked 16px above chat icon
+- [Visual Editor](mem://features/visual-editor) — Inline text editing via ?edit=true, live image swapping
+- [Tech Infrastructure](mem://tech/infrastructure) — Supabase schema details, triggers, and RLS policies
+- [Security](mem://tech/security) — RBAC, verify_jwt = false for edge functions
+- [Permissions](mem://auth/permissions) — 'profiles' table as source of truth, admin UI access control
+- [Login Entry Points](mem://auth/login-entry-points) — /admin/login for admins, modal for users
+- [Auth Providers Constraints](mem://constraints/auth-providers) — Google and Apple only
+- [Language Constraints](mem://constraints/language) — Strictly English-only, no multi-language UI
+- [Payments](mem://features/payments) — Cryptomus API, manual Binance transfers with 30-min timeout
+- [Checkout](mem://features/ecommerce-checkout) — Pre-filled fields, duplicate order checks, toast errors
+- [Product Management](mem://features/product-management) — 1:1 square aspect ratio, clickable cards, badge styling
+- [Modular Components](mem://features/modular-components) — Dynamic toggles for Work Samples, Testimonials, FAQs
+- [Menu Management](mem://features/menu-management) — Dynamic menus with lucide-react icon picker
+- [Search](mem://features/search) — Global search ignores stop words
+- [Comments](mem://features/comments) — Nested replies, 60s rate limit, XSS sanitization, moderation
+- [FAQ Content](mem://features/faq-content) — 5 categories, min 5 entries per category
+- [Social Sharing](mem://features/social-sharing) — Branded buttons, copy link, @VerifiedBMStore
+- [Verified Reviews](mem://features/verified-reviews) — Restricted to 'completed' orders, auto-notification
+- [Newsletter](mem://features/newsletter) — Manual broadcasts via Supabase Edge Function
+- [AI Live Chat](mem://features/ai-live-chat) — Hybrid AI/Live chat, standard greeting, WhatsApp/Telegram buttons
+- [AI Blog Generator](mem://features/ai-blog-generator) — Gemini Flash, specific image dimensions, Key Takeaway
+- [Invoices](mem://features/invoices) — Blue theme PDF, flattened transparent logos
+- [Order Thank You](mem://features/order-thank-you) — Conditional top-right notification with localStorage persistence
+- [Site Notices](mem://features/site-notices) — Global toasts, Base64 hashed in sessionStorage
+- [User Dashboard](mem://features/user-dashboard) — Order history with direct review links
+- [Admin Dashboard](mem://features/admin-dashboard) — Real-time metrics, Sales & Analytics widget
+- [Admin Tools](mem://features/admin-tools) — Customer management, CSV/JSON export, staging preview
+- [Admin Page Editor](mem://features/admin-page-editor) — Live Preview, integrated SEO audit engine
+- [Admin Product Controls](mem://features/admin-product-controls) — Sticky header, asset mapping, FAQ sync
+- [Admin Review Moderation](mem://features/admin-review-moderation) — Status-based UI, sync to testimonials
+- [Admin Notifications](mem://features/admin-notifications) — Real-time triggers for new orders/chats
+- [Admin Media Library](mem://features/admin-media-library) — Pending Upload workflow, WebP conversion
+- [Admin SEO Verification](mem://features/admin-seo-verification) — Google/Bing codes via site_settings
+- [Admin Auth Config](mem://features/admin-auth-config) — OAuth credentials managed in site_settings
+- [Admin UI Style](mem://style/admin-ui) — Sticky headers, scrollable tabs, AuthContext loading states
+- [Product Attributes Schema](mem://tech/database-schema/product-attributes) — 5 JSONB structures for dynamic content
+- [Performance](mem://tech/performance) — LCP optimizations, fixed aspect ratios for CLS
+- [Deployment Optimization](mem://tech/deployment-optimization) — Hostinger, Vite chunking, sitemap generation
+- [Cache Management](mem://tech/cache-management) — staleTime: 0, manual purge via Edge Function
+- [Image Processing](mem://tech/image-processing) — WebP conversion at 80%, SEO-friendly alt text
+- [Branding Management](mem://style/branding-management) — ?v= timestamp bypass, dynamic favicons
+- [Branded URLs](mem://tech/branded-urls) — Domain-masked paths via media-resolve Edge Function
+- [SEO Config](mem://tech/seo) — react-helmet-async, absolute paths at verifiedbm.shop, dynamic meta tags
+- [Global SEO Config](mem://features/global-seo-config) — Primary title and meta descriptions
+- [SEO Suite](mem://features/seo-suite) — 0-100 auditing engine, 300+ word requirement
+- [Dynamic Page Architecture](mem://tech/dynamic-page-architecture) — Static routes in CMS, PAGE_ROUTE_MAP
+- [Tracking Infrastructure](mem://tech/tracking-infrastructure) — GTM/GA4/Meta strictly on production domain
+- [Email Integrations](mem://tech/integrations/email) — Resend/SendGrid credentials in site_settings
+- [PWA](mem://features/pwa) — NetworkFirst strategy, branded offline fallback
+- [WordPress Theme](mem://tech/wordpress-theme) — React clone, WooCommerce hook overrides, demo importer
+- [Domain Migration](mem://tech/domain-migration) — Migrated from verifiedbmservices.com to verifiedbm.shop

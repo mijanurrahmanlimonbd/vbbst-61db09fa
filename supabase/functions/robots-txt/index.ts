@@ -45,7 +45,7 @@ Disallow: /admin/
 Disallow: /checkout
 
 # Sitemap
-Sitemap: https://verifiedbmservices.com/sitemap.xml`;
+Sitemap: https://verifiedbm.shop/sitemap.xml`;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {

@@ -35,7 +35,7 @@ const INTEGRATIONS: Integration[] = [
       { key: "app_id", label: "App ID", placeholder: "123456789012345" },
       { key: "app_secret", label: "App Secret", placeholder: "••••••••••••••••", type: "password" },
       { key: "access_token", label: "Access Token", placeholder: "EAABsbCS1iHgBAO...", type: "password" },
-      { key: "webhook_url", label: "Webhook URL", placeholder: "https://verifiedbmservices.com/api/meta/webhook" },
+      { key: "webhook_url", label: "Webhook URL", placeholder: "https://verifiedbm.shop/api/meta/webhook" },
     ],
   },
   {
@@ -63,7 +63,7 @@ const INTEGRATIONS: Integration[] = [
       { key: "store_url", label: "Store URL", placeholder: "https://store.example.com" },
       { key: "consumer_key", label: "Consumer Key", placeholder: "ck_••••••••••••", type: "password" },
       { key: "consumer_secret", label: "Consumer Secret", placeholder: "cs_••••••••••••", type: "password" },
-      { key: "webhook_url", label: "Webhook URL", placeholder: "https://verifiedbmservices.com/api/woo/webhook" },
+      { key: "webhook_url", label: "Webhook URL", placeholder: "https://verifiedbm.shop/api/woo/webhook" },
     ],
   },
 ];

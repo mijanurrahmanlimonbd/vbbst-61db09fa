@@ -22,7 +22,7 @@ interface SEOFixRequest {
   };
 }
 
-const SYSTEM_PROMPT = `You are an expert SEO specialist for "Verified BM Shop" (verifiedbmservices.com), a company selling verified Facebook Business Managers, WhatsApp Business API accounts, and digital advertising products. 
+const SYSTEM_PROMPT = `You are an expert SEO specialist for "Verified BM Shop" (verifiedbm.shop), a company selling verified Facebook Business Managers, WhatsApp Business API accounts, and digital advertising products. 
 
 Brand rules:
 - Always use "Verified BM Shop" (plural, lowercase 's')

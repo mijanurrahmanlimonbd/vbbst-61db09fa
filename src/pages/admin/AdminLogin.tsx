@@ -106,7 +106,7 @@ const AdminLogin = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@verifiedbmservices.com"
+                placeholder="admin@verifiedbm.shop"
                 autoComplete="email"
                 className="bg-[#1d2327] border-[#3a3f44] text-white placeholder:text-gray-500 focus:border-[#2271b1] focus:ring-[#2271b1]/20"
               />

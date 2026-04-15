@@ -90,7 +90,7 @@ const sections: PolicySection[] = [
         <ul>
           <li>WhatsApp: +880 1302 669333</li>
           <li>Telegram: @Verifiedbmbuy</li>
-          <li>Email: info@verifiedbmservices.com</li>
+          <li>Email: info@verifiedbm.shop</li>
         </ul>
         <div className="flex flex-wrap gap-3 mt-4 not-prose">
           <a href="https://wa.me/8801302669333" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[hsl(142,70%,45%)] text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity">

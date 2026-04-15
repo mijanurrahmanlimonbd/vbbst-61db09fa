@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const res = await fetch(`https://verifiedbmservices.com/purge.php?key=${encodeURIComponent(purgeKey)}`, {
+    const res = await fetch(`https://verifiedbm.shop/purge.php?key=${encodeURIComponent(purgeKey)}`, {
       signal: AbortSignal.timeout(10000),
     });
 

@@ -543,7 +543,7 @@ const AdminProducts = () => {
                 <div>
                   <Label>Slug (URL Path)</Label>
                   <Input value={editProduct.slug || ""} onChange={(e) => { setEditProduct({ ...editProduct, slug: e.target.value }); setSlugManual(true); }} placeholder="product-slug" className="mt-1.5 font-mono text-sm" />
-                  <p className="text-xs text-muted-foreground mt-1">URL: verifiedbmservices.com/product/<span className="font-semibold">{editProduct.slug || "..."}</span></p>
+                  <p className="text-xs text-muted-foreground mt-1">URL: verifiedbm.shop/product/<span className="font-semibold">{editProduct.slug || "..."}</span></p>
                 </div>
                 <div>
                   <Label>SKU (Unique ID)</Label>
@@ -789,7 +789,7 @@ const AdminProducts = () => {
                   <Input
                     value={editProduct.image_url || ""}
                     onChange={(e) => setEditProduct({ ...editProduct, image_url: e.target.value })}
-                    placeholder="https://verifiedbmservices.com/media/image.webp"
+                    placeholder="https://verifiedbm.shop/media/image.webp"
                     className="mt-1 font-mono text-xs"
                   />
                   <p className="text-xs text-muted-foreground mt-1">Paste any URL or pick from Media Library above. Manually entered URLs are preserved.</p>
@@ -818,7 +818,7 @@ const AdminProducts = () => {
                   <div className="flex gap-2 mt-1">
                     <Input
                       id="gallery-url-input"
-                      placeholder="https://verifiedbmservices.com/media/gallery-image.webp"
+                      placeholder="https://verifiedbm.shop/media/gallery-image.webp"
                       className="flex-1 font-mono text-xs"
                     />
                     <Button variant="outline" size="sm" onClick={() => {

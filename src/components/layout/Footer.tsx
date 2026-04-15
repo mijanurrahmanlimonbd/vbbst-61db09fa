@@ -43,7 +43,7 @@ const Footer = () => {
   const address = footerSettings.contact_address || "20 Madargonj, Pirgonj, Rangpur, Bangladesh\u00a0-\u00a05470";
   const phone = footerSettings.contact_phone || "+8801302669333";
   const telegram = footerSettings.contact_telegram || "Verifiedbmbuy";
-  const email = footerSettings.contact_email || "info@verifiedbmservices.com";
+  const email = footerSettings.contact_email || "info@verifiedbm.shop";
   const copyrightRaw = footerSettings.footer_copyright_text || `© {year} ${branding.site_title || "Verified BM Shop"}. All rights reserved. | Verified BM & WhatsApp API Provider`;
   const copyright = copyrightRaw.replace(/\{year\}/g, String(new Date().getFullYear()));
 

@@ -32,7 +32,7 @@ const Contact = () => {
   const channels = [
     { icon: <MessageCircle className="w-6 h-6 text-[hsl(142,70%,45%)]" />, title: "WhatsApp", badge: "Fastest", desc: "Instant chat support", detail: "+880 1302 669333", href: "https://wa.me/8801302669333" },
     { icon: <Send className="w-6 h-6 text-[hsl(200,100%,40%)]" />, title: "Telegram", desc: "Message us anytime", detail: "@Verifiedbmbuy", href: "https://t.me/Verifiedbmbuy" },
-     { icon: <Mail className="w-6 h-6 text-primary" />, title: "Email", desc: "For detailed inquiries", detail: "support@verifiedbmservices.com", href: "mailto:support@verifiedbmservices.com" },
+     { icon: <Mail className="w-6 h-6 text-primary" />, title: "Email", desc: "For detailed inquiries", detail: "support@verifiedbm.shop", href: "mailto:support@verifiedbm.shop" },
     { icon: <Facebook className="w-6 h-6 text-primary" />, title: "Messenger", desc: "Facebook Messenger", detail: "Verified BM Shop", href: "https://m.me/101736778209833" },
   ];
 

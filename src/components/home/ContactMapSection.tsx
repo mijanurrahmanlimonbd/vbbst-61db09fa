@@ -1,10 +1,10 @@
 import { MapPin, Globe, MessageCircle, Send, Mail, Clock } from "lucide-react";
 
 const contacts = [
-  { icon: <Globe className="w-5 h-5 text-primary" aria-hidden="true" />, label: "Online Store", desc: "Shop verified BM accounts 24/7 from anywhere", href: "https://verifiedbmservices.com/shop", bg: "bg-primary/10" },
+  { icon: <Globe className="w-5 h-5 text-primary" aria-hidden="true" />, label: "Online Store", desc: "Shop verified BM accounts 24/7 from anywhere", href: "https://verifiedbm.shop/shop", bg: "bg-primary/10" },
   { icon: <MessageCircle className="w-5 h-5 text-[hsl(142,70%,45%)]" aria-hidden="true" />, label: "WhatsApp Support", desc: "+880 1302 669333 — Chat with our team anytime", href: "https://wa.me/8801302669333", bg: "bg-[hsl(142,70%,45%)]/10" },
   { icon: <Send className="w-5 h-5 text-[hsl(200,100%,40%)]" aria-hidden="true" />, label: "Telegram Channel", desc: "@Verifiedbmbuy — Instant messaging support", href: "https://t.me/Verifiedbmbuy", bg: "bg-[hsl(200,100%,40%)]/10" },
-  { icon: <Mail className="w-5 h-5 text-primary" aria-hidden="true" />, label: "Email Us", desc: "info@verifiedbmservices.com — Business inquiries", href: "mailto:info@verifiedbmservices.com", bg: "bg-primary/10" },
+  { icon: <Mail className="w-5 h-5 text-primary" aria-hidden="true" />, label: "Email Us", desc: "info@verifiedbm.shop — Business inquiries", href: "mailto:info@verifiedbm.shop", bg: "bg-primary/10" },
 ];
 
 const ContactMapSection = () => (

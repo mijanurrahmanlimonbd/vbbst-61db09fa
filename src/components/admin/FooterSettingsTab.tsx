@@ -118,7 +118,7 @@ const FooterSettingsTab = () => {
           <Input
             value={values.contact_email || ""}
             onChange={(e) => set("contact_email", e.target.value)}
-            placeholder="info@verifiedbmservices.com"
+            placeholder="info@verifiedbm.shop"
           />
         </div>
 
