@@ -83,11 +83,55 @@ const CellDropdown = ({
   );
 };
 
+/* ─── CSV Parser ───────────────────────────────────────────────────── */
+
+const parseCSV = (text: string): Record<string, string>[] => {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(",").map((h) => h.trim().replace(/^"|"$/g, "").toLowerCase());
+  return lines.slice(1).map((line) => {
+    const values = line.match(/("([^"]*)"|[^,]*)/g)?.map((v) => v.trim().replace(/^"|"$/g, "")) || [];
+    const row: Record<string, string> = {};
+    headers.forEach((h, i) => { row[h] = values[i] || ""; });
+    return row;
+  });
+};
+
 /* ─── Import Modal ─────────────────────────────────────────────────── */
 
-const ImportModal = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
+const ImportModal = ({
+  open,
+  onClose,
+  onImport,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onImport: (rows: Record<string, string>[]) => void;
+}) => {
   const [dragging, setDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<Record<string, string>[]>([]);
+  const [importing, setImporting] = useState(false);
+
+  const handleFile = async (f: File) => {
+    setFile(f);
+    const text = await f.text();
+    const rows = parseCSV(text);
+    setPreview(rows.slice(0, 5));
+  };
+
+  const handleImport = async () => {
+    if (!file) return;
+    setImporting(true);
+    const text = await file.text();
+    const rows = parseCSV(text);
+    onImport(rows);
+    toast.success(`Imported ${rows.length} row${rows.length !== 1 ? "s" : ""}`);
+    setFile(null);
+    setPreview([]);
+    setImporting(false);
+    onClose();
+  };
 
   if (!open) return null;
 
@@ -102,7 +146,7 @@ const ImportModal = ({ open, onClose }: { open: boolean; onClose: () => void }) 
               <X className="w-4 h-4 text-gray-400" />
             </button>
           </div>
-          <div className="p-6">
+          <div className="p-6 space-y-4">
             <div
               onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
               onDragLeave={() => setDragging(false)}
@@ -110,11 +154,11 @@ const ImportModal = ({ open, onClose }: { open: boolean; onClose: () => void }) 
                 e.preventDefault();
                 setDragging(false);
                 const f = e.dataTransfer.files[0];
-                if (f && f.name.endsWith(".csv")) setFile(f);
+                if (f && f.name.endsWith(".csv")) handleFile(f);
                 else toast.error("Please drop a .csv file");
               }}
               className={cn(
-                "border-2 border-dashed rounded-lg p-10 text-center transition-all cursor-pointer",
+                "border-2 border-dashed rounded-lg p-8 text-center transition-all cursor-pointer",
                 dragging ? "border-[#2271b1] bg-[#2271b1]/5" : "border-gray-300 hover:border-gray-400"
               )}
               onClick={() => {
@@ -123,28 +167,60 @@ const ImportModal = ({ open, onClose }: { open: boolean; onClose: () => void }) 
                 input.accept = ".csv";
                 input.onchange = (e) => {
                   const f = (e.target as HTMLInputElement).files?.[0];
-                  if (f) setFile(f);
+                  if (f) handleFile(f);
                 };
                 input.click();
               }}
             >
-              <FileUp className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+              <FileUp className="w-8 h-8 text-gray-300 mx-auto mb-2" />
               <p className="text-sm font-medium text-gray-600">
                 {file ? file.name : "Drag & drop a CSV file here"}
               </p>
               <p className="text-xs text-gray-400 mt-1">
-                {file ? `${(file.size / 1024).toFixed(1)} KB` : "or click to browse"}
+                {file ? `${(file.size / 1024).toFixed(1)} KB · ${preview.length}+ rows detected` : "Columns: Name, Type, Status, Assigned To, Daily Spend Limit"}
               </p>
             </div>
+
+            {/* Preview */}
+            {preview.length > 0 && (
+              <div className="border border-gray-200 rounded-lg overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="px-3 py-2 bg-gray-50 border-b border-gray-200">
+                  <p className="text-[11px] font-semibold text-gray-500">Preview (first {preview.length} rows)</p>
+                </div>
+                <div className="overflow-x-auto max-h-36">
+                  <table className="w-full text-[11px]">
+                    <thead>
+                      <tr className="bg-gray-50 text-gray-500">
+                        {Object.keys(preview[0]).map((h) => (
+                          <th key={h} className="text-left px-2 py-1.5 font-medium capitalize">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {preview.map((row, i) => (
+                        <tr key={i} className="border-t border-gray-100">
+                          {Object.values(row).map((v, j) => (
+                            <td key={j} className="px-2 py-1.5 text-gray-700 truncate max-w-[120px]">{v}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
             {file && (
-              <div className="flex gap-3 mt-4">
+              <div className="flex gap-3">
                 <Button
-                  className="flex-1 bg-[#2271b1] hover:bg-[#135e96] text-white text-sm h-9"
-                  onClick={() => { toast.success("Import started (UI demo)"); onClose(); }}
+                  className="flex-1 bg-[#2271b1] hover:bg-[#135e96] text-white text-sm h-9 gap-1.5"
+                  onClick={handleImport}
+                  disabled={importing}
                 >
-                  Import File
+                  {importing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                  {importing ? "Importing…" : `Import ${preview.length}+ Rows`}
                 </Button>
-                <Button variant="outline" className="text-sm h-9" onClick={() => setFile(null)}>
+                <Button variant="outline" className="text-sm h-9" onClick={() => { setFile(null); setPreview([]); }}>
                   Clear
                 </Button>
               </div>
@@ -380,7 +456,23 @@ const AdminAssetTracker = () => {
         )}
       </div>
 
-      <ImportModal open={importOpen} onClose={() => setImportOpen(false)} />
+      <ImportModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImport={async (rows) => {
+          for (const row of rows) {
+            const mapped = {
+              name: row["name"] || row["asset name"] || "Imported Asset",
+              type: row["type"] || "e-Commerce",
+              status: row["status"] || "verified",
+              assigned_to: row["assigned to"] || row["assigned_to"] || TEAM[0],
+              daily_spend_limit: parseFloat(row["daily spend limit"] || row["daily_spend_limit"] || "0") || 0,
+            };
+            await supabase.from("assets").insert(mapped);
+          }
+          await fetchAssets();
+        }}
+      />
     </div>
   );
 };
