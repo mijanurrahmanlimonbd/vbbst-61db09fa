@@ -20,7 +20,7 @@ const faqs = [
   { q: "What happens if my account gets restricted?", a: "If your account gets restricted within the 7-day guarantee period due to no fault of your own, we'll replace it for free. Our team can also help troubleshoot restriction issues." },
   { q: "Can I use the account from any country?", a: "Yes, our verified accounts work globally. You can run campaigns targeting any country or region without geographic restrictions." },
   { q: "Do accounts come with documentation?", a: "Every account comes with complete verification documents including business registration, tax information, and all paperwork used in the Meta verification process." },
-  { q: "How long have you been doing this?", a: "Verified BM services has been operating since 2019, with over 5 years of experience serving more than 10,000 customers across 50+ countries." },
+  { q: "How long have you been doing this?", a: "Verified BM Shop has been operating since 2019, with over 5 years of experience serving more than 10,000 customers across 50+ countries." },
 ];
 
 const FAQSection = () => (

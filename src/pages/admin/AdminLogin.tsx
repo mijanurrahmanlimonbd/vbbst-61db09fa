@@ -209,7 +209,7 @@ const AdminLogin = () => {
         </div>
 
         <p className="text-center text-[11px] text-gray-600 mt-4">
-          Protected by Verified BM Services · Enterprise Security
+          Protected by Verified BM Shop · Enterprise Security
         </p>
       </div>
     </div>

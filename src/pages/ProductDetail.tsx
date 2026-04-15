@@ -175,8 +175,8 @@ const ProductDetail = () => {
   return (
     <Layout>
       <SEOHead
-        title={product.meta_title || `${product.title} - Buy Online | Verified BM Services`}
-        description={product.meta_description || product.short_description || `Buy ${product.title} from Verified BM services. Instant delivery and 7-day guarantee.`}
+        title={product.meta_title || `${product.title} - Buy Online | Verified BM Shop`}
+        description={product.meta_description || product.short_description || `Buy ${product.title} from Verified BM Shop. Instant delivery and 7-day guarantee.`}
         ogImage={product.image_url || undefined}
         ogType="product"
         keywords={product.focus_keyword || undefined}
@@ -508,10 +508,10 @@ const ProductDetail = () => {
         </div>
       </section>
 
-      {/* ─── WHY CUSTOMERS CHOOSE VERIFIED BM SERVICES ─── */}
+      {/* ─── WHY CUSTOMERS CHOOSE Verified BM Shop ─── */}
       <section className="py-14 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">{h("whyUs", "subtitle", "Why Verified BM Services")}</p>
+          <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">{h("whyUs", "subtitle", "Why Verified BM Shop")}</p>
           <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">{h("whyUs", "title", "Why Customers Choose Us")}</h2>
           <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">
             {h("whyUs", "description", "Trusted by 1,000+ advertisers worldwide for verified Meta accounts.")}
@@ -629,7 +629,7 @@ const ProductDetail = () => {
             <p className="text-sm font-bold tracking-widest uppercase text-primary text-center">{h("testimonials", "subtitle", "Testimonials")}</p>
             <h2 className="text-2xl md:text-3xl font-bold text-foreground text-center mt-2">{h("testimonials", "title", "What Our Customers Say")}</h2>
             <p className="text-muted-foreground text-center mt-3 max-w-xl mx-auto">
-              {h("testimonials", "description", "Real reviews from verified buyers who trust Verified BM services.")}
+              {h("testimonials", "description", "Real reviews from verified buyers who trust Verified BM Shop.")}
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">

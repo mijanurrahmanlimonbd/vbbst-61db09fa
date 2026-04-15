@@ -61,8 +61,8 @@ const DEFAULT_HEADINGS: Record<string, SectionHeading> = {
   description: { subtitle: "Description", title: "About This Product", description: "" },
   payment: { subtitle: "Payment", title: "How to Make Payment", description: "We accept cryptocurrency payments for secure, fast, and worldwide transactions." },
   delivery: { subtitle: "Delivery", title: "How We Deliver Your Account", description: "A fully transparent, secure process from purchase to access." },
-  whyUs: { subtitle: "Why Verified BM Services", title: "Why Customers Choose Us", description: "Trusted by 1,000+ advertisers worldwide for verified Meta accounts." },
-  testimonials: { subtitle: "Testimonials", title: "What Our Customers Say", description: "Real reviews from verified buyers who trust Verified BM services." },
+  whyUs: { subtitle: "Why Verified BM Shop", title: "Why Customers Choose Us", description: "Trusted by 1,000+ advertisers worldwide for verified Meta accounts." },
+  testimonials: { subtitle: "Testimonials", title: "What Our Customers Say", description: "Real reviews from verified buyers who trust Verified BM Shop." },
   faq: { subtitle: "FAQ", title: "Frequently Asked Questions", description: "" },
 };
 

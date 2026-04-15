@@ -37,7 +37,7 @@ const TestimonialsSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <p className="text-sm font-semibold tracking-widest uppercase text-primary text-center">Testimonials</p>
         <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mt-2">Customer Success Stories</h2>
-        <p className="text-muted-foreground text-center mt-4">Thousands of advertisers trust Verified BM services. Here's what they have to say.</p>
+        <p className="text-muted-foreground text-center mt-4">Thousands of advertisers trust Verified BM Shop. Here's what they have to say.</p>
 
         <div className="mt-10">
           {isLoading ? (

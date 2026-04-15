@@ -55,10 +55,10 @@ const FAQ = () => {
 
   return (
     <Layout>
-       <SEOHead title={pageSEO?.meta_title || pageSEO?.title || "FAQ - Frequently Asked Questions"} description={pageSEO?.meta_description || "Find answers to common questions about Verified BM services' products, payments, delivery, and support."} />
+       <SEOHead title={pageSEO?.meta_title || pageSEO?.title || "FAQ - Frequently Asked Questions"} description={pageSEO?.meta_description || "Find answers to common questions about Verified BM Shop' products, payments, delivery, and support."} />
       <JsonLdSchema
         pageTitle={pageSEO?.meta_title || pageSEO?.title || "FAQ - Frequently Asked Questions"}
-        pageDescription={pageSEO?.meta_description || "Find answers to common questions about Verified BM services."}
+        pageDescription={pageSEO?.meta_description || "Find answers to common questions about Verified BM Shop."}
         faqs={filtered.map((f) => ({ question: f.question, answer: f.answer }))}
         breadcrumbs={[{ name: "Home", url: "/" }, { name: "FAQ", url: "/faq" }]}
       />

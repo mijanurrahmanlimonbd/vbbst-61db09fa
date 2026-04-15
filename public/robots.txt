@@ -1,5 +1,5 @@
 # =============================================
-# robots.txt — Verified BM Services
+# robots.txt — Verified BM Shop
 # =============================================
 
 User-agent: Googlebot

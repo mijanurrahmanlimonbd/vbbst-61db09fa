@@ -44,7 +44,7 @@ const Footer = () => {
   const phone = footerSettings.contact_phone || "+8801302669333";
   const telegram = footerSettings.contact_telegram || "Verifiedbmbuy";
   const email = footerSettings.contact_email || "info@verifiedbmservices.com";
-  const copyrightRaw = footerSettings.footer_copyright_text || `© {year} ${branding.site_title || "Verified BM services"}. All rights reserved. | Verified BM & WhatsApp API Provider`;
+  const copyrightRaw = footerSettings.footer_copyright_text || `© {year} ${branding.site_title || "Verified BM Shop"}. All rights reserved. | Verified BM & WhatsApp API Provider`;
   const copyright = copyrightRaw.replace(/\{year\}/g, String(new Date().getFullYear()));
 
   const logoElement = branding.footer_logo ? (

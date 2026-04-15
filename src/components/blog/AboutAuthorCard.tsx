@@ -5,7 +5,7 @@ interface AboutAuthorCardProps {
   authorName?: string;
 }
 
-const AboutAuthorCard = ({ authorName = "Verified BM Services Team" }: AboutAuthorCardProps) => {
+const AboutAuthorCard = ({ authorName = "Verified BM Shop Team" }: AboutAuthorCardProps) => {
   return (
     <div className="bg-card border border-border rounded-xl p-6 mt-12">
       <div className="flex items-start gap-4">

@@ -368,21 +368,21 @@ const AdminSEO = () => {
                 <Label>Homepage Title Pattern</Label>
                 <Input value={titleHome} onChange={(e) => setTitleHome(e.target.value)} className="mt-1.5 font-mono text-sm" />
                 <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1">
-                  <Eye className="w-3 h-3" /> Preview: <span className="font-medium">Verified BM services — Your trusted source</span>
+                  <Eye className="w-3 h-3" /> Preview: <span className="font-medium">Verified BM Shop — Your trusted source</span>
                 </p>
               </div>
               <div>
                 <Label>Blog Post Title Pattern</Label>
                 <Input value={titlePost} onChange={(e) => setTitlePost(e.target.value)} className="mt-1.5 font-mono text-sm" />
                 <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1">
-                  <Eye className="w-3 h-3" /> Preview: <span className="font-medium">How to Buy Verified BM | Verified BM services</span>
+                  <Eye className="w-3 h-3" /> Preview: <span className="font-medium">How to Buy Verified BM | Verified BM Shop</span>
                 </p>
               </div>
               <div>
                 <Label>Product Title Pattern</Label>
                 <Input value={titleProduct} onChange={(e) => setTitleProduct(e.target.value)} className="mt-1.5 font-mono text-sm" />
                 <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1">
-                  <Eye className="w-3 h-3" /> Preview: <span className="font-medium">Premium BM — Buy at Verified BM services</span>
+                  <Eye className="w-3 h-3" /> Preview: <span className="font-medium">Premium BM — Buy at Verified BM Shop</span>
                 </p>
               </div>
             </div>
@@ -407,7 +407,7 @@ const AdminSEO = () => {
             <div className="space-y-4">
               <div>
                 <Label>Default OG Title</Label>
-                <Input value={ogTitle} onChange={(e) => setOgTitle(e.target.value)} placeholder="Verified BM services — Verified Facebook Business Managers" className="mt-1.5" />
+                <Input value={ogTitle} onChange={(e) => setOgTitle(e.target.value)} placeholder="Verified BM Shop — Verified Facebook Business Managers" className="mt-1.5" />
               </div>
               <div>
                 <Label>Default OG Description</Label>
@@ -755,7 +755,7 @@ const InternationalSEOPanel = () => {
 
 // ─── Crawler & Indexing Panel ───────────────────────────────────────────────
 const DEFAULT_ROBOTS = `# =============================================
-# robots.txt — Verified BM services
+# robots.txt — Verified BM Shop
 # =============================================
 
 User-agent: Googlebot
@@ -1056,9 +1056,9 @@ const SchemaConfigPanel = () => {
 
 /** ────────── BULK META EDITOR ────────── */
 const SITE_HEALTH_DOMAINS = [
-  { domain: "verifiedbmservices.com", title: "Buy Verified BM And WhatsApp API", desc: "Professional verified BM services for advertisers.", keyword: "verified bm", canonical: "https://verifiedbmservices.com/" },
+  { domain: "verifiedbmservices.com", title: "Buy Verified BM And WhatsApp API", desc: "Professional Verified BM Shop for advertisers.", keyword: "verified bm", canonical: "https://verifiedbmservices.com/" },
   { domain: "shop.verifiedbm.com", title: "Shop — Verified BM Store", desc: "Browse verified business managers and ad accounts.", keyword: "buy verified bm", canonical: "https://shop.verifiedbm.com/" },
-  { domain: "blog.verifiedbm.com", title: "Blog — Verified BM Services", desc: "Tips and guides for Facebook advertising.", keyword: "facebook bm guide", canonical: "https://blog.verifiedbm.com/" },
+  { domain: "blog.verifiedbm.com", title: "Blog — Verified BM Shop", desc: "Tips and guides for Facebook advertising.", keyword: "facebook bm guide", canonical: "https://blog.verifiedbm.com/" },
 ];
 
 const SEO_LIMITS = { title: 60, desc: 160, keyword: 30 };
@@ -1285,7 +1285,7 @@ const SCHEMA_FIELDS: Record<string, { key: string; label: string; placeholder: s
     { key: "availability", label: "Availability", placeholder: "InStock" },
   ],
   LocalBusiness: [
-    { key: "name", label: "Business Name", placeholder: "Verified BM Services" },
+    { key: "name", label: "Business Name", placeholder: "Verified BM Shop" },
     { key: "description", label: "Description", placeholder: "Professional digital advertising solutions..." },
     { key: "address", label: "Street Address", placeholder: "123 Digital Ave" },
     { key: "city", label: "City", placeholder: "New York" },
@@ -1298,7 +1298,7 @@ const SCHEMA_FIELDS: Record<string, { key: string; label: string; placeholder: s
     { key: "author", label: "Author Name", placeholder: "Akhi Vai" },
     { key: "datePublished", label: "Date Published", placeholder: "2026-04-15" },
     { key: "image", label: "Featured Image URL", placeholder: "https://verifiedbmservices.com/blog/featured.jpg" },
-    { key: "publisher", label: "Publisher Name", placeholder: "Verified BM Services" },
+    { key: "publisher", label: "Publisher Name", placeholder: "Verified BM Shop" },
   ],
 };
 

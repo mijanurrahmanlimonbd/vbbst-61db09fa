@@ -285,7 +285,7 @@ const AIChatWidget = () => {
               <div className="flex items-center gap-2">
                 <MessageCircle className="w-5 h-5 text-primary-foreground" />
                 <div>
-                  <span className="text-sm font-semibold text-primary-foreground">Verified BM services</span>
+                  <span className="text-sm font-semibold text-primary-foreground">Verified BM Shop</span>
                   <span className="flex items-center gap-1 text-xs text-primary-foreground/70">
                     <span className="w-1.5 h-1.5 rounded-full bg-accent" /> Online
                   </span>
@@ -355,7 +355,7 @@ const AIChatWidget = () => {
                 {messages.length === 0 && (
                   <div className="text-center py-8 space-y-3">
                     <MessageCircle className="w-10 h-10 mx-auto text-primary/50" />
-                    <p className="text-sm text-muted-foreground">Hello! Welcome to Verified BM services. How can I help you today?</p>
+                    <p className="text-sm text-muted-foreground">Hello! Welcome to Verified BM Shop. How can I help you today?</p>
                     <div className="grid grid-cols-2 gap-2">
                       {[
                         { icon: "🛒", q: "What products do you sell?" },

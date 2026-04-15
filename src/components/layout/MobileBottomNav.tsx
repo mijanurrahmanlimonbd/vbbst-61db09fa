@@ -63,7 +63,7 @@ const MobileBottomNav = () => {
           <Link to="/" onClick={() => setMenuOpen(false)}>
             <img
               src={logoSrc}
-              alt={branding.site_title || "Verified BM Services"}
+              alt={branding.site_title || "Verified BM Shop"}
               className="h-8 w-auto max-w-[150px] object-contain"
             />
           </Link>

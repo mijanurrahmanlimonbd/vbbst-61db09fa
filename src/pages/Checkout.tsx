@@ -302,7 +302,7 @@ const Checkout = () => {
 
   return (
     <Layout>
-      <SEOHead title="Checkout - Verified BM services" description="Complete your purchase" />
+      <SEOHead title="Checkout - Verified BM Shop" description="Complete your purchase" />
 
       {/* Duplicate Order Confirmation Dialog */}
       <AlertDialog open={duplicateDialogOpen} onOpenChange={setDuplicateDialogOpen}>

@@ -156,7 +156,7 @@ serve(async (req) => {
       (p: any) => `- ${p.title} ($${p.sale_price || p.price}) — ${p.short_description || p.category} — URL: /shop/${p.slug}`
     ).join("\n");
 
-    const systemPrompt = `You are an expert blog writer and SEO specialist for "Verified BM services" (verifiedbmservices.com). You write professional, human-like blog posts that rank on Google.
+    const systemPrompt = `You are an expert blog writer and SEO specialist for "Verified BM Shop" (verifiedbmservices.com). You write professional, human-like blog posts that rank on Google.
 
 ## STRICT WRITING RULES (Human-Centric)
 - Use a natural, conversational tone. Write like a knowledgeable friend explaining things.
@@ -232,7 +232,7 @@ Remember:
 
 For the Related Products section, use this HTML format:
 <div class="related-products">
-<h2>Related Products from Verified BM Services</h2>
+<h2>Related Products from Verified BM Shop</h2>
 <div class="product-grid">
 [Include 2-3 most relevant products from the available list with links]
 </div>
