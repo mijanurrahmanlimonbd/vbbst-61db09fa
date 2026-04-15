@@ -132,7 +132,7 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
             <div className="text-center">
               <img
                 src={branding.header_logo || headerFallback}
-                alt={branding.site_title || "Verified BM services"}
+                alt={branding.site_title || "Verified BM Shop"}
                 className="h-10 max-w-[160px] object-contain mx-auto mb-2"
                 onError={(e) => { (e.target as HTMLImageElement).src = headerFallback; }}
               />

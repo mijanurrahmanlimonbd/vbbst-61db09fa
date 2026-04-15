@@ -44,7 +44,7 @@ const fetchStoreSettings = async (): Promise<StoreSettings> => {
   (data || []).forEach((r) => { map[r.key] = r.value; });
 
   return {
-    site_title: map.site_title || "Verified BM services",
+    site_title: map.site_title || "Verified BM Shop",
     contact_email: map.contact_email || "info@verifiedbmservices.com",
     whatsapp: map.whatsapp || "",
     address: map.store_address || "Madergonj, Pirgonj, Rangpur, Bangladesh - 5470",

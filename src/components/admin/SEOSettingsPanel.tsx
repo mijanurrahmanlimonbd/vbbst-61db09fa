@@ -40,7 +40,7 @@ const SEOSettingsPanel = ({
   const [previewMode, setPreviewMode] = useState<"google" | "facebook" | "twitter">("google");
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
-  const displayTitle = (metaTitle || postTitle || "Untitled Post") + " | Verified BM services";
+  const displayTitle = (metaTitle || postTitle || "Untitled Post") + " | Verified BM Shop";
   const displayDesc = metaDescription || "No description provided. Add a meta description to improve search visibility.";
   const displayUrl = `verifiedbmservices.com/blog/${slug || "post-slug"}`;
   const displayImage = featuredImage || "/og-default.png";

@@ -47,7 +47,7 @@ const emptyMethod = (): Partial<PaymentMethod> => ({
 
 const AdminSettings = () => {
   // General
-  const [siteTitle, setSiteTitle] = useState("Verified BM services");
+  const [siteTitle, setSiteTitle] = useState("Verified BM Shop");
   const [siteDescription, setSiteDescription] = useState("Your trusted source for verified Facebook Business Managers");
   const [contactEmail, setContactEmail] = useState("info@verifiedbmservices.com");
   const [whatsapp, setWhatsapp] = useState("+1 234 567 890");

@@ -8,7 +8,7 @@ const sections: PolicySection[] = [
     icon: <Shield className="w-4 h-4" />,
     content: (
       <>
-        <p>Verified BM services ("we", "us", "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and purchase our products.</p>
+        <p>Verified BM Shop ("we", "us", "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and purchase our products.</p>
         <InfoBox><Shield className="w-5 h-5 text-primary shrink-0 mt-0.5" /><span>We never sell, trade, or rent your personal data to third parties. Your information is only used to process orders and provide customer support.</span></InfoBox>
       </>
     ),
@@ -125,7 +125,7 @@ const sections: PolicySection[] = [
           <li>WhatsApp: +880 1302 669333</li>
           <li>Telegram: @Verifiedbmbuy</li>
           <li>Email: info@verifiedbmservices.com</li>
-          <li>Address: Verified BM services, Madergonj, Pirgonj, Rangpur, Bangladesh - 5470</li>
+          <li>Address: Verified BM Shop, Madergonj, Pirgonj, Rangpur, Bangladesh - 5470</li>
         </ul>
       </>
     ),
@@ -140,8 +140,8 @@ const PrivacyPolicy = () => (
     lastUpdated="February 15, 2026"
     sections={sections}
     breadcrumb="Privacy Policy"
-     seoTitle="Privacy Policy - Verified BM services"
-    seoDescription="Learn how Verified BM services collects, uses, and protects your personal data. We are committed to transparency and data security."
+     seoTitle="Privacy Policy - Verified BM Shop"
+    seoDescription="Learn how Verified BM Shop collects, uses, and protects your personal data. We are committed to transparency and data security."
   />
 );
 

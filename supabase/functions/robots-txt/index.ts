@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const DEFAULT_ROBOTS = `# =============================================
-# robots.txt — Verified BM Services
+# robots.txt — Verified BM Shop
 # =============================================
 
 User-agent: Googlebot

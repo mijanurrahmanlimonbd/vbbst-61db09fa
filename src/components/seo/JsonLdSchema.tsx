@@ -139,7 +139,7 @@ const JsonLdSchema = ({
           "https://schema.org/MobileWebPlatform",
         ],
       },
-      name: "Search Verified BM services",
+      name: "Search Verified BM Shop",
       "query-input": {
         "@type": "PropertyValueSpecification",
         valueRequired: true,

@@ -4,7 +4,7 @@
  * in development, preview, and production.
  */
 
-export const SITE_NAME = "Verified BM services";
+export const SITE_NAME = "Verified BM Shop";
 
 /** Production domain — always used for canonical URLs, OG tags, invoices, etc. */
 const PRODUCTION_URL = "https://verifiedbmservices.com";
@@ -19,4 +19,4 @@ export const getSiteUrl = (): string => {
 };
 
 export const DEFAULT_DESCRIPTION =
-  "Buy verified BM and WhatsApp API from Verified BM Services. Instant delivery, 7-day guarantee, 24/7 support. Trusted by 10,000+ advertisers.";
+  "Buy verified BM and WhatsApp API from Verified BM Shop. Instant delivery, 7-day guarantee, 24/7 support. Trusted by 10,000+ advertisers.";

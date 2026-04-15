@@ -6,7 +6,7 @@ const BuyVerifiedBMGuide = () => (
       <p className="text-sm font-semibold tracking-widest uppercase text-primary text-center">Complete Guide</p>
       <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mt-2">Buy Verified BM — Everything You Need to Know</h2>
       <p className="text-muted-foreground text-center mt-4 max-w-2xl mx-auto">
-        Why a verified Facebook Business Manager matters for your advertising success, and how Verified BM services delivers the best accounts.
+        Why a verified Facebook Business Manager matters for your advertising success, and how Verified BM Shop delivers the best accounts.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
@@ -24,7 +24,7 @@ const BuyVerifiedBMGuide = () => (
         </div>
 
         <div className="bg-card border border-border rounded-xl p-8">
-          <h3 className="text-xl font-bold text-foreground">Why Buy from Verified BM services?</h3>
+          <h3 className="text-xl font-bold text-foreground">Why Buy from Verified BM Shop?</h3>
           <p className="text-muted-foreground mt-3 text-sm">The most trusted source for verified BM accounts for over five years. Here's what makes us different:</p>
           <ul className="mt-4 space-y-2">
             {[
@@ -57,7 +57,7 @@ const BuyVerifiedBMGuide = () => (
         <div className="bg-card border border-border rounded-xl p-8">
           <h3 className="text-xl font-bold text-foreground">Trusted by 10,000+ Advertisers</h3>
           <p className="text-muted-foreground mt-3 text-sm">
-            Since 2019, Verified BM services has delivered over 10,000 verified BM accounts to advertisers in 50+ countries. Our customers include Facebook Ads agencies, e-commerce brands, affiliate marketers, and media buying teams. We accept cryptocurrency payments for fast, secure transactions. Our 24/7 support team is always ready to help.
+            Since 2019, Verified BM Shop has delivered over 10,000 verified BM accounts to advertisers in 50+ countries. Our customers include Facebook Ads agencies, e-commerce brands, affiliate marketers, and media buying teams. We accept cryptocurrency payments for fast, secure transactions. Our 24/7 support team is always ready to help.
           </p>
         </div>
       </div>

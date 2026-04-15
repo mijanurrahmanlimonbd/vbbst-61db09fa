@@ -20,9 +20,9 @@ const AggregateOfferSchema = ({ products }: { products: any[] }) => {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: "Verified BM Services — Digital Marketing Accounts",
+    name: "Verified BM Shop — Digital Marketing Accounts",
     description: "Premium verified Facebook Business Managers, WhatsApp Business API, and advertising accounts.",
-    brand: { "@type": "Brand", name: "Verified BM Services" },
+    brand: { "@type": "Brand", name: "Verified BM Shop" },
     url: `${siteUrl}/shop`,
     offers: {
       "@type": "AggregateOffer",

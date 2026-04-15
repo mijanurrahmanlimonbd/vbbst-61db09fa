@@ -462,7 +462,7 @@ const AdvancedSEOSidebar = ({
       <div className="bg-secondary/40 rounded-lg p-3 space-y-0.5">
         <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-1">Google Preview</p>
         <p className="text-[hsl(217,89%,61%)] text-sm font-medium leading-tight truncate">
-          {(metaTitle || data.postTitle || "Untitled").slice(0, 60)} | Verified BM services
+          {(metaTitle || data.postTitle || "Untitled").slice(0, 60)} | Verified BM Shop
         </p>
         <p className="text-[hsl(142,70%,45%)] text-[11px] truncate">
           verifiedbmservices.com{data.urlPrefix || "/product/"}{data.slug || "…"}

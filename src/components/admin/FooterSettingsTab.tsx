@@ -128,7 +128,7 @@ const FooterSettingsTab = () => {
           <Input
             value={values.footer_copyright_text || ""}
             onChange={(e) => set("footer_copyright_text", e.target.value)}
-            placeholder="© {year} Verified BM services. All rights reserved."
+            placeholder="© {year} Verified BM Shop. All rights reserved."
           />
         </div>
       </div>

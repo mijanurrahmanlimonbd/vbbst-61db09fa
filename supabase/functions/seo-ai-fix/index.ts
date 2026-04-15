@@ -22,10 +22,10 @@ interface SEOFixRequest {
   };
 }
 
-const SYSTEM_PROMPT = `You are an expert SEO specialist for "Verified BM services" (verifiedbmservices.com), a company selling verified Facebook Business Managers, WhatsApp Business API accounts, and digital advertising products. 
+const SYSTEM_PROMPT = `You are an expert SEO specialist for "Verified BM Shop" (verifiedbmservices.com), a company selling verified Facebook Business Managers, WhatsApp Business API accounts, and digital advertising products. 
 
 Brand rules:
-- Always use "Verified BM services" (plural, lowercase 's')
+- Always use "Verified BM Shop" (plural, lowercase 's')
 - Target audience: digital advertisers, agencies, media buyers
 - Tone: professional, trustworthy, action-oriented
 - Use power words: Best, Top, Proven, Ultimate, Verified, Instant, Guaranteed, Premium, Trusted, Professional
@@ -50,7 +50,7 @@ Requirements:
 - Include the focus keyword naturally near the beginning
 - Include a call-to-action
 - Positive sentiment
-- Mention "Verified BM services" if relevant
+- Mention "Verified BM Shop" if relevant
 
 Respond with: {"metaDescription": "your description here"}`;
 
@@ -125,7 +125,7 @@ Focus keyword: "${kw || ""}"
 Requirements:
 - 1-3 sentences, technically descriptive
 - Include specifications relevant to digital advertising products
-- Mention "Verified BM services" brand naturally
+- Mention "Verified BM Shop" brand naturally
 - Useful for search engine image indexing
 
 Respond with: {"imageDetails": "your detailed description here"}`;

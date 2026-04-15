@@ -48,12 +48,12 @@ const About = () => {
   return (
     <Layout>
       <SEOHead
-        title={pageSEO?.meta_title || pageSEO?.title || "About Us — Verified BM Services"}
-        description={pageSEO?.meta_description || "Learn about Verified BM services — the #1 trusted provider of verified Facebook Business Managers. 10,000+ advertisers in 50+ countries."}
+        title={pageSEO?.meta_title || pageSEO?.title || "About Us — Verified BM Shop"}
+        description={pageSEO?.meta_description || "Learn about Verified BM Shop — the #1 trusted provider of verified Facebook Business Managers. 10,000+ advertisers in 50+ countries."}
       />
       <JsonLdSchema
         pageTitle={pageSEO?.meta_title || pageSEO?.title || "About Us"}
-        pageDescription={pageSEO?.meta_description || "Learn about Verified BM services — trusted by 10,000+ advertisers in 50+ countries."}
+        pageDescription={pageSEO?.meta_description || "Learn about Verified BM Shop — trusted by 10,000+ advertisers in 50+ countries."}
         breadcrumbs={[{ name: "Home", url: "/" }, { name: "About Us", url: "/about" }]}
       />
 
@@ -106,7 +106,7 @@ const About = () => {
               <EditableText
                 fieldKey="about_text"
                 value={c.about_text || ""}
-                fallback="Verified BM services started in 2019 with one clear mission — give advertisers worldwide access to legitimate, verified Facebook Business Manager accounts without the headache. We saw how many marketers struggled with unverified accounts, bans, and unreliable sellers. So we built something different: a transparent, secure, and fast service backed by real documentation and real people. Today, over 10,000 advertisers in 50+ countries trust us to power their campaigns."
+                fallback="Verified BM Shop started in 2019 with one clear mission — give advertisers worldwide access to legitimate, verified Facebook Business Manager accounts without the headache. We saw how many marketers struggled with unverified accounts, bans, and unreliable sellers. So we built something different: a transparent, secure, and fast service backed by real documentation and real people. Today, over 10,000 advertisers in 50+ countries trust us to power their campaigns."
                 as="div"
                 className="text-muted-foreground mt-5 text-sm leading-relaxed"
                 richText
@@ -146,7 +146,7 @@ const About = () => {
           <div className="text-center mb-12">
             <span className="text-xs font-semibold tracking-widest uppercase text-primary">Why Choose Us</span>
             <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mt-2">
-              What Sets Verified BM Services Apart
+              What Sets Verified BM Shop Apart
             </h2>
             <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
               We don't just sell accounts — we deliver peace of mind with every purchase.

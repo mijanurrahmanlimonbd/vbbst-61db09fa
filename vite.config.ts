@@ -20,9 +20,9 @@ export default defineConfig(({ mode }) => ({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg", "favicon.png", "favicon.ico", "pwa-192x192.png", "pwa-512x512.png", "offline.html"],
       manifest: {
-        name: "Verified BM services",
+        name: "Verified BM Shop",
         short_name: "Verified BM",
-        description: "Secure, high-limit Verified Business Managers and WhatsApp Business API solutions. Instant delivery at Verified BM services.",
+        description: "Secure, high-limit Verified Business Managers and WhatsApp Business API solutions. Instant delivery at Verified BM Shop.",
         start_url: "/",
         display: "standalone",
         theme_color: "#2563EB",

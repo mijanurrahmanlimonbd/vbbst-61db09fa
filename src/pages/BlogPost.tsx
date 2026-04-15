@@ -158,7 +158,7 @@ const BlogPost = () => {
       />
       <SEOHead
         title={post.meta_title || post.title}
-        description={post.meta_description || post.excerpt || `Read ${post.title} on Verified BM services blog.`}
+        description={post.meta_description || post.excerpt || `Read ${post.title} on Verified BM Shop blog.`}
         ogImage={featuredImage || undefined}
         ogType="article"
         keywords={post.focus_keyword || undefined}
@@ -183,7 +183,7 @@ const BlogPost = () => {
           </h1>
           <div className="flex flex-wrap items-center gap-4 mt-5 text-primary-foreground/70 text-sm">
             <span className="flex items-center gap-1.5">
-              <User className="w-4 h-4" /> {post.author || "Verified BM Services"}
+              <User className="w-4 h-4" /> {post.author || "Verified BM Shop"}
             </span>
             <span className="flex items-center gap-1.5">
               <CalendarDays className="w-4 h-4" />
@@ -247,7 +247,7 @@ const BlogPost = () => {
               </div>
 
               {/* About Author */}
-              <AboutAuthorCard authorName={post.author || "Verified BM Services Team"} />
+              <AboutAuthorCard authorName={post.author || "Verified BM Shop Team"} />
 
               {/* Comments */}
               <CommentSection postId={post.id} />

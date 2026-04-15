@@ -64,7 +64,7 @@ export interface BusinessInfo {
 }
 
 const DEFAULT_BUSINESS: BusinessInfo = {
-  name: "Verified BM Services",
+  name: "Verified BM Shop",
   description: DEFAULT_DESCRIPTION,
   email: "info@verifiedbmservices.com",
   phone: "+8801302669333",
