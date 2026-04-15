@@ -40,6 +40,7 @@ const navItems = [
   { title: "Asset Tracker", path: "/admin/assets", icon: Database, section: "dashboard" },
   { title: "Team Analytics", path: "/admin/team", icon: BarChart3, section: "dashboard" },
   { title: "Financial", path: "/admin/finance", icon: Wallet, section: "dashboard" },
+  { title: "Task Board", path: "/admin/tasks", icon: ClipboardList, section: "dashboard" },
   { title: "Navigation", path: "/admin/menus", icon: Menu, section: "settings" },
   { title: "SEO", path: "/admin/seo", icon: Search, section: "settings" },
   { title: "Auth Config", path: "/admin/auth-config", icon: Lock, section: "settings" },
@@ -56,7 +57,21 @@ const AdminLayout = () => {
   const [pendingCount, setPendingCount] = useState(0);
   const [syncing, setSyncing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== "undefined") return localStorage.getItem("admin_dark_mode") === "true";
+    return false;
+  });
   const location = useLocation();
+
+  // Apply dark mode class
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    localStorage.setItem("admin_dark_mode", String(darkMode));
+  }, [darkMode]);
 
   const handleSyncSite = useCallback(async () => {
     setSyncing(true);
