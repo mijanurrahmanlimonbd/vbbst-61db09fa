@@ -37,6 +37,7 @@ const navItems = [
   { title: "Testimonials", path: "/admin/testimonials", icon: MessageCircle, section: "dashboard" },
   { title: "FAQs", path: "/admin/faqs", icon: HelpCircle, section: "dashboard" },
   { title: "Asset Tracker", path: "/admin/assets", icon: Database, section: "dashboard" },
+  { title: "Team Analytics", path: "/admin/team", icon: BarChart3, section: "dashboard" },
   { title: "Navigation", path: "/admin/menus", icon: Menu, section: "settings" },
   { title: "SEO", path: "/admin/seo", icon: Search, section: "settings" },
   { title: "Auth Config", path: "/admin/auth-config", icon: Lock, section: "settings" },
