@@ -331,15 +331,35 @@ const ProductDetail = () => {
                 </p>
               )}
 
-              {/* Attributes Table - 2 columns */}
+              {/* Attributes Table - 2 columns per row */}
               {attrEntries.length > 0 && (
-                <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-0 border border-border rounded-xl overflow-hidden">
-                  {attrEntries.map(([key, value], i) => (
-                    <div key={key} className={`flex justify-between py-2.5 px-4 text-sm ${i % 2 === 0 ? "bg-muted/30" : "bg-card"} ${i < attrEntries.length - (attrEntries.length % 2 === 0 ? 2 : 1) ? "border-b border-border" : ""}`}>
-                      <span className="font-semibold text-foreground">{key}</span>
-                      <span className="text-muted-foreground text-right">{String(value)}</span>
-                    </div>
-                  ))}
+                <div className="mt-5 border border-border rounded-xl overflow-hidden">
+                  <table className="w-full text-sm">
+                    <tbody>
+                      {Array.from({ length: Math.ceil(attrEntries.length / 2) }).map((_, rowIdx) => {
+                        const left = attrEntries[rowIdx * 2];
+                        const right = attrEntries[rowIdx * 2 + 1];
+                        const rowBg = rowIdx % 2 === 0 ? "bg-muted/30" : "bg-card";
+                        return (
+                          <tr key={rowIdx} className={`${rowBg} border-b border-border last:border-b-0`}>
+                            <td className="py-2.5 px-4 font-semibold text-foreground whitespace-nowrap w-1/4">{left[0]}</td>
+                            <td className="py-2.5 px-4 text-muted-foreground text-right w-1/4">{String(left[1])}</td>
+                            {right ? (
+                              <>
+                                <td className="py-2.5 px-4 font-semibold text-foreground whitespace-nowrap border-l border-border w-1/4">{right[0]}</td>
+                                <td className="py-2.5 px-4 text-muted-foreground text-right w-1/4">{String(right[1])}</td>
+                              </>
+                            ) : (
+                              <>
+                                <td className="border-l border-border" />
+                                <td />
+                              </>
+                            )}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               )}
 
