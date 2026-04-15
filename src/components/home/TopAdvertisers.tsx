@@ -8,7 +8,7 @@ const metrics = [
 ];
 
 const TopAdvertisers = () => (
-  <section className="py-16 bg-background">
+  <section className="pt-16 pb-8 bg-background">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <p className="text-sm font-semibold tracking-widest uppercase text-primary text-center">Top Advertisers</p>
       <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mt-2">Why the Best Media Buyers Use Verified BMs</h2>
