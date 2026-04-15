@@ -107,6 +107,43 @@ const Navbar = () => {
               {logoElement}
             </Link>
 
+            {/* Mobile/tablet: cart + user icons next to logo */}
+            <div className="flex lg:hidden items-center gap-4">
+              <button
+                onClick={(e) => { e.stopPropagation(); openCart(); }}
+                className="relative text-foreground/70 hover:text-primary transition-colors"
+                aria-label={`Shopping cart with ${totalItems} items`}
+              >
+                <ShoppingCart className="w-[18px] h-[18px]" strokeWidth={2.2} />
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 w-4 h-4 bg-primary text-primary-foreground text-[9px] font-bold rounded-full flex items-center justify-center">
+                    {totalItems > 9 ? "9+" : totalItems}
+                  </span>
+                )}
+              </button>
+              {user ? (
+                <button
+                  onClick={handleAccountClick}
+                  className="text-foreground/70 hover:text-primary transition-colors"
+                  aria-label="My Account"
+                >
+                  {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} alt={displayName} className="w-7 h-7 rounded-full object-cover border border-border" />
+                  ) : (
+                    <User className="w-[18px] h-[18px]" strokeWidth={2.2} />
+                  )}
+                </button>
+              ) : (
+                <button
+                  onClick={(e) => { e.stopPropagation(); setAuthModalOpen(true); }}
+                  className="text-foreground/70 hover:text-primary transition-colors"
+                  aria-label="Sign in or register"
+                >
+                  <User className="w-[18px] h-[18px]" strokeWidth={2.2} />
+                </button>
+              )}
+            </div>
+
             <div className="hidden lg:flex items-center justify-center flex-1 gap-8">
               {navLinks.map((link) => (
                 <Link
