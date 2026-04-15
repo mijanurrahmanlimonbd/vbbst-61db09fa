@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { Home, ChevronRight } from "lucide-react";
-import { usePageHero } from "@/hooks/usePageHero";
 
 interface PageHeaderProps {
   breadcrumb: string;
@@ -10,10 +9,6 @@ interface PageHeaderProps {
   showSearch?: boolean;
   searchValue?: string;
   onSearchChange?: (val: string) => void;
-  showCTAs?: boolean;
-  showSocials?: boolean;
-  heroImage?: string | null;
-  heroOverlay?: number | null;
 }
 
 const PageHeader = ({
@@ -24,40 +19,9 @@ const PageHeader = ({
   showSearch,
   searchValue,
   onSearchChange,
-  heroImage,
-  heroOverlay,
 }: PageHeaderProps) => {
-  const { settings: globalSettings } = usePageHero();
-
-  const image = heroImage ?? globalSettings.image;
-  const overlay = heroOverlay ?? globalSettings.overlay;
-  const hasImage = !!image;
-
   return (
-    <section
-      className="relative h-[200px] md:h-[200px] lg:h-[220px] flex items-center justify-center text-center overflow-hidden"
-      style={
-        hasImage
-          ? {
-              backgroundImage: `url(${image})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }
-          : undefined
-      }
-    >
-      {/* Overlay or solid fallback */}
-      <div
-        className="absolute inset-0"
-        style={
-          hasImage
-            ? { backgroundColor: `rgba(0,0,0,${overlay / 100})` }
-            : undefined
-        }
-      >
-        {!hasImage && <div className="absolute inset-0 bg-primary" />}
-      </div>
-
+    <section className="relative h-[200px] md:h-[200px] lg:h-[220px] flex items-center justify-center text-center overflow-hidden bg-primary">
       <div className="relative z-10 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6">
         {/* Breadcrumbs */}
         <div className="flex items-center justify-center gap-1.5 text-xs text-primary-foreground/80 mb-2">
