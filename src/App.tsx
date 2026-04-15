@@ -59,6 +59,7 @@ const AdminAssetTracker = lazy(() => import("./pages/admin/AdminAssetTracker"));
 const AdminTeamAnalytics = lazy(() => import("./pages/admin/AdminTeamAnalytics"));
 const AdminFinancialOverview = lazy(() => import("./pages/admin/AdminFinancialOverview"));
 const AdminTaskBoard = lazy(() => import("./pages/admin/AdminTaskBoard"));
+const AdminIntegrations = lazy(() => import("./pages/admin/AdminIntegrations"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
