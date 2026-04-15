@@ -3,9 +3,8 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { FileText, MessageSquare, Mail, ShoppingCart, CheckCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 
-interface FeedItem {
+export interface FeedItem {
   id: string;
   icon: typeof FileText;
   color: string;
@@ -25,8 +24,12 @@ const timeAgo = (date: Date) => {
   return `${days}d ago`;
 };
 
-const ActivityFeed = () => {
-  const [items, setItems] = useState<FeedItem[]>([]);
+interface ActivityFeedProps {
+  extraItems?: FeedItem[];
+}
+
+const ActivityFeed = ({ extraItems = [] }: ActivityFeedProps) => {
+  const [dbItems, setDbItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -85,11 +88,14 @@ const ActivityFeed = () => {
       });
 
       feed.sort((a, b) => b.time.getTime() - a.time.getTime());
-      setItems(feed.slice(0, 8));
+      setDbItems(feed.slice(0, 8));
       setLoading(false);
     };
     load();
   }, []);
+
+  // Merge extra items (from QuickDraft) on top of DB items
+  const allItems = [...extraItems, ...dbItems].sort((a, b) => b.time.getTime() - a.time.getTime()).slice(0, 10);
 
   return (
     <div className="bg-white rounded-lg border border-[#dcdcde]">
@@ -109,15 +115,13 @@ const ActivityFeed = () => {
               </div>
             ))}
           </div>
-        ) : items.length === 0 ? (
+        ) : allItems.length === 0 ? (
           <p className="text-sm text-gray-500 text-center py-6">No activity yet</p>
         ) : (
           <div className="relative">
-            {/* Timeline line */}
             <div className="absolute left-[15px] top-4 bottom-4 w-px bg-gray-200" />
-
             <div className="space-y-4">
-              {items.map((item, i) => {
+              {allItems.map((item) => {
                 const Icon = item.icon;
                 return (
                   <div key={item.id} className="flex gap-3 relative">
