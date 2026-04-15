@@ -383,6 +383,19 @@ const AdminLayout = () => {
 
             <NotificationBell />
 
+            {/* Dark Mode Toggle */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setDarkMode(!darkMode)}
+                  className="p-1.5 rounded text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300"
+                >
+                  {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>{darkMode ? "Light Mode" : "Dark Mode"}</TooltipContent>
+            </Tooltip>
+
             {/* Profile Dropdown */}
             <div className="relative">
               <button
