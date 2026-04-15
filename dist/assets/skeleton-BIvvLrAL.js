@@ -1,1 +1,0 @@
-import{j as m}from"./ui-DKfcRXjU.js";import{t as o}from"./index-DRNNsgVl.js";function n({className:t,...e}){return m.jsx("div",{className:o("animate-pulse rounded-md bg-muted",t),...e})}export{n as S};

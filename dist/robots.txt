@@ -1,5 +1,5 @@
 # =============================================
-# robots.txt — Verified BM services
+# robots.txt — Verified BM Services
 # =============================================
 
 User-agent: Googlebot
@@ -12,6 +12,18 @@ User-agent: Bingbot
 Allow: /
 Disallow: /admin/
 Disallow: /checkout
+
+User-agent: SemrushBot
+Allow: /
+
+User-agent: SiteAuditBot
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
 
 User-agent: Twitterbot
 Allow: /
