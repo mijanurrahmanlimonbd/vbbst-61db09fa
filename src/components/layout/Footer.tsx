@@ -63,6 +63,7 @@ const Footer = () => {
     { to: "/blog", label: "All Post" },
     { to: "/about", label: "About Us" },
     { to: "/contact", label: "Contact & Support" },
+    { to: "/faq", label: "FAQ" },
   ];
   const defaultTrustLinks = [
     { to: "/terms", label: "Terms of Service" },
@@ -98,9 +99,9 @@ const Footer = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
 
           {/* Col 1 — Brand */}
-          <div className="sm:col-span-2 lg:col-span-1">
+          <div className="sm:col-span-2 lg:col-span-1 flex flex-col">
             <div className="mb-5">{logoElement}</div>
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mt-auto">
               {desc}
             </p>
           </div>
