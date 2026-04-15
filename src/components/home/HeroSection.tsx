@@ -16,7 +16,7 @@ const HeroSection = () => {
     <section className="relative overflow-hidden bg-background pt-10 pb-3 md:pt-12 md:pb-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Main two-column layout */}
-        <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-center lg:gap-16">
+        <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-center lg:gap-16 w-full">
           {/* Left — Logo with rotating border */}
           <div
             className="flex shrink-0 items-center justify-center lg:w-auto animate-hero-fade-left"
