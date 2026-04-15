@@ -6,6 +6,7 @@ import type { SchemaConfig } from "@/lib/jsonLdSchemas";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -246,6 +247,9 @@ const AdminSEO = () => {
             <TabsTrigger value="social">Social Meta</TabsTrigger>
             <TabsTrigger value="search-console">Search Console</TabsTrigger>
             <TabsTrigger value="health">Health Report</TabsTrigger>
+            <TabsTrigger value="bulk-meta">Bulk Meta Editor</TabsTrigger>
+            <TabsTrigger value="robots-sitemap">Robots & Sitemap</TabsTrigger>
+            <TabsTrigger value="schema-gen">Schema Generator</TabsTrigger>
           </TabsList>
         </div>
 
@@ -544,6 +548,27 @@ const AdminSEO = () => {
         <TabsContent value="health">
           <div className="mt-4">
             <SEOHealthWidget />
+          </div>
+        </TabsContent>
+
+        {/* ────────── BULK META EDITOR TAB ────────── */}
+        <TabsContent value="bulk-meta">
+          <div className="mt-4">
+            <BulkMetaEditor />
+          </div>
+        </TabsContent>
+
+        {/* ────────── ROBOTS & SITEMAP TAB ────────── */}
+        <TabsContent value="robots-sitemap">
+          <div className="mt-4">
+            <RobotsSitemapManager />
+          </div>
+        </TabsContent>
+
+        {/* ────────── SCHEMA GENERATOR TAB ────────── */}
+        <TabsContent value="schema-gen">
+          <div className="mt-4">
+            <SchemaGeneratorWidget />
           </div>
         </TabsContent>
       </Tabs>
@@ -1025,6 +1050,417 @@ const SchemaConfigPanel = () => {
         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
         Save Schema Config
       </Button>
+    </div>
+  );
+};
+
+/** ────────── BULK META EDITOR ────────── */
+const SITE_HEALTH_DOMAINS = [
+  { domain: "verifiedbmservices.com", title: "Buy Verified BM And WhatsApp API", desc: "Professional verified BM services for advertisers.", keyword: "verified bm", canonical: "https://verifiedbmservices.com/" },
+  { domain: "shop.verifiedbm.com", title: "Shop — Verified BM Store", desc: "Browse verified business managers and ad accounts.", keyword: "buy verified bm", canonical: "https://shop.verifiedbm.com/" },
+  { domain: "blog.verifiedbm.com", title: "Blog — Verified BM Services", desc: "Tips and guides for Facebook advertising.", keyword: "facebook bm guide", canonical: "https://blog.verifiedbm.com/" },
+];
+
+const SEO_LIMITS = { title: 60, desc: 160, keyword: 30 };
+
+const BulkMetaEditor = () => {
+  const [rows, setRows] = useState(SITE_HEALTH_DOMAINS.map((d, i) => ({ id: `meta-${i}`, ...d })));
+  const [animated, setAnimated] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setAnimated(true), 100);
+    return () => clearTimeout(t);
+  }, []);
+
+  const updateRow = (id: string, field: string, value: string) => {
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, [field]: value } : r)));
+  };
+
+  const charClass = (len: number, max: number) =>
+    len > max ? "text-red-500 font-semibold" : len > max * 0.9 ? "text-amber-500" : "text-gray-400 dark:text-gray-500";
+
+  return (
+    <div
+      className={cn(
+        "bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-500",
+        animated ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+      )}
+    >
+      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Bulk Meta Tag Editor</h3>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Edit title tags, meta descriptions, and focus keywords across all tracked domains.</p>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[900px]">
+          <thead>
+            <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60">
+              {["Domain", "Title Tag", "Meta Description", "Focus Keyword", "Canonical URL"].map((h) => (
+                <th key={h} className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide px-4 py-3">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">{row.domain}</td>
+                <td className="px-4 py-2">
+                  <Input value={row.title} onChange={(e) => updateRow(row.id, "title", e.target.value)} className="h-8 text-xs" />
+                  <span className={cn("text-[10px] mt-0.5 block", charClass(row.title.length, SEO_LIMITS.title))}>
+                    {row.title.length}/{SEO_LIMITS.title}
+                  </span>
+                </td>
+                <td className="px-4 py-2">
+                  <Textarea value={row.desc} onChange={(e) => updateRow(row.id, "desc", e.target.value)} className="text-xs min-h-[40px] resize-none" />
+                  <span className={cn("text-[10px] mt-0.5 block", charClass(row.desc.length, SEO_LIMITS.desc))}>
+                    {row.desc.length}/{SEO_LIMITS.desc}
+                  </span>
+                </td>
+                <td className="px-4 py-2">
+                  <Input value={row.keyword} onChange={(e) => updateRow(row.id, "keyword", e.target.value)} className="h-8 text-xs" />
+                  <span className={cn("text-[10px] mt-0.5 block", charClass(row.keyword.length, SEO_LIMITS.keyword))}>
+                    {row.keyword.length}/{SEO_LIMITS.keyword}
+                  </span>
+                </td>
+                <td className="px-4 py-2">
+                  <Input value={row.canonical} onChange={(e) => updateRow(row.id, "canonical", e.target.value)} className="h-8 text-xs font-mono" />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="px-6 py-3 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+        <Button size="sm" className="gap-2 bg-[#2271b1] hover:bg-[#135e96]" onClick={() => toast.success("Bulk meta tags saved!")}>
+          <Save className="w-4 h-4" /> Save All Changes
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+/** ────────── ROBOTS & SITEMAP MANAGER ────────── */
+const DEFAULT_ROBOTS_TEMPLATE = `User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /checkout/
+
+User-agent: Googlebot
+Allow: /
+
+Sitemap: https://verifiedbmservices.com/sitemap.xml`;
+
+const SITEMAP_PREVIEW = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://verifiedbmservices.com/</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://verifiedbmservices.com/shop</loc>
+    <lastmod>2026-04-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://verifiedbmservices.com/blog</loc>
+    <lastmod>2026-04-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>`;
+
+const RobotsSitemapManager = () => {
+  const [subTab, setSubTab] = useState<"robots" | "sitemap">("robots");
+  const [robotsContent, setRobotsContent] = useState(DEFAULT_ROBOTS_TEMPLATE);
+  const [animated, setAnimated] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setAnimated(true), 100);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <div
+      className={cn(
+        "bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-500",
+        animated ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+      )}
+    >
+      {/* Sub-tabs */}
+      <div className="flex border-b border-gray-200 dark:border-gray-700">
+        {(["robots", "sitemap"] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setSubTab(tab)}
+            className={cn(
+              "flex-1 px-4 py-3 text-sm font-medium transition-colors",
+              subTab === tab
+                ? "text-[#2271b1] border-b-2 border-[#2271b1] bg-blue-50/50 dark:bg-blue-900/10"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+            )}
+          >
+            {tab === "robots" ? "Robots.txt Editor" : "Sitemap.xml Preview"}
+          </button>
+        ))}
+      </div>
+
+      <div className="p-6">
+        {subTab === "robots" ? (
+          <div className="space-y-4 animate-fade-in">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <Bot className="w-4 h-4 text-[hsl(262,83%,58%)]" /> Robots.txt Configuration
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Control search engine crawler access to specific paths.</p>
+            </div>
+            <div className="relative">
+              <Textarea
+                value={robotsContent}
+                onChange={(e) => setRobotsContent(e.target.value)}
+                className="font-mono text-sm leading-relaxed min-h-[350px] bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 resize-none"
+                spellCheck={false}
+              />
+              <div className="absolute top-2 right-2 flex gap-1">
+                <span className="text-[10px] bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded font-mono">robots.txt</span>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button size="sm" className="gap-2 bg-[#2271b1] hover:bg-[#135e96]" onClick={() => toast.success("Robots.txt saved!")}>
+                <Save className="w-4 h-4" /> Save Changes
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setRobotsContent(DEFAULT_ROBOTS_TEMPLATE)}>
+                <RefreshCw className="w-4 h-4 mr-1" /> Reset Default
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4 animate-fade-in">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <Globe className="w-4 h-4 text-[hsl(217,91%,60%)]" /> Sitemap.xml Preview
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Auto-generated sitemap including all published pages, products, and blog posts.</p>
+            </div>
+            <div className="relative">
+              <pre className="bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg p-4 text-xs font-mono text-gray-700 dark:text-gray-300 overflow-x-auto max-h-[400px]">
+                {SITEMAP_PREVIEW}
+              </pre>
+              <div className="absolute top-2 right-2">
+                <span className="text-[10px] bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded font-mono">sitemap.xml</span>
+              </div>
+            </div>
+            <a
+              href="https://verifiedbmservices.com/sitemap.xml"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-[#2271b1] hover:underline"
+            >
+              <ExternalLink className="w-4 h-4" /> View Live Sitemap
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/** ────────── SCHEMA GENERATOR WIDGET ────────── */
+const SCHEMA_GEN_TYPES = [
+  { value: "Product", label: "Product (e-Commerce)" },
+  { value: "LocalBusiness", label: "Local Business" },
+  { value: "Article", label: "Article / Blog Post" },
+];
+
+const SCHEMA_FIELDS: Record<string, { key: string; label: string; placeholder: string }[]> = {
+  Product: [
+    { key: "name", label: "Product Name", placeholder: "Verified Business Manager" },
+    { key: "description", label: "Description", placeholder: "High-quality verified BM for advertising..." },
+    { key: "price", label: "Price", placeholder: "299.00" },
+    { key: "currency", label: "Currency", placeholder: "USD" },
+    { key: "image", label: "Image URL", placeholder: "https://verifiedbmservices.com/product.jpg" },
+    { key: "sku", label: "SKU", placeholder: "VBM-001" },
+    { key: "availability", label: "Availability", placeholder: "InStock" },
+  ],
+  LocalBusiness: [
+    { key: "name", label: "Business Name", placeholder: "Verified BM Services" },
+    { key: "description", label: "Description", placeholder: "Professional digital advertising solutions..." },
+    { key: "address", label: "Street Address", placeholder: "123 Digital Ave" },
+    { key: "city", label: "City", placeholder: "New York" },
+    { key: "phone", label: "Phone", placeholder: "+1-555-0100" },
+    { key: "image", label: "Logo URL", placeholder: "https://verifiedbmservices.com/logo.png" },
+  ],
+  Article: [
+    { key: "headline", label: "Headline", placeholder: "How to Buy Verified Business Managers" },
+    { key: "description", label: "Description", placeholder: "A comprehensive guide to purchasing..." },
+    { key: "author", label: "Author Name", placeholder: "Akhi Vai" },
+    { key: "datePublished", label: "Date Published", placeholder: "2026-04-15" },
+    { key: "image", label: "Featured Image URL", placeholder: "https://verifiedbmservices.com/blog/featured.jpg" },
+    { key: "publisher", label: "Publisher Name", placeholder: "Verified BM Services" },
+  ],
+};
+
+const generateJsonLd = (type: string, fields: Record<string, string>) => {
+  if (type === "Product") {
+    return {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: fields.name || "",
+      description: fields.description || "",
+      image: fields.image || "",
+      sku: fields.sku || "",
+      offers: {
+        "@type": "Offer",
+        price: fields.price || "",
+        priceCurrency: fields.currency || "USD",
+        availability: `https://schema.org/${fields.availability || "InStock"}`,
+      },
+    };
+  }
+  if (type === "LocalBusiness") {
+    return {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      name: fields.name || "",
+      description: fields.description || "",
+      image: fields.image || "",
+      telephone: fields.phone || "",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: fields.address || "",
+        addressLocality: fields.city || "",
+      },
+    };
+  }
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: fields.headline || "",
+    description: fields.description || "",
+    image: fields.image || "",
+    author: { "@type": "Person", name: fields.author || "" },
+    datePublished: fields.datePublished || "",
+    publisher: { "@type": "Organization", name: fields.publisher || "" },
+  };
+};
+
+const SchemaGeneratorWidget = () => {
+  const [schemaType, setSchemaType] = useState("Product");
+  const [fields, setFields] = useState<Record<string, string>>({});
+  const [copied, setCopied] = useState(false);
+  const [animated, setAnimated] = useState(false);
+  const [generated, setGenerated] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setAnimated(true), 100);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    setFields({});
+    setGenerated(false);
+  }, [schemaType]);
+
+  const jsonLd = generateJsonLd(schemaType, fields);
+  const scriptBlock = `<script type="application/ld+json">\n${JSON.stringify(jsonLd, null, 2)}\n</script>`;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(scriptBlock);
+    setCopied(true);
+    toast.success("Schema copied to clipboard!");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const currentFields = SCHEMA_FIELDS[schemaType] || [];
+  const filledCount = currentFields.filter((f) => fields[f.key]?.trim()).length;
+
+  return (
+    <div
+      className={cn(
+        "bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-500",
+        animated ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+      )}
+    >
+      <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+          <Code2 className="w-5 h-5 text-[hsl(262,83%,58%)]" /> JSON-LD Schema Generator
+        </h3>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Select a schema type, fill in the fields, and copy the generated structured data.</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 dark:divide-gray-700">
+        {/* Left: Form */}
+        <div className="p-6 space-y-4">
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Schema Type</Label>
+            <Select value={schemaType} onValueChange={setSchemaType}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SCHEMA_GEN_TYPES.map((t) => (
+                  <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-3">
+            {currentFields.map((field, i) => (
+              <div
+                key={field.key}
+                className="space-y-1 animate-fade-in"
+                style={{ animationDelay: `${i * 50}ms` }}
+              >
+                <Label className="text-xs font-medium text-gray-600 dark:text-gray-400">{field.label}</Label>
+                <Input
+                  value={fields[field.key] || ""}
+                  onChange={(e) => {
+                    setFields((prev) => ({ ...prev, [field.key]: e.target.value }));
+                    setGenerated(true);
+                  }}
+                  placeholder={field.placeholder}
+                  className="h-9 text-sm"
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+            <CheckCircle className={cn("w-3.5 h-3.5", filledCount === currentFields.length ? "text-green-500" : "text-gray-300")} />
+            {filledCount}/{currentFields.length} fields completed
+          </div>
+        </div>
+
+        {/* Right: Preview */}
+        <div className="p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Generated Output</p>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleCopy}
+              className="gap-1.5 text-xs"
+            >
+              {copied ? <CheckCircle className="w-3.5 h-3.5 text-green-500" /> : <Link2 className="w-3.5 h-3.5" />}
+              {copied ? "Copied!" : "Copy to Clipboard"}
+            </Button>
+          </div>
+          <div className={cn(
+            "relative transition-all duration-500",
+            generated ? "opacity-100 translate-y-0" : "opacity-70"
+          )}>
+            <pre className="bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg p-4 text-xs font-mono text-gray-700 dark:text-gray-300 overflow-x-auto max-h-[400px] whitespace-pre-wrap">
+              {scriptBlock}
+            </pre>
+            <div className="absolute top-2 right-2">
+              <span className="text-[10px] bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded font-mono">JSON-LD</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
