@@ -125,24 +125,26 @@ const ProductCard = forwardRef<HTMLDivElement, { product: Product }>(({ product 
 
         {/* Action Buttons */}
         <div className="flex flex-col gap-2 pt-4">
-          <a
-            href="https://wa.me/8801302669333"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-[hsl(142,70%,45%)] text-white text-sm font-semibold hover:bg-[hsl(142,70%,40%)] transition-colors"
-          >
-            <MessageCircle className="w-4 h-4" /> Buy on WhatsApp
-          </a>
-          <a
-            href="https://t.me/Verifiedbmbuy"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-[hsl(200,100%,40%)] text-white text-sm font-semibold hover:bg-[hsl(200,100%,35%)] transition-colors"
-          >
-            <Send className="w-4 h-4" /> Buy on Telegram
-          </a>
+          <div className="flex gap-2">
+            <a
+              href="https://wa.me/8801302669333"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center justify-center gap-1.5 flex-1 py-2.5 rounded-lg bg-[hsl(142,70%,45%)] text-white text-sm font-semibold hover:bg-[hsl(142,70%,40%)] transition-colors"
+            >
+              <MessageCircle className="w-4 h-4" /> WA
+            </a>
+            <a
+              href="https://t.me/Verifiedbmbuy"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center justify-center gap-1.5 flex-1 py-2.5 rounded-lg bg-[hsl(200,100%,40%)] text-white text-sm font-semibold hover:bg-[hsl(200,100%,35%)] transition-colors"
+            >
+              <Send className="w-4 h-4" /> TG
+            </a>
+          </div>
           <button
             onClick={(e) => {
               e.stopPropagation();
