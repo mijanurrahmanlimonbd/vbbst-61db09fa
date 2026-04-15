@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
-import { DollarSign, TrendingUp, Activity, BarChart3 } from "lucide-react";
+import { DollarSign, TrendingUp, Activity, BarChart3, FileDown, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 interface Asset {
@@ -22,6 +23,8 @@ const AdminFinancialOverview = () => {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [animated, setAnimated] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchAssets = async () => {
