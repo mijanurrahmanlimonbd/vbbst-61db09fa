@@ -1,4 +1,11 @@
-import { MapPin, Globe, MessageCircle, Send, Mail } from "lucide-react";
+import { MapPin, Globe, MessageCircle, Send, Mail, Clock } from "lucide-react";
+
+const contacts = [
+  { icon: <Globe className="w-5 h-5 text-primary" />, label: "Online Store", desc: "vbbstore.verifiedbmbuy.com – Shop 24/7 from anywhere", href: "https://vbbstore.verifiedbmbuy.com/", bg: "bg-primary/10" },
+  { icon: <MessageCircle className="w-5 h-5 text-[hsl(142,70%,45%)]" />, label: "WhatsApp", desc: "+880 1302 669333 – Chat with us anytime", href: "https://wa.me/8801302669333", bg: "bg-[hsl(142,70%,45%)]/10" },
+  { icon: <Send className="w-5 h-5 text-[hsl(200,100%,40%)]" />, label: "Telegram", desc: "@Verifiedbmbuy – Message us on Telegram", href: "https://t.me/Verifiedbmbuy", bg: "bg-[hsl(200,100%,40%)]/10" },
+  { icon: <Mail className="w-5 h-5 text-primary" />, label: "Email", desc: "info@verifiedbmservices.com", href: "mailto:info@verifiedbmservices.com", bg: "bg-primary/10" },
+];
 
 const ContactMapSection = () => (
   <section className="py-16 bg-background">
@@ -10,46 +17,52 @@ const ContactMapSection = () => (
       </p>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10">
-        <div>
-          <h3 className="font-bold text-foreground flex items-center gap-2 mb-4">
-            <MapPin className="w-5 h-5 text-primary" /> Store Address
-          </h3>
-          <p className="text-muted-foreground mb-6">Verified BM services, Madergonj, Pirgonj, Rangpur, Bangladesh - 5470</p>
-
-          <div className="space-y-4">
-            {[
-              { icon: <Globe className="w-5 h-5 text-primary" />, label: "Online Store", desc: "vbbstore.verifiedbmbuy.com – Shop 24/7 from anywhere in the world", href: "https://vbbstore.verifiedbmbuy.com/" },
-              { icon: <MessageCircle className="w-5 h-5 text-primary" />, label: "WhatsApp", desc: "+880 1302 669333 – Chat with us anytime", href: "https://wa.me/8801302669333" },
-              { icon: <Send className="w-5 h-5 text-primary" />, label: "Telegram", desc: "@Verifiedbmbuy – Message us on Telegram", href: "https://t.me/Verifiedbmbuy" },
-              { icon: <Mail className="w-5 h-5 text-primary" />, label: "Email", desc: "info@verifiedbmservices.com", href: "mailto:info@verifiedbmservices.com" },
-            ].map((c, i) => (
-              <a key={i} href={c.href} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 p-4 bg-card border border-border rounded-lg hover:shadow-md transition-shadow">
-                {c.icon}
-                <div>
-                  <p className="font-semibold text-foreground">{c.label}</p>
-                  <p className="text-sm text-muted-foreground">{c.desc}</p>
-                </div>
-              </a>
-            ))}
+        {/* Left — Address & Availability */}
+        <div className="bg-card border border-border rounded-2xl p-8 flex flex-col">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <MapPin className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-bold text-foreground text-lg">Store Address</h3>
+              <p className="text-muted-foreground text-sm mt-1">Verified BM services, 20 Madargonj, Pirgonj, Rangpur, Bangladesh&nbsp;-&nbsp;5470</p>
+            </div>
           </div>
 
-          <div className="mt-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
-            <p className="font-semibold text-foreground">Available 24/7</p>
-            <p className="text-sm text-muted-foreground">We're online round the clock — reach out anytime, any day</p>
+          <div className="flex items-start gap-4 mb-6">
+            <div className="w-12 h-12 rounded-xl bg-[hsl(142,70%,45%)]/10 flex items-center justify-center shrink-0">
+              <Clock className="w-6 h-6 text-[hsl(142,70%,45%)]" />
+            </div>
+            <div>
+              <h3 className="font-bold text-foreground text-lg">Available 24/7</h3>
+              <p className="text-muted-foreground text-sm mt-1">We're online round the clock — reach out anytime, any day of the week.</p>
+            </div>
+          </div>
+
+          <div className="mt-auto pt-4 border-t border-border">
+            <p className="text-xs text-muted-foreground">Serving 10,000+ advertisers across 50+ countries worldwide.</p>
           </div>
         </div>
 
-        <div className="rounded-xl overflow-hidden border border-border h-[400px]">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14382.073642373!2d89.3!3d25.8!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjXCsDQ4JzAwLjAiTiA4OcKwMTgnMDAuMCJF!5e0!3m2!1sen!2sbd!4v1600000000000!5m2!1sen!2sbd"
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            title="Verified BM services Location"
-          />
+        {/* Right — Contact Channels */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {contacts.map((c, i) => (
+            <a
+              key={i}
+              href={c.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex flex-col items-start gap-3 p-5 bg-card border border-border rounded-2xl hover:shadow-lg hover:border-primary/30 transition-all"
+            >
+              <div className={`w-10 h-10 rounded-xl ${c.bg} flex items-center justify-center`}>
+                {c.icon}
+              </div>
+              <div>
+                <p className="font-semibold text-foreground group-hover:text-primary transition-colors">{c.label}</p>
+                <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{c.desc}</p>
+              </div>
+            </a>
+          ))}
         </div>
       </div>
     </div>
