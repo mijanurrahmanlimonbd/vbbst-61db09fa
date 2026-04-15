@@ -286,7 +286,7 @@ const AdminLayout = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#f0f2f5]">
+    <div className="min-h-screen bg-[#f0f2f5] dark:bg-[#1a1d21] transition-colors duration-300">
       {branding.favicon && (
         <Helmet>
           <link rel="icon" href={branding.favicon} type="image/png" />
@@ -317,7 +317,7 @@ const AdminLayout = () => {
       {/* Main Content */}
       <div className={cn("transition-all duration-200", sidebarOpen ? "md:ml-56" : "md:ml-[60px]")}>
         {/* Top Header Bar */}
-        <header className="sticky top-0 z-30 h-14 bg-white border-b border-[#dcdcde] flex items-center justify-between px-4 sm:px-6 shadow-sm">
+        <header className="sticky top-0 z-30 h-14 bg-white dark:bg-[#23272b] border-b border-[#dcdcde] dark:border-[#3a3f44] flex items-center justify-between px-4 sm:px-6 shadow-sm transition-colors duration-300">
           <div className="flex items-center gap-3">
             {/* Mobile hamburger */}
             <button
