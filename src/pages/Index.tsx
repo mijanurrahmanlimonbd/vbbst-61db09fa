@@ -13,7 +13,7 @@ const WhyVBBStore = lazy(() => import("@/components/home/WhyVBBStore"));
 const ScaleUpCTA = lazy(() => import("@/components/home/ScaleUpCTA"));
 const TopAdvertisers = lazy(() => import("@/components/home/TopAdvertisers"));
 const KeyAdvantages = lazy(() => import("@/components/home/KeyAdvantages"));
-const PortfolioSection = lazy(() => import("@/components/home/PortfolioSection"));
+
 const TestimonialsSection = lazy(() => import("@/components/home/TestimonialsSection"));
 const FAQSection = lazy(() => import("@/components/home/FAQSection"));
 const AboutSection = lazy(() => import("@/components/home/AboutSection"));
@@ -51,7 +51,7 @@ const Index = () => {
         <ScaleUpCTA />
         <TopAdvertisers />
         <KeyAdvantages />
-        <PortfolioSection />
+        
         <TestimonialsSection />
         <FAQSection />
         <AboutSection />
