@@ -39,7 +39,7 @@ const Footer = () => {
     });
   }, []);
 
-  const desc = footerSettings.footer_description || "Trusted provider of verified Meta Business Managers and WhatsApp Business API accounts since 2020. Serving 10,000+ advertisers globally.";
+  const desc = footerSettings.footer_description || "Okey! Trusted provider of verified Meta Business Managers and WhatsApp Business API accounts since 2020. Serving 10,000+ advertisers globally. We offer premium, fully verified BMs with high spending limits, dedicated support, and a hassle-free replacement guarantee — helping agencies and media buyers scale their ad campaigns with confidence.";
   const address = footerSettings.contact_address || "20 Madargonj, Pirgonj, Rangpur, Bangladesh\u00a0-\u00a05470";
   const phone = footerSettings.contact_phone || "+8801302669333";
   const telegram = footerSettings.contact_telegram || "Verifiedbmbuy";
