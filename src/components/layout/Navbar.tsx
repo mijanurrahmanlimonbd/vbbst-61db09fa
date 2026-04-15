@@ -82,7 +82,7 @@ const Navbar = () => {
 
   // Always use the static import to avoid a flash; only override if branding
   // has finished loading AND returned a custom (non-empty) logo URL.
-  const logoSrc = (!loading && branding.header_logo) ? branding.header_logo : headerLogo;
+  const logoSrc = headerLogo;
 
   const logoElement = (
     <img
