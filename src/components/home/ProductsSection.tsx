@@ -14,7 +14,6 @@ const ProductsSection = () => {
   const [displayCount, setDisplayCount] = useState(6);
   const fetchedRef = useRef(false);
 
-  // Fetch display count setting
   useEffect(() => {
     const fetchCount = async () => {
       const { data } = await supabase
@@ -66,19 +65,20 @@ const ProductsSection = () => {
   const displayed = filtered.slice(0, displayCount);
 
   return (
-    <section className="pt-16 pb-8 bg-secondary/30">
+    <section className="pt-16 pb-8 bg-secondary/30" aria-label="Browse verified BM products and premium ad accounts">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <p className="text-sm font-semibold tracking-widest uppercase text-primary text-center">Our Products</p>
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mt-2">Buy Verified BM & Premium Accounts</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mt-2">Buy Verified BM &amp; Premium Ad Accounts</h2>
         <p className="text-muted-foreground text-center mt-4 max-w-2xl mx-auto">
-          Hand-picked verified accounts, ready to use. Every one comes with real documentation and same-day delivery.
+          Hand-picked <strong>verified Meta advertising assets</strong>, ready to use. Every account comes with real documentation, same-day delivery, and a 7-day replacement guarantee.
         </p>
 
-        <div className="flex flex-wrap justify-center gap-2 mt-8">
+        <nav className="flex flex-wrap justify-center gap-2 mt-8" aria-label="Filter products by category">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
+              aria-pressed={activeCategory === cat}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                 activeCategory === cat
                   ? "bg-primary text-primary-foreground"
@@ -88,14 +88,14 @@ const ProductsSection = () => {
               {cat}
             </button>
           ))}
-        </div>
+        </nav>
 
         {loading ? (
-          <div className="text-center py-12 text-muted-foreground">Loading products...</div>
+          <div className="text-center py-12 text-muted-foreground" role="status">Loading products...</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10" role="list" aria-label="Product listings">
             {displayed.map((product, idx) => (
-              <div key={product.id} className="flex">
+              <div key={product.id} className="flex" role="listitem">
                 {idx >= 3 ? (
                   <div className="w-full" style={{ contentVisibility: "auto" }}>
                     <ProductCard product={product} />
