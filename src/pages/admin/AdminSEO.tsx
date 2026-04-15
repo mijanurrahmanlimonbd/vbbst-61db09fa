@@ -246,6 +246,9 @@ const AdminSEO = () => {
             <TabsTrigger value="social">Social Meta</TabsTrigger>
             <TabsTrigger value="search-console">Search Console</TabsTrigger>
             <TabsTrigger value="health">Health Report</TabsTrigger>
+            <TabsTrigger value="bulk-meta">Bulk Meta Editor</TabsTrigger>
+            <TabsTrigger value="robots-sitemap">Robots & Sitemap</TabsTrigger>
+            <TabsTrigger value="schema-gen">Schema Generator</TabsTrigger>
           </TabsList>
         </div>
 
