@@ -33,7 +33,7 @@ import { toast } from "sonner";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
-const BRANDED_DOMAIN = "https://verifiedbmservices.com";
+const BRANDED_DOMAIN = "https://verifiedbm.shop";
 
 /** Force lowercase, replace spaces/underscores with hyphens, strip non-web-safe chars */
 const toWebSafeSlug = (val: string): string =>

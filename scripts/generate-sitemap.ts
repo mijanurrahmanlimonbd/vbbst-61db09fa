@@ -10,7 +10,7 @@ const EDGE_FUNCTION_URL =
 const SUPABASE_URL = "https://xukkejkvcgixogvbllmf.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1a2tlamt2Y2dpeG9ndmJsbG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExMjE5OTUsImV4cCI6MjA4NjY5Nzk5NX0.OAYDM8SFgKAXSN1WMlHkJIwMSA4xwgvH3m05TwUJky0";
-const BASE_URL = "https://verifiedbmservices.com";
+const BASE_URL = "https://verifiedbm.shop";
 
 interface BlogPost {
   slug: string;

@@ -45,7 +45,7 @@ const fetchStoreSettings = async (): Promise<StoreSettings> => {
 
   return {
     site_title: map.site_title || "Verified BM Shop",
-    contact_email: map.contact_email || "info@verifiedbmservices.com",
+    contact_email: map.contact_email || "info@verifiedbm.shop",
     whatsapp: map.whatsapp || "",
     address: map.store_address || "Madergonj, Pirgonj, Rangpur, Bangladesh - 5470",
     tax_id: map.tax_id || "",
@@ -267,7 +267,7 @@ export const generateInvoicePDF = async (
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...primaryColor);
-  doc.textWithLink("https://verifiedbmservices.com", pageWidth / 2 - doc.getTextWidth("https://verifiedbmservices.com") / 2, footerY + 14, { url: "https://verifiedbmservices.com" });
+  doc.textWithLink("https://verifiedbm.shop", pageWidth / 2 - doc.getTextWidth("https://verifiedbm.shop") / 2, footerY + 14, { url: "https://verifiedbm.shop" });
   doc.text(`${settings.site_title} · ${settings.address}`, pageWidth / 2, footerY + 19, { align: "center" });
 
   // ──── Save ────

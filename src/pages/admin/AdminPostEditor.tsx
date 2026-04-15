@@ -607,7 +607,7 @@ const AdminPostEditor = () => {
           if (data.featuredImageUrl) {
             setFeaturedImage(data.featuredImageUrl);
           } else if (data.featuredImageSlug) {
-            setFeaturedImage(`https://verifiedbmservices.com/media/${data.featuredImageSlug}`);
+            setFeaturedImage(`https://verifiedbm.shop/media/${data.featuredImageSlug}`);
           }
           markUnsaved();
         }}

@@ -156,7 +156,7 @@ serve(async (req) => {
       (p: any) => `- ${p.title} ($${p.sale_price || p.price}) — ${p.short_description || p.category} — URL: /shop/${p.slug}`
     ).join("\n");
 
-    const systemPrompt = `You are an expert blog writer and SEO specialist for "Verified BM Shop" (verifiedbmservices.com). You write professional, human-like blog posts that rank on Google.
+    const systemPrompt = `You are an expert blog writer and SEO specialist for "Verified BM Shop" (verifiedbm.shop). You write professional, human-like blog posts that rank on Google.
 
 ## STRICT WRITING RULES (Human-Centric)
 - Use a natural, conversational tone. Write like a knowledgeable friend explaining things.
@@ -186,7 +186,7 @@ The blog post MUST follow this exact structure:
    a. Questions MUST mirror real "People Also Ask" queries on Google for this topic. Think about what a buyer/advertiser would actually search.
    b. Each answer MUST be exactly 40-60 words — this is the Featured Snippet sweet spot.
    c. The FIRST sentence of every answer MUST directly answer the question with zero fluff or preamble. No "Great question!" or "Well,".
-   d. In at least ONE answer, naturally include an internal link: <a href="https://verifiedbmservices.com/shop">verified Business Manager</a> or link to a specific product.
+   d. In at least ONE answer, naturally include an internal link: <a href="https://verifiedbm.shop/shop">verified Business Manager</a> or link to a specific product.
    e. Use <h3> for questions and <p> for answers.
 6. **Related Products** — Widget linking to relevant Verified BM products
 
@@ -228,7 +228,7 @@ Remember:
 - Include the Key Takeaway box, Table of Contents, FAQ section, and Related Products widget
 - Content should be 800-1200 words
 - Featured image slug format: ${focusKeyword.toLowerCase().replace(/\s+/g, "-")}-guide.webp
-- Related Products widget should link to: https://verifiedbmservices.com/shop/[product-slug]
+- Related Products widget should link to: https://verifiedbm.shop/shop/[product-slug]
 
 For the Related Products section, use this HTML format:
 <div class="related-products">
@@ -241,7 +241,7 @@ For the Related Products section, use this HTML format:
 For the FAQ section, format each Q&A as:
 <div class="faq-item">
 <h3>Question here? (mirror a real Google "People Also Ask" query)</h3>
-<p>Answer here — MUST be 40-60 words. First sentence directly answers the question. In at least one FAQ, include an internal link like <a href="https://verifiedbmservices.com/shop">verified Business Manager</a>.</p>
+<p>Answer here — MUST be 40-60 words. First sentence directly answers the question. In at least one FAQ, include an internal link like <a href="https://verifiedbm.shop/shop">verified Business Manager</a>.</p>
 </div>
 
 IMPORTANT: Also include a separate "faqs" array in the JSON output with the same questions and answers as plain text (no HTML in the faqs array answers, except <a> links). This is used for Schema markup.

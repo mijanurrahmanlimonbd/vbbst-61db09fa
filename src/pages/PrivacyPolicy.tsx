@@ -124,7 +124,7 @@ const sections: PolicySection[] = [
         <ul>
           <li>WhatsApp: +880 1302 669333</li>
           <li>Telegram: @Verifiedbmbuy</li>
-          <li>Email: info@verifiedbmservices.com</li>
+          <li>Email: info@verifiedbm.shop</li>
           <li>Address: Verified BM Shop, Madergonj, Pirgonj, Rangpur, Bangladesh - 5470</li>
         </ul>
       </>

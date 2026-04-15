@@ -201,7 +201,7 @@ export function runAdvancedSEOAudit(data: AdvancedSEOData): { score: number; che
   }
 
   // 14. Slug length
-  const fullSlug = `https://verifiedbmservices.com${prefix}${data.slug}`;
+  const fullSlug = `https://verifiedbm.shop${prefix}${data.slug}`;
   if (fullSlug.length > 75) {
     checks.push({ id: "slug-len", label: "URL length", status: "warning", detail: `${fullSlug.length} chars — over 75. Shorten the slug.`, fixAction: "fix_slug" });
   } else {
@@ -465,7 +465,7 @@ const AdvancedSEOSidebar = ({
           {(metaTitle || data.postTitle || "Untitled").slice(0, 60)} | Verified BM Shop
         </p>
         <p className="text-[hsl(142,70%,45%)] text-[11px] truncate">
-          verifiedbmservices.com{data.urlPrefix || "/product/"}{data.slug || "…"}
+          verifiedbm.shop{data.urlPrefix || "/product/"}{data.slug || "…"}
         </p>
         <p className="text-[11px] text-muted-foreground line-clamp-2">
           {(metaDescription || "Add a meta description to improve visibility.").slice(0, 160)}

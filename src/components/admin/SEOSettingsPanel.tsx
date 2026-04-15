@@ -42,7 +42,7 @@ const SEOSettingsPanel = ({
 
   const displayTitle = (metaTitle || postTitle || "Untitled Post") + " | Verified BM Shop";
   const displayDesc = metaDescription || "No description provided. Add a meta description to improve search visibility.";
-  const displayUrl = `verifiedbmservices.com/blog/${slug || "post-slug"}`;
+  const displayUrl = `verifiedbm.shop/blog/${slug || "post-slug"}`;
   const displayImage = featuredImage || "/og-default.png";
 
   return (
@@ -98,7 +98,7 @@ const SEOSettingsPanel = ({
             </div>
           )}
           <div className="p-3 space-y-0.5">
-            <p className="text-[10px] text-muted-foreground uppercase">verifiedbmservices.com</p>
+            <p className="text-[10px] text-muted-foreground uppercase">verifiedbm.shop</p>
             <p className="text-sm font-semibold text-foreground leading-tight truncate">{displayTitle.slice(0, 60)}</p>
             <p className="text-xs text-muted-foreground line-clamp-2">{displayDesc.slice(0, 160)}</p>
           </div>
@@ -117,7 +117,7 @@ const SEOSettingsPanel = ({
           <div className="p-3 space-y-0.5">
             <p className="text-sm font-semibold text-foreground leading-tight truncate">{displayTitle.slice(0, 60)}</p>
             <p className="text-xs text-muted-foreground line-clamp-2">{displayDesc.slice(0, 160)}</p>
-            <p className="text-[10px] text-muted-foreground flex items-center gap-1"><Link2 className="w-3 h-3" /> verifiedbmservices.com</p>
+            <p className="text-[10px] text-muted-foreground flex items-center gap-1"><Link2 className="w-3 h-3" /> verifiedbm.shop</p>
           </div>
         </div>
       )}

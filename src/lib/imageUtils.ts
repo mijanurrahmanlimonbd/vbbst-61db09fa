@@ -1,16 +1,16 @@
 const SUPABASE_STORAGE_BASE = "https://xukkejkvcgixogvbllmf.supabase.co/storage/v1/object/public/media/";
-const BRANDED_DOMAIN = "https://verifiedbmservices.com";
+const BRANDED_DOMAIN = "https://verifiedbm.shop";
 const BRANDED_MEDIA_PATH = `${BRANDED_DOMAIN}/media/`;
 
 /**
  * Convert a Supabase storage URL to a branded domain URL.
  * e.g. https://xukkej...supabase.co/storage/v1/object/public/media/image.webp
- *   → https://verifiedbmservices.com/media/image.webp
+ *   → https://verifiedbm.shop/media/image.webp
  */
 export const toBrandedUrl = (url: string): string => {
   if (!url) return url;
   // Only apply branded URLs on the production domain
-  const isProduction = typeof window !== "undefined" && window.location.hostname === "verifiedbmservices.com";
+  const isProduction = typeof window !== "undefined" && window.location.hostname === "verifiedbm.shop";
   if (!isProduction) return url;
   if (url.startsWith(SUPABASE_STORAGE_BASE)) {
     const path = url.substring(SUPABASE_STORAGE_BASE.length).split("?")[0];

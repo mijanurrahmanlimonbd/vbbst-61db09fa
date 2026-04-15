@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
     .select("value")
     .eq("key", "site_url")
     .single();
-  const siteUrl = (siteUrlRow?.value || Deno.env.get("SITE_URL") || "https://verifiedbmservices.com").replace(/\/$/, "");
+  const siteUrl = (siteUrlRow?.value || Deno.env.get("SITE_URL") || "https://verifiedbm.shop").replace(/\/$/, "");
   const today = new Date().toISOString().split("T")[0];
 
   // Load sitemap settings

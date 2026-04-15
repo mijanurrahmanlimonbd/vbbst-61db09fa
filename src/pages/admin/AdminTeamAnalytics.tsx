@@ -58,7 +58,7 @@ interface SiteRow {
 }
 
 const initialSites: SiteRow[] = [
-  { id: "1", domain: "verifiedbmservices.com", lighthouse: 94, seoStatus: "complete", renderBlocking: 0 },
+  { id: "1", domain: "verifiedbm.shop", lighthouse: 94, seoStatus: "complete", renderBlocking: 0 },
   { id: "2", domain: "shop.verifiedbm.com", lighthouse: 87, seoStatus: "complete", renderBlocking: 2 },
   { id: "3", domain: "blog.verifiedbm.com", lighthouse: 72, seoStatus: "partial", renderBlocking: 5 },
   { id: "4", domain: "api.verifiedbm.com", lighthouse: 96, seoStatus: "complete", renderBlocking: 0 },

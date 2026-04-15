@@ -63,7 +63,7 @@ const AdminPages = () => {
     const map = new Map<string, SEOScoreResult>();
     pages.forEach((p) => {
       const route = PAGE_ROUTE_MAP[p.slug];
-      const pageFullUrl = route ? `https://verifiedbmservices.com${route}` : undefined;
+      const pageFullUrl = route ? `https://verifiedbm.shop${route}` : undefined;
       const prefix = route ? (route === "/" ? "/" : `${route}/`) : `/page/${p.slug}/`;
       map.set(p.id, computeSEOScore({
         title: p.title,

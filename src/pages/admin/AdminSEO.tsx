@@ -782,7 +782,7 @@ Disallow: /checkout
 Disallow: /api/
 
 # Sitemap
-Sitemap: https://verifiedbmservices.com/sitemap.xml`;
+Sitemap: https://verifiedbm.shop/sitemap.xml`;
 
 const CrawlerIndexingPanel = ({ saveSetting }: { saveSetting: (key: string, value: string) => Promise<void> }) => {
   const [robotsTxt, setRobotsTxt] = useState(DEFAULT_ROBOTS);
@@ -892,7 +892,7 @@ const CrawlerIndexingPanel = ({ saveSetting }: { saveSetting: (key: string, valu
             {pinging ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
             Ping Google
           </Button>
-          <a href="https://verifiedbmservices.com/sitemap.xml" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-primary hover:underline self-center">
+          <a href="https://verifiedbm.shop/sitemap.xml" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm text-primary hover:underline self-center">
             <Eye className="w-4 h-4" /> View Live Sitemap
           </a>
         </div>
@@ -1056,7 +1056,7 @@ const SchemaConfigPanel = () => {
 
 /** ────────── BULK META EDITOR ────────── */
 const SITE_HEALTH_DOMAINS = [
-  { domain: "verifiedbmservices.com", title: "Buy Verified BM And WhatsApp API", desc: "Professional Verified BM Shop for advertisers.", keyword: "verified bm", canonical: "https://verifiedbmservices.com/" },
+  { domain: "verifiedbm.shop", title: "Buy Verified BM And WhatsApp API", desc: "Professional Verified BM Shop for advertisers.", keyword: "verified bm", canonical: "https://verifiedbm.shop/" },
   { domain: "shop.verifiedbm.com", title: "Shop — Verified BM Store", desc: "Browse verified business managers and ad accounts.", keyword: "buy verified bm", canonical: "https://shop.verifiedbm.com/" },
   { domain: "blog.verifiedbm.com", title: "Blog — Verified BM Shop", desc: "Tips and guides for Facebook advertising.", keyword: "facebook bm guide", canonical: "https://blog.verifiedbm.com/" },
 ];
@@ -1148,24 +1148,24 @@ Disallow: /checkout/
 User-agent: Googlebot
 Allow: /
 
-Sitemap: https://verifiedbmservices.com/sitemap.xml`;
+Sitemap: https://verifiedbm.shop/sitemap.xml`;
 
 const SITEMAP_PREVIEW = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://verifiedbmservices.com/</loc>
+    <loc>https://verifiedbm.shop/</loc>
     <lastmod>2026-04-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://verifiedbmservices.com/shop</loc>
+    <loc>https://verifiedbm.shop/shop</loc>
     <lastmod>2026-04-15</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://verifiedbmservices.com/blog</loc>
+    <loc>https://verifiedbm.shop/blog</loc>
     <lastmod>2026-04-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -1253,7 +1253,7 @@ const RobotsSitemapManager = () => {
               </div>
             </div>
             <a
-              href="https://verifiedbmservices.com/sitemap.xml"
+              href="https://verifiedbm.shop/sitemap.xml"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-sm text-[#2271b1] hover:underline"
@@ -1280,7 +1280,7 @@ const SCHEMA_FIELDS: Record<string, { key: string; label: string; placeholder: s
     { key: "description", label: "Description", placeholder: "High-quality verified BM for advertising..." },
     { key: "price", label: "Price", placeholder: "299.00" },
     { key: "currency", label: "Currency", placeholder: "USD" },
-    { key: "image", label: "Image URL", placeholder: "https://verifiedbmservices.com/product.jpg" },
+    { key: "image", label: "Image URL", placeholder: "https://verifiedbm.shop/product.jpg" },
     { key: "sku", label: "SKU", placeholder: "VBM-001" },
     { key: "availability", label: "Availability", placeholder: "InStock" },
   ],
@@ -1290,14 +1290,14 @@ const SCHEMA_FIELDS: Record<string, { key: string; label: string; placeholder: s
     { key: "address", label: "Street Address", placeholder: "123 Digital Ave" },
     { key: "city", label: "City", placeholder: "New York" },
     { key: "phone", label: "Phone", placeholder: "+1-555-0100" },
-    { key: "image", label: "Logo URL", placeholder: "https://verifiedbmservices.com/logo.png" },
+    { key: "image", label: "Logo URL", placeholder: "https://verifiedbm.shop/logo.png" },
   ],
   Article: [
     { key: "headline", label: "Headline", placeholder: "How to Buy Verified Business Managers" },
     { key: "description", label: "Description", placeholder: "A comprehensive guide to purchasing..." },
     { key: "author", label: "Author Name", placeholder: "Akhi Vai" },
     { key: "datePublished", label: "Date Published", placeholder: "2026-04-15" },
-    { key: "image", label: "Featured Image URL", placeholder: "https://verifiedbmservices.com/blog/featured.jpg" },
+    { key: "image", label: "Featured Image URL", placeholder: "https://verifiedbm.shop/blog/featured.jpg" },
     { key: "publisher", label: "Publisher Name", placeholder: "Verified BM Shop" },
   ],
 };

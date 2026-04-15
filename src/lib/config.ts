@@ -7,7 +7,7 @@
 export const SITE_NAME = "Verified BM Shop";
 
 /** Production domain — always used for canonical URLs, OG tags, invoices, etc. */
-const PRODUCTION_URL = "https://verifiedbmservices.com";
+const PRODUCTION_URL = "https://verifiedbm.shop";
 
 /**
  * Returns the canonical site URL.

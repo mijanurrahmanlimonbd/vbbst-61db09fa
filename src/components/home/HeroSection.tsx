@@ -97,7 +97,7 @@ const HeroSection = () => {
                   <Facebook className="mr-2 h-4 w-4" aria-hidden="true" /> Facebook
                 </Button>
               </a>
-              <a href="mailto:info@verifiedbmservices.com" className="flex-1 min-w-[120px]" aria-label="Send us an email at info@verifiedbmservices.com">
+              <a href="mailto:info@verifiedbm.shop" className="flex-1 min-w-[120px]" aria-label="Send us an email at info@verifiedbm.shop">
                 <Button size="lg" className="w-full h-12 rounded-[9px] px-6 font-bold bg-destructive hover:bg-destructive/90 text-destructive-foreground transition-all">
                   <Mail className="mr-2 h-4 w-4" aria-hidden="true" /> Email
                 </Button>

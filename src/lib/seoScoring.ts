@@ -40,7 +40,7 @@ export function computeSEOScore(input: ScoringInput): SEOScoreResult {
   const fullTitle = input.metaTitle || input.title || "";
   const desc = input.metaDescription || "";
   const prefix = input.urlPrefix || "/";
-  const fullUrl = input.fullUrl || `https://verifiedbmservices.com${prefix}${input.slug}`;
+  const fullUrl = input.fullUrl || `https://verifiedbm.shop${prefix}${input.slug}`;
   const plainText = stripHtml(input.content || "");
   const wordCount = countWords(input.content || "");
 
