@@ -35,7 +35,7 @@ const BenefitsGrid = ({ type }: { type: "bm" | "whatsapp" }) => {
   const benefits = isBM ? verifiedBMBenefits : whatsappBenefits;
 
   return (
-    <section className="py-16 bg-background">
+    <section className="pt-16 pb-8 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <p className="text-sm font-semibold tracking-widest uppercase text-primary text-center">
           {isBM ? "Why Verified BM?" : "WhatsApp API"}
