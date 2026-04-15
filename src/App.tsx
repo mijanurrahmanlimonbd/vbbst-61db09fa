@@ -55,6 +55,7 @@ const AdminCustomers = lazy(() => import("./pages/admin/AdminCustomers"));
 const AdminAuthConfig = lazy(() => import("./pages/admin/AdminAuthConfig"));
 const AdminMenus = lazy(() => import("./pages/admin/AdminMenus"));
 const AdminReviews = lazy(() => import("./pages/admin/AdminReviews"));
+const AdminAssetTracker = lazy(() => import("./pages/admin/AdminAssetTracker"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -126,6 +127,7 @@ const App = () => (
               <Route path="auth-config" element={<AdminAuthConfig />} />
               <Route path="menus" element={<AdminMenus />} />
               <Route path="reviews" element={<AdminReviews />} />
+              <Route path="assets" element={<AdminAssetTracker />} />
             </Route>
             <Route path="/page/:slug" element={<DynamicPage />} />
             <Route path="*" element={<NotFound />} />

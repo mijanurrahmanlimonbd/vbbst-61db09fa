@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      assets: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          daily_spend_limit: number | null
+          id: string
+          name: string
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          daily_spend_limit?: number | null
+          id?: string
+          name: string
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          daily_spend_limit?: number | null
+          id?: string
+          name?: string
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string

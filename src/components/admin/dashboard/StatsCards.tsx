@@ -1,17 +1,13 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { DollarSign, Users, MessageSquare, Activity, TrendingUp, TrendingDown } from "lucide-react";
+import { DollarSign, Users, MessageSquare, TrendingUp, TrendingDown } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-interface SparklineProps {
-  data: number[];
-  color: string;
-  height?: number;
-}
+/* ─── Sparkline ────────────────────────────────────────────────────── */
 
-const Sparkline = ({ data, color, height = 32 }: SparklineProps) => {
+const Sparkline = ({ data, color, height = 32 }: { data: number[]; color: string; height?: number }) => {
   if (data.length < 2) return null;
   const max = Math.max(...data, 1);
   const min = Math.min(...data, 0);
@@ -19,20 +15,71 @@ const Sparkline = ({ data, color, height = 32 }: SparklineProps) => {
   const w = 80;
   const step = w / (data.length - 1);
   const points = data.map((v, i) => `${i * step},${height - ((v - min) / range) * (height - 4) - 2}`).join(" ");
-
   return (
     <svg width={w} height={height} className="shrink-0">
-      <polyline
-        fill="none"
-        stroke={color}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        points={points}
-      />
+      <polyline fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points={points} />
     </svg>
   );
 };
+
+/* ─── Gauge Chart ──────────────────────────────────────────────────── */
+
+const PerformanceGauge = ({ score, loading }: { score: number; loading: boolean }) => {
+  const [animatedScore, setAnimatedScore] = useState(0);
+
+  useEffect(() => {
+    if (loading) return;
+    let frame: number;
+    const start = performance.now();
+    const dur = 1200;
+    const animate = (now: number) => {
+      const p = Math.min((now - start) / dur, 1);
+      const ease = 1 - Math.pow(1 - p, 3); // ease-out cubic
+      setAnimatedScore(Math.round(ease * score));
+      if (p < 1) frame = requestAnimationFrame(animate);
+    };
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
+  }, [score, loading]);
+
+  const size = 72;
+  const strokeW = 6;
+  const radius = (size - strokeW) / 2;
+  const circ = Math.PI * radius; // semicircle
+  const offset = circ - (animatedScore / 100) * circ;
+  const gaugeColor = animatedScore >= 80 ? "#00a32a" : animatedScore >= 50 ? "#dba617" : "#d63638";
+
+  if (loading) return <Skeleton className="w-[72px] h-[40px]" />;
+
+  return (
+    <div className="relative flex flex-col items-center">
+      <svg width={size} height={size / 2 + 4} viewBox={`0 0 ${size} ${size / 2 + 4}`}>
+        {/* Track */}
+        <path
+          d={`M ${strokeW / 2} ${size / 2} A ${radius} ${radius} 0 0 1 ${size - strokeW / 2} ${size / 2}`}
+          fill="none"
+          stroke="#e5e7eb"
+          strokeWidth={strokeW}
+          strokeLinecap="round"
+        />
+        {/* Value arc */}
+        <path
+          d={`M ${strokeW / 2} ${size / 2} A ${radius} ${radius} 0 0 1 ${size - strokeW / 2} ${size / 2}`}
+          fill="none"
+          stroke={gaugeColor}
+          strokeWidth={strokeW}
+          strokeLinecap="round"
+          strokeDasharray={circ}
+          strokeDashoffset={offset}
+          className="transition-all duration-500"
+        />
+      </svg>
+      <span className="text-lg font-bold text-gray-900 -mt-2">{animatedScore}</span>
+    </div>
+  );
+};
+
+/* ─── Stats Cards ──────────────────────────────────────────────────── */
 
 const StatsCards = () => {
   const [loading, setLoading] = useState(true);
@@ -45,7 +92,7 @@ const StatsCards = () => {
   const [newComments, setNewComments] = useState(0);
   const [commentsTrend, setCommentsTrend] = useState(0);
   const [commentsHistory, setCommentsHistory] = useState<number[]>([]);
-  const [systemHealth, setSystemHealth] = useState(98);
+  const [perfScore, setPerfScore] = useState(0);
 
   useEffect(() => {
     const load = async () => {
@@ -55,11 +102,9 @@ const StatsCards = () => {
         supabase.from("comments").select("created_at, status").order("created_at", { ascending: true }),
       ]);
 
-      // Sales
       const completed = (ordersRes.data || []).filter((o: any) => o.status === "completed");
       const total = completed.reduce((s: number, o: any) => s + Number(o.total_amount), 0);
       setTotalSales(total);
-      // Generate sparkline from last 7 entries
       const last7Sales = completed.slice(-7).map((o: any) => Number(o.total_amount));
       setSalesHistory(last7Sales.length > 1 ? last7Sales : [0, 0, 0, total]);
       const half = Math.floor(completed.length / 2);
@@ -67,28 +112,27 @@ const StatsCards = () => {
       const second = completed.slice(half).reduce((s: number, o: any) => s + Number(o.total_amount), 0);
       setSalesTrend(first > 0 ? Math.round(((second - first) / first) * 100) : 0);
 
-      // Users
       const users = profilesRes.data || [];
       const active = users.filter((u: any) => u.is_active).length;
       setActiveUsers(active);
       setUsersHistory(users.slice(-7).map((_: any, i: number) => Math.max(1, active - (7 - i))));
       setUsersTrend(users.length > 5 ? 12 : 0);
 
-      // Comments
       const pending = (commentsRes.data || []).filter((c: any) => c.status === "pending");
       setNewComments(pending.length);
       setCommentsHistory((commentsRes.data || []).slice(-7).map(() => Math.floor(Math.random() * 5) + 1));
       setCommentsTrend(pending.length > 3 ? 8 : -2);
 
-      // System health (simulated)
-      setSystemHealth(98);
+      // Performance score based on real data signals
+      const completionRate = ordersRes.data?.length ? (completed.length / ordersRes.data.length) * 100 : 50;
+      setPerfScore(Math.min(99, Math.round(completionRate * 0.6 + active * 2 + 20)));
 
       setLoading(false);
     };
     load();
   }, []);
 
-  const cards = [
+  const sparkCards = [
     {
       label: "Total Sales",
       value: `$${totalSales.toFixed(2)}`,
@@ -119,21 +163,11 @@ const StatsCards = () => {
       history: commentsHistory,
       link: "/admin/comments",
     },
-    {
-      label: "System Health",
-      value: `${systemHealth}%`,
-      trend: 0,
-      icon: Activity,
-      color: "#8c5ae8",
-      bgColor: "bg-[#8c5ae8]/5",
-      history: [95, 96, 97, 98, 98, 97, 98],
-      link: "/admin/settings",
-    },
   ];
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-      {cards.map((card) => (
+      {sparkCards.map((card) => (
         <Link
           key={card.label}
           to={card.link}
@@ -164,6 +198,20 @@ const StatsCards = () => {
           </div>
         </Link>
       ))}
+
+      {/* Performance Score Gauge Card */}
+      <div className="bg-white rounded-lg border border-[#dcdcde] p-5 flex flex-col items-center justify-center">
+        <PerformanceGauge score={perfScore} loading={loading} />
+        <span className="text-xs font-medium text-gray-500 mt-2">Performance Score</span>
+        {!loading && (
+          <span className={cn(
+            "text-[10px] font-semibold mt-0.5",
+            perfScore >= 80 ? "text-green-600" : perfScore >= 50 ? "text-yellow-600" : "text-red-500"
+          )}>
+            {perfScore >= 80 ? "Excellent" : perfScore >= 50 ? "Needs Improvement" : "Critical"}
+          </span>
+        )}
+      </div>
     </div>
   );
 };
