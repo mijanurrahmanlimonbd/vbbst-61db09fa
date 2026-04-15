@@ -6,8 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import type { FeedItem } from "./ActivityFeed";
 
-const QuickDraftWidget = () => {
+interface QuickDraftWidgetProps {
+  onDraftSaved?: (item: FeedItem) => void;
+}
+
+const QuickDraftWidget = ({ onDraftSaved }: QuickDraftWidgetProps) => {
   const { user } = useAuth();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -31,6 +36,17 @@ const QuickDraftWidget = () => {
       toast.error("Failed to save draft.");
     } else {
       toast.success("Draft saved!");
+
+      // Push to activity feed
+      onDraftSaved?.({
+        id: `draft-${Date.now()}`,
+        icon: FileText,
+        color: "#2271b1",
+        text: `Draft created: "${title.trim()}"`,
+        time: new Date(),
+        link: "/admin/posts",
+      });
+
       setTitle("");
       setContent("");
     }
