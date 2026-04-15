@@ -190,9 +190,26 @@ const NotificationBell = () => {
     setSystemAlerts((prev) =>
       prev.map((a) => (a.id === selectedAlert.id ? { ...a, delegated_to: selectedMember, is_read: true } : a))
     );
+    // Push task to Kanban board via localStorage
+    const kanbanTask = {
+      id: `delegated-${selectedAlert.id}-${Date.now()}`,
+      title: selectedAlert.title,
+      description: selectedAlert.message,
+      assignee: selectedMember,
+      status: "todo",
+      created_at: new Date().toISOString(),
+      source: "Alert Center",
+      priority: selectedAlert.severity === "critical" ? "critical" : "normal",
+    };
+    try {
+      const existing = JSON.parse(localStorage.getItem("vbb_kanban_tasks") || "[]");
+      localStorage.setItem("vbb_kanban_tasks", JSON.stringify([kanbanTask, ...existing]));
+      // Trigger storage event for other tabs/components
+      localStorage.setItem("vbb_delegated_task", JSON.stringify(kanbanTask));
+    } catch { /* ignore */ }
     toast({
-      title: "Task Delegated",
-      description: `Assigned to ${selectedMember} for: ${selectedAlert.message}`,
+      title: "Task Delegated & Added to Board",
+      description: `Assigned to ${selectedMember} — card added to Task Board`,
     });
     setDelegateOpen(false);
     setSelectedAlert(null);

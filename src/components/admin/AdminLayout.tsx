@@ -12,6 +12,7 @@ import {
   ChevronDown, ChevronRight, LogOut, Lock, Package, MessageSquare,
   Mail, ShoppingCart, Search, Briefcase, MessageCircle, HelpCircle,
   ExternalLink, RefreshCw, Star, Users, UserCheck, Database, BarChart3, Wallet,
+  ClipboardList, Sun, Moon,
 } from "lucide-react";
 import {
   Tooltip, TooltipContent, TooltipTrigger,
@@ -39,6 +40,7 @@ const navItems = [
   { title: "Asset Tracker", path: "/admin/assets", icon: Database, section: "dashboard" },
   { title: "Team Analytics", path: "/admin/team", icon: BarChart3, section: "dashboard" },
   { title: "Financial", path: "/admin/finance", icon: Wallet, section: "dashboard" },
+  { title: "Task Board", path: "/admin/tasks", icon: ClipboardList, section: "dashboard" },
   { title: "Navigation", path: "/admin/menus", icon: Menu, section: "settings" },
   { title: "SEO", path: "/admin/seo", icon: Search, section: "settings" },
   { title: "Auth Config", path: "/admin/auth-config", icon: Lock, section: "settings" },
@@ -55,7 +57,21 @@ const AdminLayout = () => {
   const [pendingCount, setPendingCount] = useState(0);
   const [syncing, setSyncing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== "undefined") return localStorage.getItem("admin_dark_mode") === "true";
+    return false;
+  });
   const location = useLocation();
+
+  // Apply dark mode class
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    localStorage.setItem("admin_dark_mode", String(darkMode));
+  }, [darkMode]);
 
   const handleSyncSite = useCallback(async () => {
     setSyncing(true);
@@ -270,7 +286,7 @@ const AdminLayout = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#f0f2f5]">
+    <div className="min-h-screen bg-[#f0f2f5] dark:bg-[#1a1d21] transition-colors duration-300">
       {branding.favicon && (
         <Helmet>
           <link rel="icon" href={branding.favicon} type="image/png" />
@@ -301,7 +317,7 @@ const AdminLayout = () => {
       {/* Main Content */}
       <div className={cn("transition-all duration-200", sidebarOpen ? "md:ml-56" : "md:ml-[60px]")}>
         {/* Top Header Bar */}
-        <header className="sticky top-0 z-30 h-14 bg-white border-b border-[#dcdcde] flex items-center justify-between px-4 sm:px-6 shadow-sm">
+        <header className="sticky top-0 z-30 h-14 bg-white dark:bg-[#23272b] border-b border-[#dcdcde] dark:border-[#3a3f44] flex items-center justify-between px-4 sm:px-6 shadow-sm transition-colors duration-300">
           <div className="flex items-center gap-3">
             {/* Mobile hamburger */}
             <button
@@ -366,6 +382,19 @@ const AdminLayout = () => {
             </Tooltip>
 
             <NotificationBell />
+
+            {/* Dark Mode Toggle */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setDarkMode(!darkMode)}
+                  className="p-1.5 rounded text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300"
+                >
+                  {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>{darkMode ? "Light Mode" : "Dark Mode"}</TooltipContent>
+            </Tooltip>
 
             {/* Profile Dropdown */}
             <div className="relative">
