@@ -103,7 +103,7 @@ const Navbar = () => {
       <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm shadow-[0_1px_3px_rgba(0,0,0,0.05)]" role="navigation" aria-label="Main navigation">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center shrink-0" aria-label="Go to homepage">
+            <Link to="/" className="flex items-center shrink-0 lg:flex-none flex-1 justify-center lg:justify-start" aria-label="Go to homepage">
               {logoElement}
             </Link>
 
