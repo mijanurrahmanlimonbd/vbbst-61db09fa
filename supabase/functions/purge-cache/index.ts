@@ -44,7 +44,14 @@ Deno.serve(async (req) => {
       );
     }
 
-    const res = await fetch("https://verifiedbmservices.com/purge.php?key=vbs_secure_purge_123", {
+    const purgeKey = Deno.env.get("PURGE_CACHE_KEY");
+    if (!purgeKey) {
+      return new Response(JSON.stringify({ success: false, message: "Purge key not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const res = await fetch(`https://verifiedbmservices.com/purge.php?key=${encodeURIComponent(purgeKey)}`, {
       signal: AbortSignal.timeout(10000),
     });
 
