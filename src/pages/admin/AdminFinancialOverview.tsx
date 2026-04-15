@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react";
+import { Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { DollarSign, TrendingUp, Activity, BarChart3, FileDown, Loader2 } from "lucide-react";
+import { DollarSign, TrendingUp, Activity, BarChart3, FileDown, Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
@@ -20,13 +22,16 @@ const COLORS: Record<string, string> = {
 };
 
 const AdminFinancialOverview = () => {
+  const { role, canAccess } = useAuth();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [animated, setAnimated] = useState(false);
   const [generating, setGenerating] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
+  const hasAccess = canAccess("finance");
 
   useEffect(() => {
+    if (!hasAccess) return;
     const fetchAssets = async () => {
       const { data } = await supabase.from("assets").select("*");
       if (data) setAssets(data as Asset[]);
@@ -35,7 +40,21 @@ const AdminFinancialOverview = () => {
     fetchAssets();
     const timer = setTimeout(() => setAnimated(true), 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [hasAccess]);
+
+  if (!hasAccess) {
+    return (
+      <div className="min-h-[400px] flex items-center justify-center">
+        <div className="text-center space-y-3 animate-in fade-in duration-300">
+          <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto">
+            <Lock className="w-7 h-7 text-red-500" />
+          </div>
+          <h2 className="text-lg font-bold text-gray-900">Admin Only</h2>
+          <p className="text-sm text-gray-500 max-w-xs">The Financial Overview is restricted to administrators.</p>
+        </div>
+      </div>
+    );
+  }
 
   const activeAssets = assets.filter((a) => a.status !== "Restricted");
   const totalDailyExposure = activeAssets.reduce((sum, a) => sum + (a.daily_spend_limit || 0), 0);
