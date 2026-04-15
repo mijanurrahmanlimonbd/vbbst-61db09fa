@@ -114,9 +114,9 @@ const AuthModal = ({ open, onClose }: AuthModalProps) => {
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
+      <div className="fixed inset-0 z-[101] flex items-end sm:items-center justify-center pointer-events-none">
         <div
-          className="relative w-full max-w-md bg-background rounded-2xl border border-border shadow-2xl pointer-events-auto animate-in zoom-in-95 fade-in duration-200 overflow-hidden"
+          className="relative w-full max-w-md max-h-[100dvh] sm:max-h-[90vh] bg-background rounded-t-2xl sm:rounded-2xl border border-border shadow-2xl pointer-events-auto animate-in slide-in-from-bottom sm:zoom-in-95 fade-in duration-200 overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close button */}
