@@ -41,6 +41,7 @@ const navItems = [
   { title: "Team Analytics", path: "/admin/team", icon: BarChart3, section: "dashboard" },
   { title: "Financial", path: "/admin/finance", icon: Wallet, section: "dashboard" },
   { title: "Task Board", path: "/admin/tasks", icon: ClipboardList, section: "dashboard" },
+  { title: "Integrations", path: "/admin/integrations", icon: Plug, section: "settings" },
   { title: "Navigation", path: "/admin/menus", icon: Menu, section: "settings" },
   { title: "SEO", path: "/admin/seo", icon: Search, section: "settings" },
   { title: "Auth Config", path: "/admin/auth-config", icon: Lock, section: "settings" },
