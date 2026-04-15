@@ -7,14 +7,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Lock, UserPlus } from "lucide-react";
+import { Loader2, Lock, UserPlus, Shield } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [exiting, setExiting] = useState(false);
   const { signIn } = useAuth();
   const { branding } = useBranding();
   const navigate = useNavigate();
@@ -38,9 +40,11 @@ const AdminLogin = () => {
         toast.error(error.message);
       } else {
         toast.success("Account created! Signing you in...");
-        // Auto-confirm is enabled, so sign in immediately
         const { error: signInError } = await signIn(email, password);
-        if (!signInError) navigate("/admin");
+        if (!signInError) {
+          setExiting(true);
+          setTimeout(() => navigate("/admin"), 600);
+        }
       }
     } else {
       const { error } = await signIn(email, password);
@@ -49,62 +53,80 @@ const AdminLogin = () => {
         toast.error(error);
       } else {
         toast.success("Welcome back!");
-        navigate("/admin");
+        setExiting(true);
+        setTimeout(() => navigate("/admin"), 600);
       }
     }
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(210,20%,96%)] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#1d2327] flex items-center justify-center p-4 relative overflow-hidden">
       {branding.favicon && (
         <Helmet>
           <link rel="icon" href={branding.favicon} type="image/png" />
         </Helmet>
       )}
-      <div className="w-full max-w-sm">
-        <div className="bg-background rounded-2xl border border-border shadow-lg p-8 space-y-6">
+
+      {/* Ambient glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#2271b1]/10 rounded-full blur-[120px] pointer-events-none" />
+
+      <div
+        className={cn(
+          "w-full max-w-sm relative z-10 transition-all duration-600",
+          exiting
+            ? "opacity-0 scale-95 translate-y-4"
+            : "animate-scale-in"
+        )}
+      >
+        <div className="bg-[#23272b] rounded-2xl border border-[#3a3f44] shadow-2xl p-8 space-y-6">
           <div className="text-center">
             {branding.header_logo ? (
               <img
                 src={branding.header_logo}
                 alt={branding.site_title || "Admin"}
-                className="h-12 max-w-[200px] object-contain mx-auto mb-4"
+                className="h-12 max-w-[200px] object-contain mx-auto mb-4 brightness-0 invert"
               />
             ) : (
-              <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-primary-foreground font-bold text-lg mx-auto mb-4">
-                {(branding.site_title || "VS").substring(0, 2).toUpperCase()}
+              <div className="w-14 h-14 bg-[#2271b1] rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Shield className="w-7 h-7 text-white" />
               </div>
             )}
-            <h1 className="text-xl font-bold text-foreground">
+            <h1 className="text-xl font-bold text-white">
               {isSignUp ? "Create Account" : "Admin Login"}
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              {isSignUp ? "Create a new admin account" : `Sign in to your ${branding.site_title || "Verified BM services"} admin panel`}
+            <p className="text-sm text-gray-400 mt-1">
+              {isSignUp ? "Create a new admin account" : "Sign in to access your dashboard"}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-foreground mb-1.5 block">Email</label>
+              <label className="text-sm font-medium text-gray-300 mb-1.5 block">Email</label>
               <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@verifiedbmservices.com"
                 autoComplete="email"
+                className="bg-[#1d2327] border-[#3a3f44] text-white placeholder:text-gray-500 focus:border-[#2271b1] focus:ring-[#2271b1]/20"
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground mb-1.5 block">Password</label>
+              <label className="text-sm font-medium text-gray-300 mb-1.5 block">Password</label>
               <Input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 autoComplete={isSignUp ? "new-password" : "current-password"}
+                className="bg-[#1d2327] border-[#3a3f44] text-white placeholder:text-gray-500 focus:border-[#2271b1] focus:ring-[#2271b1]/20"
               />
             </div>
-            <Button type="submit" className="w-full gap-2" disabled={loading}>
+            <Button
+              type="submit"
+              className="w-full gap-2 bg-[#2271b1] hover:bg-[#135e96] text-white h-11 text-sm font-semibold transition-all duration-200 hover:shadow-lg hover:shadow-[#2271b1]/25"
+              disabled={loading}
+            >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : isSignUp ? (
@@ -119,19 +141,19 @@ const AdminLogin = () => {
           {/* Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border" />
+              <span className="w-full border-t border-[#3a3f44]" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              <span className="bg-[#23272b] px-2 text-gray-500">Or continue with</span>
             </div>
           </div>
 
-          {/* Social Login Buttons */}
+          {/* Social Login */}
           <div className="grid grid-cols-2 gap-3">
             <Button
               type="button"
               variant="outline"
-              className="gap-2"
+              className="gap-2 bg-transparent border-[#3a3f44] text-gray-300 hover:bg-[#2c3338] hover:text-white hover:border-[#4a4f54]"
               disabled={loading}
               onClick={async () => {
                 setLoading(true);
@@ -155,7 +177,7 @@ const AdminLogin = () => {
             <Button
               type="button"
               variant="outline"
-              className="gap-2"
+              className="gap-2 bg-transparent border-[#3a3f44] text-gray-300 hover:bg-[#2c3338] hover:text-white hover:border-[#4a4f54]"
               disabled={loading}
               onClick={async () => {
                 setLoading(true);
@@ -179,12 +201,16 @@ const AdminLogin = () => {
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-primary hover:underline"
+              className="text-sm text-[#2271b1] hover:text-[#4a9fd4] transition-colors"
             >
               {isSignUp ? "Already have an account? Sign In" : "Need an account? Sign Up"}
             </button>
           </div>
         </div>
+
+        <p className="text-center text-[11px] text-gray-600 mt-4">
+          Protected by Verified BM Services · Enterprise Security
+        </p>
       </div>
     </div>
   );
