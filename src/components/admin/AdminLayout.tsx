@@ -11,7 +11,7 @@ import {
   LayoutDashboard, FileText, File, Image, Settings, Menu, X,
   ChevronDown, ChevronRight, LogOut, Lock, Package, MessageSquare,
   Mail, ShoppingCart, Search, Briefcase, MessageCircle, HelpCircle,
-  ExternalLink, RefreshCw, Star, Users, UserCheck, Database, BarChart3,
+  ExternalLink, RefreshCw, Star, Users, UserCheck, Database, BarChart3, Wallet,
 } from "lucide-react";
 import {
   Tooltip, TooltipContent, TooltipTrigger,
@@ -38,6 +38,7 @@ const navItems = [
   { title: "FAQs", path: "/admin/faqs", icon: HelpCircle, section: "dashboard" },
   { title: "Asset Tracker", path: "/admin/assets", icon: Database, section: "dashboard" },
   { title: "Team Analytics", path: "/admin/team", icon: BarChart3, section: "dashboard" },
+  { title: "Financial", path: "/admin/finance", icon: Wallet, section: "dashboard" },
   { title: "Navigation", path: "/admin/menus", icon: Menu, section: "settings" },
   { title: "SEO", path: "/admin/seo", icon: Search, section: "settings" },
   { title: "Auth Config", path: "/admin/auth-config", icon: Lock, section: "settings" },
