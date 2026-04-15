@@ -404,19 +404,6 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              {/* Trust Info Checklist */}
-              <div className="mt-6 rounded-xl border border-border bg-card p-5 space-y-3">
-                {trustPoints.map((text, i) => {
-                  const icons = [Zap, RefreshCw, FileText, Lock, Shield, Clock, Globe, Award];
-                  const Icon = icons[i % icons.length];
-                  return (
-                    <div key={i} className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <Icon className="w-5 h-5 text-primary shrink-0" />
-                      <span>{text}</span>
-                    </div>
-                  );
-                })}
-              </div>
             </div>
           </div>
         </div>
