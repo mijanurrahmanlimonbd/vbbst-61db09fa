@@ -186,3 +186,9 @@ All colors MUST be HSL.
   overflow: hidden;
   padding: 2px;
 }
+
+/* Prevent horizontal overflow on mobile */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}

@@ -62,13 +62,13 @@ const HeroSection = () => {
             >
               <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl md:text-[2.75rem] lg:text-[2.85rem] xl:text-[3.25rem]">
                 Buy <span className="text-primary">Verified BM</span>
-                <span className="mt-3 block whitespace-nowrap text-[1.35rem] sm:text-4xl md:text-[2.75rem] lg:text-[2.85rem] xl:text-[3.25rem]">And <span className="text-[hsl(142,70%,45%)]">WhatsApp Business API</span></span>
+                <span className="mt-3 block text-[1.35rem] sm:text-4xl md:text-[2.75rem] lg:text-[2.85rem] xl:text-[3.25rem]">And <span className="text-[hsl(142,70%,45%)]">WhatsApp Business API</span></span>
               </h1>
             </div>
 
             {/* Description */}
             <p
-              className="mb-8 text-sm text-muted-foreground md:text-base leading-relaxed text-justify animate-hero-fade-right"
+              className="mb-8 text-sm text-muted-foreground md:text-base leading-relaxed text-center lg:text-justify animate-hero-fade-right"
               style={{ animationDelay: "0.35s" }}
             >
               We sell verified Facebook Business Managers and WhatsApp Business API accounts — the real deal, with proper documentation. Need Facebook Ads, TikTok Ads, Google Ads accounts, or reinstated profiles? We've got those too. Every account is legit, secure, and ready to use. Over 10,000 advertisers trust us because we deliver what we promise, fast.
@@ -76,7 +76,7 @@ const HeroSection = () => {
 
             {/* Contact buttons with neon glow */}
             <div
-              className="flex flex-wrap items-center gap-3 lg:gap-4 w-full animate-hero-fade-right"
+              className="flex flex-wrap items-center justify-center lg:justify-start gap-3 lg:gap-4 w-full animate-hero-fade-right"
               style={{ animationDelay: "0.45s" }}
             >
               <a href="https://wa.me/8801302669333" target="_blank" rel="noopener noreferrer" className="flex-1 min-w-[120px]">

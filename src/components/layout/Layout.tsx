@@ -124,7 +124,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
   }, [isEditMode]);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col overflow-x-hidden">
       <AnnouncementBar />
       <Navbar />
       <main ref={mainRef} className="flex-1">{children}</main>
