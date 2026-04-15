@@ -31,7 +31,7 @@ const Navbar = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { branding } = useBranding();
+  const { branding, loading } = useBranding();
   const { user, profile, role, signOut } = useAuth();
   const { openCart, totalItems } = useCart();
   const { data: dbMenuItems } = useMenuItems("header");
