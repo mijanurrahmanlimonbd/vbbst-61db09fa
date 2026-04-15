@@ -62,7 +62,7 @@ const HeroSection = () => {
             >
               <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl md:text-[2.75rem] lg:text-[2.85rem] xl:text-[3.25rem]">
                 Buy <span className="text-primary">Verified BM</span>
-                <span className="mt-3 block whitespace-nowrap text-[1.35rem] sm:text-4xl md:text-[2.75rem] lg:text-[2.85rem] xl:text-[3.25rem]">And <span className="text-[hsl(142,70%,45%)]">WhatsApp Business API</span></span>
+                <span className="mt-3 block text-[1.35rem] sm:text-4xl md:text-[2.75rem] lg:text-[2.85rem] xl:text-[3.25rem]">And <span className="text-[hsl(142,70%,45%)]">WhatsApp Business API</span></span>
               </h1>
             </div>
 
