@@ -125,9 +125,15 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:text-sm focus:font-semibold focus:shadow-lg focus:outline-none"
+      >
+        Skip to content
+      </a>
       <AnnouncementBar />
       <Navbar />
-      <main ref={mainRef} className="flex-1">{children}</main>
+      <main ref={mainRef} id="main-content" className="flex-1">{children}</main>
       <Footer />
       <MobileBottomNav />
       <Suspense fallback={null}>
