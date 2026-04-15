@@ -87,12 +87,14 @@ const ProductCard = forwardRef<HTMLDivElement, { product: Product }>(({ product 
         </div>
 
         {/* Price Box */}
-        <div className="mt-4 rounded-lg border border-border bg-[hsl(0,60%,97%)] p-3">
+        <div className="mt-4 rounded-lg border border-border bg-[hsl(0,60%,97%)] p-3 min-h-[82px] flex flex-col justify-center">
           {product.sale_price ? (
-            <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-sm text-muted-foreground line-through">${product.price}</span>
-              <span className="text-xs font-medium text-[hsl(142,70%,40%)]">Save ${(product.price - product.sale_price).toFixed(2)}</span>
-              <div className="w-full mt-0.5">
+            <div>
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <span className="text-sm text-muted-foreground line-through">${product.price}</span>
+                <span className="text-xs font-medium text-[hsl(142,70%,40%)]">Save ${(product.price - product.sale_price).toFixed(2)}</span>
+              </div>
+              <div className="mt-0.5">
                 <span className="text-3xl font-extrabold text-foreground">${product.sale_price}</span>
                 <span className="text-sm text-muted-foreground ml-1">USD</span>
               </div>
