@@ -89,40 +89,6 @@ const MobileBottomNav = () => {
           ))}
 
           <div className="border-t border-border my-2" />
-
-          {/* Cart */}
-          <button
-            onClick={() => { openCart(); setMenuOpen(false); }}
-            className="flex items-center gap-3 w-full text-left text-sm font-medium text-foreground hover:text-primary transition-colors py-3 px-3 rounded-lg hover:bg-muted"
-          >
-            <ShoppingCart className="w-5 h-5" />
-            Cart
-            {totalItems > 0 && (
-              <span className="ml-auto w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
-                {totalItems > 9 ? "9+" : totalItems}
-              </span>
-            )}
-          </button>
-
-          {/* Account */}
-          {user ? (
-            <Link
-              to="/dashboard"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center gap-3 text-sm font-medium text-foreground hover:text-primary transition-colors py-3 px-3 rounded-lg hover:bg-muted"
-            >
-              <User className="w-5 h-5" />
-              My Account
-            </Link>
-          ) : (
-            <button
-              onClick={() => { setAuthOpen(true); setMenuOpen(false); }}
-              className="flex items-center gap-3 w-full text-left text-sm font-medium text-foreground hover:text-primary transition-colors py-3 px-3 rounded-lg hover:bg-muted"
-            >
-              <User className="w-5 h-5" />
-              Sign In / Register
-            </button>
-          )}
         </div>
       </div>
 
