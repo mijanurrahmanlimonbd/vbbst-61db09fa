@@ -87,28 +87,55 @@ const About = () => {
         </div>
       </section>
 
-      {/* About Story Section */}
+      {/* Our Story Section */}
       <section className="py-16 md:py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold text-primary mb-5">
-              <Star className="h-3.5 w-3.5 fill-primary" /> Our Story
-            </span>
-            <EditableText
-              fieldKey="about_heading"
-              value={c.about_heading || ""}
-              fallback="We Make Meta Advertising Accessible to Everyone"
-              as="h2"
-              className="text-3xl md:text-4xl font-extrabold text-foreground leading-tight"
-            />
-            <EditableText
-              fieldKey="about_text"
-              value={c.about_text || ""}
-              fallback="Verified BM services started in 2019 with one clear mission — give advertisers worldwide access to legitimate, verified Facebook Business Manager accounts without the headache. We saw how many marketers struggled with unverified accounts, bans, and unreliable sellers. So we built something different: a transparent, secure, and fast service backed by real documentation and real people. Today, over 10,000 advertisers in 50+ countries trust us to power their campaigns."
-              as="div"
-              className="text-muted-foreground mt-6 text-base leading-relaxed max-w-3xl mx-auto"
-              richText
-            />
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+            {/* Left — Text */}
+            <div>
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold text-primary mb-5">
+                <Star className="h-3.5 w-3.5 fill-primary" /> Our Story
+              </span>
+              <EditableText
+                fieldKey="about_heading"
+                value={c.about_heading || ""}
+                fallback="We Make Meta Advertising Accessible to Everyone"
+                as="h2"
+                className="text-3xl md:text-4xl font-extrabold text-foreground leading-tight"
+              />
+              <EditableText
+                fieldKey="about_text"
+                value={c.about_text || ""}
+                fallback="Verified BM services started in 2019 with one clear mission — give advertisers worldwide access to legitimate, verified Facebook Business Manager accounts without the headache. We saw how many marketers struggled with unverified accounts, bans, and unreliable sellers. So we built something different: a transparent, secure, and fast service backed by real documentation and real people. Today, over 10,000 advertisers in 50+ countries trust us to power their campaigns."
+                as="div"
+                className="text-muted-foreground mt-5 text-sm leading-relaxed"
+                richText
+              />
+            </div>
+
+            {/* Right — Highlight Cards */}
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { icon: Shield, value: "100%", label: "Verified Accounts", accent: "hsl(var(--primary))" },
+                { icon: Zap, value: "1–4 hrs", label: "Avg. Delivery", accent: "hsl(142,70%,45%)" },
+                { icon: RefreshCw, value: "7 Days", label: "Free Replacement", accent: "hsl(200,100%,40%)" },
+                { icon: Headphones, value: "24/7", label: "Human Support", accent: "hsl(45,100%,50%)" },
+              ].map((card, i) => (
+                <div
+                  key={i}
+                  className="bg-card border border-border rounded-2xl p-5 text-center hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
+                    style={{ backgroundColor: `${card.accent}15` }}
+                  >
+                    <card.icon className="w-5 h-5" style={{ color: card.accent }} />
+                  </div>
+                  <p className="text-xl font-extrabold text-foreground">{card.value}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{card.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
