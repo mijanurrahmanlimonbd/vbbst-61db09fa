@@ -279,7 +279,7 @@ const ProductDetail = () => {
 
             {/* Right: Buy Box */}
             <div className="flex flex-col">
-              <span className="text-xs font-bold tracking-widest uppercase text-primary border-b-2 border-primary pb-1 self-start">{product.category}</span>
+              
 
               <h1 className="text-2xl md:text-3xl font-bold text-foreground mt-4 leading-tight">{product.title}</h1>
 
