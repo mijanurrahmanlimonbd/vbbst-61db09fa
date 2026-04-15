@@ -878,6 +878,42 @@ export type Database = {
         }
         Relationships: []
       }
+      tasks: {
+        Row: {
+          assignee: string | null
+          created_at: string
+          description: string | null
+          id: string
+          priority: string
+          source: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignee?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          priority?: string
+          source?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignee?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          priority?: string
+          source?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       testimonials: {
         Row: {
           avatar_url: string | null
@@ -932,6 +968,33 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      work_logs: {
+        Row: {
+          created_at: string
+          hours: number
+          id: string
+          log_date: string
+          member: string
+          notes: string | null
+        }
+        Insert: {
+          created_at?: string
+          hours?: number
+          id?: string
+          log_date?: string
+          member: string
+          notes?: string | null
+        }
+        Update: {
+          created_at?: string
+          hours?: number
+          id?: string
+          log_date?: string
+          member?: string
+          notes?: string | null
         }
         Relationships: []
       }
