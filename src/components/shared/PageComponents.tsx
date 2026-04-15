@@ -156,7 +156,7 @@ export const FAQsSection = ({ group }: { group?: string }) => {
               <AccordionTrigger className="text-sm font-medium text-foreground hover:no-underline py-4">
                 {item.question}
               </AccordionTrigger>
-              <AccordionContent className="text-sm text-muted-foreground pb-4" dangerouslySetInnerHTML={{ __html: item.answer }} />
+              <AccordionContent className="text-sm text-muted-foreground pb-4" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.answer) }} />
             </AccordionItem>
           ))}
         </Accordion>
