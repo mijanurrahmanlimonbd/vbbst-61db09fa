@@ -456,7 +456,23 @@ const AdminAssetTracker = () => {
         )}
       </div>
 
-      <ImportModal open={importOpen} onClose={() => setImportOpen(false)} />
+      <ImportModal
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImport={async (rows) => {
+          for (const row of rows) {
+            const mapped = {
+              name: row["name"] || row["asset name"] || "Imported Asset",
+              type: row["type"] || "e-Commerce",
+              status: row["status"] || "verified",
+              assigned_to: row["assigned to"] || row["assigned_to"] || TEAM[0],
+              daily_spend_limit: parseFloat(row["daily spend limit"] || row["daily_spend_limit"] || "0") || 0,
+            };
+            await supabase.from("assets").insert(mapped);
+          }
+          await fetchAssets();
+        }}
+      />
     </div>
   );
 };

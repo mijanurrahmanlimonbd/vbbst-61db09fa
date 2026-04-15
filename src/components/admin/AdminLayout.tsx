@@ -11,7 +11,7 @@ import {
   LayoutDashboard, FileText, File, Image, Settings, Menu, X,
   ChevronDown, ChevronRight, LogOut, Lock, Package, MessageSquare,
   Mail, ShoppingCart, Search, Briefcase, MessageCircle, HelpCircle,
-  ExternalLink, RefreshCw, Star, Users, UserCheck, Database,
+  ExternalLink, RefreshCw, Star, Users, UserCheck, Database, BarChart3,
 } from "lucide-react";
 import {
   Tooltip, TooltipContent, TooltipTrigger,
