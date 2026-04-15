@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
-import { ClipboardList, Plus, GripVertical, User, Clock, Trash2, Tag } from "lucide-react";
+import { ClipboardList, Plus, GripVertical, User, Clock, Trash2, Tag, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 const TEAM_MEMBERS = ["Akhi Vai", "Shopon", "Tasneem", "Maruf"];
 
@@ -26,7 +28,7 @@ interface KanbanCard {
   status: KanbanStatus;
   created_at: string;
   source?: string;
-  priority?: "critical" | "normal";
+  priority?: string;
 }
 
 interface WorkLogEntry {
@@ -34,7 +36,7 @@ interface WorkLogEntry {
   member: string;
   hours: number;
   notes: string;
-  date: string;
+  log_date: string;
 }
 
 const COLUMNS: { key: KanbanStatus; label: string; color: string; bg: string }[] = [
@@ -44,12 +46,11 @@ const COLUMNS: { key: KanbanStatus; label: string; color: string; bg: string }[]
   { key: "done", label: "Done", color: "border-t-green-500", bg: "bg-green-50/50 dark:bg-green-900/10" },
 ];
 
-const STORAGE_KEY = "vbb_kanban_tasks";
-const WORKLOG_KEY = "vbb_work_logs";
-
 const AdminTaskBoard = () => {
   const [cards, setCards] = useState<KanbanCard[]>([]);
   const [workLogs, setWorkLogs] = useState<WorkLogEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [logsLoading, setLogsLoading] = useState(true);
   const [draggedCard, setDraggedCard] = useState<string | null>(null);
   const [dragOverCol, setDragOverCol] = useState<KanbanStatus | null>(null);
   const [addingTo, setAddingTo] = useState<KanbanStatus | null>(null);
@@ -61,75 +62,96 @@ const AdminTaskBoard = () => {
   const [logNotes, setLogNotes] = useState("");
   const [animated, setAnimated] = useState(false);
 
-  // Load from localStorage
+  // Fetch tasks
+  const fetchTasks = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (!error && data) {
+      setCards(data.map((t: any) => ({
+        id: t.id,
+        title: t.title,
+        description: t.description || "",
+        assignee: t.assignee || "",
+        status: t.status as KanbanStatus,
+        created_at: t.created_at,
+        source: t.source || "",
+        priority: t.priority || "normal",
+      })));
+    }
+    setLoading(false);
+  }, []);
+
+  // Fetch work logs
+  const fetchWorkLogs = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("work_logs")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (!error && data) {
+      setWorkLogs(data.map((l: any) => ({
+        id: l.id,
+        member: l.member,
+        hours: Number(l.hours),
+        notes: l.notes || "",
+        log_date: l.log_date,
+      })));
+    }
+    setLogsLoading(false);
+  }, []);
+
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) setCards(JSON.parse(saved));
-      const savedLogs = localStorage.getItem(WORKLOG_KEY);
-      if (savedLogs) setWorkLogs(JSON.parse(savedLogs));
-    } catch { /* ignore */ }
+    fetchTasks();
+    fetchWorkLogs();
     const timer = setTimeout(() => setAnimated(true), 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [fetchTasks, fetchWorkLogs]);
 
-  // Persist cards
+  // Realtime subscriptions
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
-  }, [cards]);
+    const tasksChannel = supabase
+      .channel("tasks-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, () => {
+        fetchTasks();
+      })
+      .subscribe();
 
-  // Persist work logs
-  useEffect(() => {
-    localStorage.setItem(WORKLOG_KEY, JSON.stringify(workLogs));
-  }, [workLogs]);
+    const logsChannel = supabase
+      .channel("work-logs-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "work_logs" }, () => {
+        fetchWorkLogs();
+      })
+      .subscribe();
 
-  // Listen for delegated alerts from NotificationBell
-  const handleStorageEvent = useCallback((e: StorageEvent) => {
-    if (e.key === "vbb_delegated_task" && e.newValue) {
-      try {
-        const task = JSON.parse(e.newValue);
-        setCards((prev) => {
-          if (prev.some((c) => c.id === task.id)) return prev;
-          return [task, ...prev];
-        });
-      } catch { /* ignore */ }
-    }
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener("storage", handleStorageEvent);
-    // Also check on mount
-    try {
-      const pending = localStorage.getItem("vbb_delegated_task");
-      if (pending) {
-        const task = JSON.parse(pending);
-        setCards((prev) => {
-          if (prev.some((c) => c.id === task.id)) return prev;
-          return [task, ...prev];
-        });
-      }
-    } catch { /* ignore */ }
-    return () => window.removeEventListener("storage", handleStorageEvent);
-  }, [handleStorageEvent]);
+    return () => {
+      supabase.removeChannel(tasksChannel);
+      supabase.removeChannel(logsChannel);
+    };
+  }, [fetchTasks, fetchWorkLogs]);
 
   // Drag handlers
-  const handleDragStart = (cardId: string) => {
-    setDraggedCard(cardId);
-  };
+  const handleDragStart = (cardId: string) => setDraggedCard(cardId);
 
   const handleDragOver = (e: React.DragEvent, col: KanbanStatus) => {
     e.preventDefault();
     setDragOverCol(col);
   };
 
-  const handleDragLeave = () => {
-    setDragOverCol(null);
-  };
+  const handleDragLeave = () => setDragOverCol(null);
 
-  const handleDrop = (col: KanbanStatus) => {
+  const handleDrop = async (col: KanbanStatus) => {
     if (draggedCard) {
+      // Optimistic update
       setCards((prev) => prev.map((c) => (c.id === draggedCard ? { ...c, status: col } : c)));
-      toast({ title: "Card Moved", description: `Task moved to ${COLUMNS.find((c) => c.key === col)?.label}` });
+      const { error } = await supabase.from("tasks").update({ status: col }).eq("id", draggedCard);
+      if (error) {
+        toast({ title: "Error", description: "Failed to move task", variant: "destructive" });
+        fetchTasks();
+      } else {
+        toast({ title: "Card Moved", description: `Task moved to ${COLUMNS.find((c) => c.key === col)?.label}` });
+      }
     }
     setDraggedCard(null);
     setDragOverCol(null);
@@ -140,43 +162,50 @@ const AdminTaskBoard = () => {
     setDragOverCol(null);
   };
 
-  const addCard = (status: KanbanStatus) => {
+  const addCard = async (status: KanbanStatus) => {
     if (!newTitle.trim()) return;
-    const card: KanbanCard = {
-      id: `task-${Date.now()}`,
+    const { error } = await supabase.from("tasks").insert({
       title: newTitle,
       description: newDesc,
       assignee: newAssignee,
       status,
-      created_at: new Date().toISOString(),
       priority: "normal",
-    };
-    setCards((prev) => [card, ...prev]);
+    });
+    if (error) {
+      toast({ title: "Error", description: "Failed to create task", variant: "destructive" });
+    } else {
+      toast({ title: "Task Created", description: `"${newTitle}" added to ${COLUMNS.find((c) => c.key === status)?.label}` });
+    }
     setNewTitle("");
     setNewDesc("");
     setNewAssignee("");
     setAddingTo(null);
-    toast({ title: "Task Created", description: `"${card.title}" added to ${COLUMNS.find((c) => c.key === status)?.label}` });
   };
 
-  const deleteCard = (id: string) => {
+  const deleteCard = async (id: string) => {
     setCards((prev) => prev.filter((c) => c.id !== id));
+    const { error } = await supabase.from("tasks").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Error", description: "Failed to delete task", variant: "destructive" });
+      fetchTasks();
+    }
   };
 
-  const addWorkLog = () => {
+  const addWorkLog = async () => {
     if (!logMember || !logHours) return;
-    const entry: WorkLogEntry = {
-      id: `log-${Date.now()}`,
+    const { error } = await supabase.from("work_logs").insert({
       member: logMember,
       hours: parseFloat(logHours) || 0,
       notes: logNotes,
-      date: new Date().toLocaleDateString(),
-    };
-    setWorkLogs((prev) => [entry, ...prev]);
+    });
+    if (error) {
+      toast({ title: "Error", description: "Failed to log hours", variant: "destructive" });
+    } else {
+      toast({ title: "Work Log Added", description: `${logHours}h logged for ${logMember}` });
+    }
     setLogMember("");
     setLogHours("");
     setLogNotes("");
-    toast({ title: "Work Log Added", description: `${entry.hours}h logged for ${entry.member}` });
   };
 
   const timeAgo = (dateStr: string) => {
@@ -195,7 +224,7 @@ const AdminTaskBoard = () => {
 
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Task Board</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage team tasks and delegated alerts</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage team tasks with real-time sync</p>
       </div>
 
       {/* Kanban Board */}
@@ -271,55 +300,65 @@ const AdminTaskBoard = () => {
 
               {/* Cards */}
               <div className="flex-1 p-2 space-y-2 overflow-y-auto">
-                {colCards.map((card) => (
-                  <div
-                    key={card.id}
-                    draggable
-                    onDragStart={() => handleDragStart(card.id)}
-                    onDragEnd={handleDragEnd}
-                    className={cn(
-                      "bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3 cursor-grab active:cursor-grabbing",
-                      "shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5",
-                      draggedCard === card.id && "opacity-40 scale-95 rotate-1"
-                    )}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-1.5">
-                        <GripVertical className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600 shrink-0" />
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-2">{card.title}</p>
+                {loading ? (
+                  <div className="space-y-2">
+                    {[...Array(2)].map((_, i) => (
+                      <Skeleton key={i} className="h-24 w-full rounded-lg" />
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    {colCards.map((card) => (
+                      <div
+                        key={card.id}
+                        draggable
+                        onDragStart={() => handleDragStart(card.id)}
+                        onDragEnd={handleDragEnd}
+                        className={cn(
+                          "bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3 cursor-grab active:cursor-grabbing",
+                          "shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5",
+                          draggedCard === card.id && "opacity-40 scale-95 rotate-1"
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-1.5">
+                            <GripVertical className="w-3.5 h-3.5 text-gray-300 dark:text-gray-600 shrink-0" />
+                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 line-clamp-2">{card.title}</p>
+                          </div>
+                          <button onClick={() => deleteCard(card.id)} className="p-0.5 text-gray-300 hover:text-red-500 transition-colors shrink-0">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        {card.description && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 ml-5 line-clamp-2">{card.description}</p>
+                        )}
+                        <div className="flex items-center gap-2 mt-2.5 ml-5 flex-wrap">
+                          {card.assignee && (
+                            <span className="inline-flex items-center gap-1 text-[10px] bg-[#2271b1]/10 text-[#2271b1] dark:bg-[#2271b1]/20 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium">
+                              <User className="w-2.5 h-2.5" /> {card.assignee}
+                            </span>
+                          )}
+                          {card.priority === "critical" && (
+                            <span className="inline-flex items-center gap-1 text-[10px] bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full font-semibold">
+                              <Tag className="w-2.5 h-2.5" /> Critical
+                            </span>
+                          )}
+                          {card.source && (
+                            <span className="text-[10px] text-gray-400 dark:text-gray-500">{card.source}</span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1.5 ml-5 flex items-center gap-1">
+                          <Clock className="w-2.5 h-2.5" /> {timeAgo(card.created_at)}
+                        </p>
                       </div>
-                      <button onClick={() => deleteCard(card.id)} className="p-0.5 text-gray-300 hover:text-red-500 transition-colors shrink-0">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                    {card.description && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 ml-5 line-clamp-2">{card.description}</p>
+                    ))}
+                    {colCards.length === 0 && (
+                      <div className="text-center py-8 text-gray-300 dark:text-gray-600">
+                        <ClipboardList className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-xs">Drop tasks here</p>
+                      </div>
                     )}
-                    <div className="flex items-center gap-2 mt-2.5 ml-5 flex-wrap">
-                      {card.assignee && (
-                        <span className="inline-flex items-center gap-1 text-[10px] bg-[#2271b1]/10 text-[#2271b1] dark:bg-[#2271b1]/20 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium">
-                          <User className="w-2.5 h-2.5" /> {card.assignee}
-                        </span>
-                      )}
-                      {card.priority === "critical" && (
-                        <span className="inline-flex items-center gap-1 text-[10px] bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full font-semibold">
-                          <Tag className="w-2.5 h-2.5" /> Critical
-                        </span>
-                      )}
-                      {card.source && (
-                        <span className="text-[10px] text-gray-400 dark:text-gray-500">{card.source}</span>
-                      )}
-                    </div>
-                    <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1.5 ml-5 flex items-center gap-1">
-                      <Clock className="w-2.5 h-2.5" /> {timeAgo(card.created_at)}
-                    </p>
-                  </div>
-                ))}
-                {colCards.length === 0 && (
-                  <div className="text-center py-8 text-gray-300 dark:text-gray-600">
-                    <ClipboardList className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-xs">Drop tasks here</p>
-                  </div>
+                  </>
                 )}
               </div>
             </div>
@@ -394,16 +433,27 @@ const AdminTaskBoard = () => {
               </tr>
             </thead>
             <tbody>
-              {workLogs.length === 0 ? (
+              {logsLoading ? (
+                <>
+                  {[...Array(3)].map((_, i) => (
+                    <tr key={i} className="border-b border-gray-100 dark:border-gray-700">
+                      <td className="px-6 py-3"><Skeleton className="h-4 w-20" /></td>
+                      <td className="px-6 py-3"><Skeleton className="h-4 w-24" /></td>
+                      <td className="px-6 py-3"><Skeleton className="h-4 w-12" /></td>
+                      <td className="px-6 py-3"><Skeleton className="h-4 w-40" /></td>
+                    </tr>
+                  ))}
+                </>
+              ) : workLogs.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="text-center py-8 text-sm text-gray-400 dark:text-gray-500">
                     No work logs yet. Start logging hours above.
                   </td>
                 </tr>
               ) : (
-                workLogs.slice(0, 20).map((log) => (
+                workLogs.map((log) => (
                   <tr key={log.id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                    <td className="px-6 py-3 text-sm text-gray-700 dark:text-gray-300">{log.date}</td>
+                    <td className="px-6 py-3 text-sm text-gray-700 dark:text-gray-300">{log.log_date}</td>
                     <td className="px-6 py-3">
                       <span className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-gray-100">
                         <User className="w-3.5 h-3.5 text-[#2271b1]" /> {log.member}

@@ -252,6 +252,17 @@ const AdminAssetTracker = () => {
 
   useEffect(() => { fetchAssets(); }, [fetchAssets]);
 
+  // Realtime subscription for live sync
+  useEffect(() => {
+    const channel = supabase
+      .channel("assets-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "assets" }, () => {
+        fetchAssets();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [fetchAssets]);
+
   const updateAsset = async (id: string, field: string, value: any) => {
     setAssets((prev) => prev.map((a) => (a.id === id ? { ...a, [field]: value } : a)));
     const { error } = await supabase.from("assets").update({ [field]: value } as any).eq("id", id);
