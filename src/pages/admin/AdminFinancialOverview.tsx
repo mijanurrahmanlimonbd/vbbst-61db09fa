@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react";
+import { Navigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { DollarSign, TrendingUp, Activity, BarChart3, FileDown, Loader2 } from "lucide-react";
+import { DollarSign, TrendingUp, Activity, BarChart3, FileDown, Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 

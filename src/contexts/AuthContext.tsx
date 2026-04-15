@@ -26,7 +26,7 @@ export const useAuth = () => {
 
 // Permission matrix
 const PERMISSIONS: Record<AppRole, string[]> = {
-  admin: ["dashboard", "posts", "pages", "media", "settings", "users"],
+  admin: ["dashboard", "posts", "pages", "media", "settings", "users", "finance"],
   editor: ["dashboard", "posts", "pages", "media"],
   author: ["dashboard", "posts"],
 };

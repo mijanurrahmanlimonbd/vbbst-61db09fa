@@ -39,7 +39,7 @@ const navItems = [
   { title: "FAQs", path: "/admin/faqs", icon: HelpCircle, section: "dashboard" },
   { title: "Asset Tracker", path: "/admin/assets", icon: Database, section: "dashboard" },
   { title: "Team Analytics", path: "/admin/team", icon: BarChart3, section: "dashboard" },
-  { title: "Financial", path: "/admin/finance", icon: Wallet, section: "dashboard" },
+  { title: "Financial", path: "/admin/finance", icon: Wallet, section: "finance" },
   { title: "Task Board", path: "/admin/tasks", icon: ClipboardList, section: "dashboard" },
   { title: "Integrations", path: "/admin/integrations", icon: Plug, section: "settings" },
   { title: "Navigation", path: "/admin/menus", icon: Menu, section: "settings" },
