@@ -331,6 +331,22 @@ const ProductDetail = () => {
                 </p>
               )}
 
+              {/* Attributes Table */}
+              {attrEntries.length > 0 && (
+                <div className="mt-5 border border-border rounded-xl overflow-hidden">
+                  <table className="w-full text-sm">
+                    <tbody>
+                      {attrEntries.map(([key, value], i) => (
+                        <tr key={key} className={i % 2 === 0 ? "bg-muted/30" : "bg-card"}>
+                          <td className="py-2.5 px-4 font-semibold text-foreground whitespace-nowrap">{key}</td>
+                          <td className="py-2.5 px-4 text-muted-foreground text-right">{String(value)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
               {/* Quantity Selector & Primary CTA */}
               <div className="flex flex-col gap-3 mt-6">
                 {inStock && (
