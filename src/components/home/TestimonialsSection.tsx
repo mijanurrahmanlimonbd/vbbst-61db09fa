@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Carousel,
@@ -11,9 +11,9 @@ import {
 } from "@/components/ui/carousel";
 
 const fallback = [
-  { id: "1", client_name: "James W.", job_title: "Agency buyer • USA", rating: 5, testimonial_text: "Best verified BM provider I've ever used. Account was delivered in minutes and works flawlessly.", avatar_url: null },
-  { id: "2", client_name: "Aisha K.", job_title: "Digital Marketer • UAE", rating: 5, testimonial_text: "Purchased 3 verified BMs for our agency. All came with genuine documentation and high trust scores.", avatar_url: null },
-  { id: "3", client_name: "Markus S.", job_title: "E-commerce Owner • Germany", rating: 5, testimonial_text: "The WhatsApp API account was set up perfectly. Customer support was incredibly helpful throughout the process.", avatar_url: null },
+  { id: "1", client_name: "James W.", job_title: "Agency Media Buyer • USA", rating: 5, testimonial_text: "Best verified BM provider I've ever used. Account was delivered in minutes and works flawlessly for all our Meta advertising campaigns.", avatar_url: null },
+  { id: "2", client_name: "Aisha K.", job_title: "Digital Marketer • UAE", rating: 5, testimonial_text: "Purchased 3 verified BMs for our agency. All came with genuine documentation, high trust scores, and have been running without issues.", avatar_url: null },
+  { id: "3", client_name: "Markus S.", job_title: "E-commerce Owner • Germany", rating: 5, testimonial_text: "The WhatsApp Business API account was set up perfectly. Customer support was incredibly helpful throughout the onboarding process.", avatar_url: null },
 ];
 
 const TestimonialsSection = () => {
@@ -33,11 +33,13 @@ const TestimonialsSection = () => {
   const display = isLoading ? [] : (items && items.length > 0 ? items : fallback);
 
   return (
-    <section className="py-16 bg-secondary/30">
+    <section className="py-16 bg-secondary/30" aria-label="Customer testimonials and success stories">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <p className="text-sm font-semibold tracking-widest uppercase text-primary text-center">Testimonials</p>
         <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mt-2">Customer Success Stories</h2>
-        <p className="text-muted-foreground text-center mt-4">Thousands of advertisers trust Verified BM Shop. Here's what they have to say.</p>
+        <p className="text-muted-foreground text-center mt-4 max-w-2xl mx-auto">
+          Thousands of advertisers trust Verified BM Shop for their <strong>verified business solutions</strong>. Here's what they have to say.
+        </p>
 
         <div className="mt-10">
           {isLoading ? (
@@ -58,36 +60,33 @@ const TestimonialsSection = () => {
             </div>
           ) : (
             <Carousel
-              opts={{
-                align: "start",
-                loop: true,
-              }}
+              opts={{ align: "start", loop: true }}
               className="w-full"
             >
               <CarouselContent className="-ml-4">
                 {display.map((t) => (
                   <CarouselItem key={t.id} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
-                    <div className="bg-card border border-border rounded-xl p-8 hover:shadow-md transition-shadow h-full flex flex-col">
-                      <div className="flex gap-0.5 mb-3">
+                    <article className="bg-card border border-border rounded-xl p-8 hover:shadow-md transition-shadow h-full flex flex-col">
+                      <div className="flex gap-0.5 mb-3" aria-label={`${t.rating} out of 5 stars`}>
                         {[1, 2, 3, 4, 5].map((i) => (
-                          <Star key={i} className={`w-4 h-4 ${i <= t.rating ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/20"}`} />
+                          <Star key={i} className={`w-4 h-4 ${i <= t.rating ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/20"}`} aria-hidden="true" />
                         ))}
                       </div>
-                      <p className="text-muted-foreground italic text-sm leading-relaxed flex-1">"{t.testimonial_text}"</p>
-                      <div className="flex items-center gap-3 mt-6">
+                      <blockquote className="text-muted-foreground italic text-sm leading-relaxed flex-1">"{t.testimonial_text}"</blockquote>
+                      <footer className="flex items-center gap-3 mt-6">
                         {t.avatar_url ? (
-                          <img src={t.avatar_url} alt={t.client_name} loading="lazy" className="w-10 h-10 rounded-full object-cover" />
+                          <img src={t.avatar_url} alt={`${t.client_name} — verified BM customer`} loading="lazy" className="w-10 h-10 rounded-full object-cover" />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
+                          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold" aria-hidden="true">
                             {t.client_name.charAt(0)}
                           </div>
                         )}
                         <div>
-                          <p className="font-semibold text-foreground text-sm">{t.client_name}</p>
+                          <cite className="font-semibold text-foreground text-sm not-italic">{t.client_name}</cite>
                           {t.job_title && <p className="text-xs text-muted-foreground">{t.job_title}</p>}
                         </div>
-                      </div>
-                    </div>
+                      </footer>
+                    </article>
                   </CarouselItem>
                 ))}
               </CarouselContent>
