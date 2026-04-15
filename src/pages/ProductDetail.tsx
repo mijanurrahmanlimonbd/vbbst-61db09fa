@@ -310,13 +310,11 @@ const ProductDetail = () => {
               {/* Price Card */}
               <div className="mt-5 rounded-xl border border-border bg-muted/30 p-5">
                 {product.sale_price ? (
-                  <div>
-                    <div className="flex items-baseline gap-3">
-                      <span className="text-lg text-muted-foreground line-through">${product.price}</span>
-                      <span className="text-sm font-medium text-[hsl(142,70%,45%)]">
-                        Save ${(product.price - product.sale_price).toFixed(2)} ({discount}%)
-                      </span>
-                    </div>
+                  <div className="flex items-baseline gap-3 flex-wrap">
+                    <span className="text-lg text-muted-foreground line-through">${product.price}</span>
+                    <span className="text-sm font-medium text-[hsl(142,70%,45%)]">
+                      Save ${(product.price - product.sale_price).toFixed(2)} ({discount}%)
+                    </span>
                     <span className="text-4xl font-extrabold text-foreground">${product.sale_price}</span>
                   </div>
                 ) : (
