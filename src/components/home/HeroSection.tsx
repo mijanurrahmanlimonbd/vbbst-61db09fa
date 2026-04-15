@@ -16,7 +16,7 @@ const HeroSection = () => {
     <section className="relative overflow-hidden bg-background pt-10 pb-3 md:pt-12 md:pb-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Main two-column layout */}
-        <div className="flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:gap-16">
+        <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-center lg:gap-16">
           {/* Left — Logo with rotating border */}
           <div
             className="flex shrink-0 items-center justify-center lg:w-auto animate-hero-fade-left"
@@ -33,12 +33,12 @@ const HeroSection = () => {
                 <img
                   src={vbbLogo}
                   alt="Buy Verified BM - Verified BM Shop"
-                  className="relative h-44 w-44 rounded-[21px] object-contain sm:h-56 sm:w-56 md:h-64 md:w-64 lg:h-64 lg:w-64 bg-background"
+                  className="relative h-56 w-56 rounded-[21px] object-contain sm:h-64 sm:w-64 md:h-72 md:w-72 lg:h-64 lg:w-64 bg-background"
                   loading="eager"
                   fetchPriority="high"
                   decoding="sync"
-                  width={256}
-                  height={256}
+                  width={288}
+                  height={288}
                 />
               </div>
             </div>
