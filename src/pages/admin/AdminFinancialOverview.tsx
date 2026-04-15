@@ -28,8 +28,21 @@ const AdminFinancialOverview = () => {
   const [animated, setAnimated] = useState(false);
   const [generating, setGenerating] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
+  const hasAccess = canAccess("finance");
 
-  if (!canAccess("finance")) {
+  useEffect(() => {
+    if (!hasAccess) return;
+    const fetchAssets = async () => {
+      const { data } = await supabase.from("assets").select("*");
+      if (data) setAssets(data as Asset[]);
+      setLoading(false);
+    };
+    fetchAssets();
+    const timer = setTimeout(() => setAnimated(true), 100);
+    return () => clearTimeout(timer);
+  }, [hasAccess]);
+
+  if (!hasAccess) {
     return (
       <div className="min-h-[400px] flex items-center justify-center">
         <div className="text-center space-y-3 animate-in fade-in duration-300">
@@ -42,17 +55,6 @@ const AdminFinancialOverview = () => {
       </div>
     );
   }
-
-  useEffect(() => {
-    const fetchAssets = async () => {
-      const { data } = await supabase.from("assets").select("*");
-      if (data) setAssets(data as Asset[]);
-      setLoading(false);
-    };
-    fetchAssets();
-    const timer = setTimeout(() => setAnimated(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
 
   const activeAssets = assets.filter((a) => a.status !== "Restricted");
   const totalDailyExposure = activeAssets.reduce((sum, a) => sum + (a.daily_spend_limit || 0), 0);
