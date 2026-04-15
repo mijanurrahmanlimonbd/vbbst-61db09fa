@@ -34,8 +34,6 @@ const Blog = () => {
         subtitle="Our Blog"
         title={pageSEO?.title || "Insights & Guides"}
         description={pageSEO?.meta_description || "Expert tips, industry insights, and guides on Meta advertising, verified Business Managers, and WhatsApp API."}
-        heroImage={pageSEO?.hero_image}
-        heroOverlay={pageSEO?.hero_overlay}
       />
 
       <section className="py-12">
