@@ -87,7 +87,7 @@ const ProductCard = forwardRef<HTMLDivElement, { product: Product }>(({ product 
         </div>
 
         {/* Price Box */}
-        <div className="mt-4 rounded-lg border border-border bg-[hsl(0,60%,97%)] p-3 min-h-[82px] flex flex-col justify-center">
+        <div className="mt-4 rounded-lg border border-border bg-[hsl(0,60%,97%)] p-3 h-[90px] flex flex-col justify-end">
           {product.sale_price ? (
             <div>
               <div className="flex items-baseline gap-2 flex-wrap">
