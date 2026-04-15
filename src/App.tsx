@@ -135,6 +135,7 @@ const App = () => (
               <Route path="team" element={<AdminTeamAnalytics />} />
               <Route path="finance" element={<AdminFinancialOverview />} />
               <Route path="tasks" element={<AdminTaskBoard />} />
+              <Route path="integrations" element={<AdminIntegrations />} />
             </Route>
             <Route path="/page/:slug" element={<DynamicPage />} />
             <Route path="*" element={<NotFound />} />
