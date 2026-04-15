@@ -549,6 +549,27 @@ const AdminSEO = () => {
             <SEOHealthWidget />
           </div>
         </TabsContent>
+
+        {/* ────────── BULK META EDITOR TAB ────────── */}
+        <TabsContent value="bulk-meta">
+          <div className="mt-4">
+            <BulkMetaEditor />
+          </div>
+        </TabsContent>
+
+        {/* ────────── ROBOTS & SITEMAP TAB ────────── */}
+        <TabsContent value="robots-sitemap">
+          <div className="mt-4">
+            <RobotsSitemapManager />
+          </div>
+        </TabsContent>
+
+        {/* ────────── SCHEMA GENERATOR TAB ────────── */}
+        <TabsContent value="schema-gen">
+          <div className="mt-4">
+            <SchemaGeneratorWidget />
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   );
