@@ -48,9 +48,6 @@ const About = () => {
         subtitle="ABOUT US"
         title={c.page_title || pageSEO?.title || "Who We Are"}
         description={c.page_description || pageSEO?.meta_description || "Trusted by advertisers worldwide since day one."}
-        showSocials
-        heroImage={pageSEO?.hero_image}
-        heroOverlay={pageSEO?.hero_overlay}
       />
 
       {/* Stats */}

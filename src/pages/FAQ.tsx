@@ -68,8 +68,6 @@ const FAQ = () => {
         title={pageSEO?.title || "Frequently Asked Questions"}
         subtitle="HELP CENTER"
         description={pageSEO?.meta_description || "Find quick answers to common questions about our products, payments, and support."}
-        heroImage={pageSEO?.hero_image}
-        heroOverlay={pageSEO?.hero_overlay}
       />
 
       {/* Search & Meta bar */}

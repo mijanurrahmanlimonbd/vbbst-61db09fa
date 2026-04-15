@@ -78,8 +78,6 @@ const DynamicPage = () => {
         subtitle={page.title.toUpperCase()}
         title={content.page_title || page.title}
         description={content.page_description || ""}
-        heroImage={page.hero_image}
-        heroOverlay={page.hero_overlay}
       />
 
       <section className="py-16">

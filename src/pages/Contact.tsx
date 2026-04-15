@@ -75,10 +75,6 @@ const Contact = () => {
         subtitle="24/7 SUPPORT"
         title={pageSEO?.title || "Get in Touch"}
         description={pageSEO?.meta_description || "We're here to help 24/7. Reach out through any of our channels."}
-        showCTAs
-        showSocials
-        heroImage={pageSEO?.hero_image}
-        heroOverlay={pageSEO?.hero_overlay}
       />
 
       {/* Stats */}

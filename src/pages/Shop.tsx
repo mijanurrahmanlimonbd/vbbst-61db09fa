@@ -79,8 +79,6 @@ const Shop = () => {
         showSearch
         searchValue={search}
         onSearchChange={setSearch}
-        heroImage={pageSEO?.hero_image}
-        heroOverlay={pageSEO?.hero_overlay}
       />
 
       <section className="py-12">
