@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
-import { DollarSign, TrendingUp, Activity, BarChart3 } from "lucide-react";
+import { DollarSign, TrendingUp, Activity, BarChart3, FileDown, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 interface Asset {
@@ -22,6 +23,8 @@ const AdminFinancialOverview = () => {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [animated, setAnimated] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchAssets = async () => {
@@ -64,13 +67,50 @@ const AdminFinancialOverview = () => {
     );
   }
 
+  const generateReport = async () => {
+    setGenerating(true);
+    // Build CSV-style report data
+    const now = new Date().toLocaleDateString();
+    const lines = [
+      `Financial Report — ${now}`,
+      "",
+      `Total Daily Ad Exposure: $${totalDailyExposure.toLocaleString()}`,
+      `Active Campaigns: ${activeCampaignCount}`,
+      `Restricted Assets: ${restrictedCount}`,
+      `Avg. Spend / Campaign: $${avgSpend}`,
+      "",
+      "Asset Breakdown:",
+      "Name, Type, Status, Daily Spend Limit",
+      ...assets.map((a) => `${a.name}, ${a.type}, ${a.status}, $${(a.daily_spend_limit || 0).toLocaleString()}`),
+    ];
+    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Financial_Report_${now.replace(/\//g, "-")}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setTimeout(() => setGenerating(false), 800);
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" ref={reportRef}>
       <Helmet><title>Financial Overview — Admin</title></Helmet>
 
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Financial Overview</h1>
-        <p className="text-sm text-gray-500 mt-1">Aggregated daily ad exposure and campaign metrics</p>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Financial Overview</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Aggregated daily ad exposure and campaign metrics</p>
+        </div>
+        <Button
+          onClick={generateReport}
+          disabled={generating}
+          className="gap-2 bg-[#2271b1] hover:bg-[#135e96] text-white"
+          size="sm"
+        >
+          {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
+          Generate Client Report
+        </Button>
       </div>
 
       {/* Stats */}
