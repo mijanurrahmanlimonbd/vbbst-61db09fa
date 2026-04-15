@@ -58,6 +58,7 @@ const AdminReviews = lazy(() => import("./pages/admin/AdminReviews"));
 const AdminAssetTracker = lazy(() => import("./pages/admin/AdminAssetTracker"));
 const AdminTeamAnalytics = lazy(() => import("./pages/admin/AdminTeamAnalytics"));
 const AdminFinancialOverview = lazy(() => import("./pages/admin/AdminFinancialOverview"));
+const AdminTaskBoard = lazy(() => import("./pages/admin/AdminTaskBoard"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -132,6 +133,7 @@ const App = () => (
               <Route path="assets" element={<AdminAssetTracker />} />
               <Route path="team" element={<AdminTeamAnalytics />} />
               <Route path="finance" element={<AdminFinancialOverview />} />
+              <Route path="tasks" element={<AdminTaskBoard />} />
             </Route>
             <Route path="/page/:slug" element={<DynamicPage />} />
             <Route path="*" element={<NotFound />} />
