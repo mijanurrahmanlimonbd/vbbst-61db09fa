@@ -331,19 +331,15 @@ const ProductDetail = () => {
                 </p>
               )}
 
-              {/* Attributes Table */}
+              {/* Attributes Table - 2 columns */}
               {attrEntries.length > 0 && (
-                <div className="mt-5 border border-border rounded-xl overflow-hidden">
-                  <table className="w-full text-sm">
-                    <tbody>
-                      {attrEntries.map(([key, value], i) => (
-                        <tr key={key} className={i % 2 === 0 ? "bg-muted/30" : "bg-card"}>
-                          <td className="py-2.5 px-4 font-semibold text-foreground whitespace-nowrap">{key}</td>
-                          <td className="py-2.5 px-4 text-muted-foreground text-right">{String(value)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-0 border border-border rounded-xl overflow-hidden">
+                  {attrEntries.map(([key, value], i) => (
+                    <div key={key} className={`flex justify-between py-2.5 px-4 text-sm ${i % 2 === 0 ? "bg-muted/30" : "bg-card"} ${i < attrEntries.length - (attrEntries.length % 2 === 0 ? 2 : 1) ? "border-b border-border" : ""}`}>
+                      <span className="font-semibold text-foreground">{key}</span>
+                      <span className="text-muted-foreground text-right">{String(value)}</span>
+                    </div>
+                  ))}
                 </div>
               )}
 
