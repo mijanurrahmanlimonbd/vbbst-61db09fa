@@ -19,7 +19,7 @@ const HeroSection = () => {
         <div className="flex flex-col items-center gap-6 lg:flex-row lg:items-center lg:gap-16 w-full">
           {/* Left — Logo with rotating border */}
           <div
-            className="flex shrink-0 items-center justify-center lg:w-auto animate-hero-fade-left"
+            className="flex shrink-0 items-center justify-center w-full lg:w-auto animate-hero-fade-left"
             style={{ animationDelay: "0.1s" }}
           >
             <div className="relative">
