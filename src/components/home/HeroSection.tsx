@@ -32,13 +32,13 @@ const HeroSection = () => {
                 />
                 <img
                   src={vbbLogo}
-                  alt="Buy Verified BM - Verified BM services"
-                  className="relative h-52 w-52 rounded-[21px] object-cover sm:h-72 sm:w-72 md:h-80 md:w-80 lg:h-80 lg:w-80 bg-secondary"
+                  alt="Buy Verified BM - Verified BM Shop"
+                  className="relative h-44 w-44 rounded-[21px] object-contain sm:h-56 sm:w-56 md:h-64 md:w-64 lg:h-64 lg:w-64 bg-background"
                   loading="eager"
                   fetchPriority="high"
                   decoding="sync"
-                  width={320}
-                  height={320}
+                  width={256}
+                  height={256}
                 />
               </div>
             </div>

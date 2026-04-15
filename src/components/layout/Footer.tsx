@@ -48,13 +48,13 @@ const Footer = () => {
   const copyright = copyrightRaw.replace(/\{year\}/g, String(new Date().getFullYear()));
 
   const logoElement = branding.footer_logo ? (
-    <img src={branding.footer_logo} alt={branding.site_title} className="h-9 max-w-[180px] object-contain" loading="lazy" />
+    <img src={branding.footer_logo} alt={branding.site_title} className="h-11 max-w-[200px] object-contain" loading="lazy" />
   ) : branding.header_logo ? (
-    <img src={branding.header_logo} alt={branding.site_title} className="h-9 max-w-[180px] object-contain" loading="lazy" />
+    <img src={branding.header_logo} alt={branding.site_title} className="h-11 max-w-[200px] object-contain" loading="lazy" />
   ) : (
     <div className="flex items-center gap-2.5">
       <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-sm shadow-sm">V</div>
-      <span className="text-lg font-bold text-foreground tracking-tight">Verified BM <span className="text-primary">services</span></span>
+      <span className="text-lg font-bold text-foreground tracking-tight">Verified BM <span className="text-primary">Shop</span></span>
     </div>
   );
 

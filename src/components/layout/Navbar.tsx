@@ -85,13 +85,13 @@ const Navbar = () => {
   const logoElement = (
     <img
       src={logoSrc}
-      alt={branding.site_title || "Verified BM services official logo"}
+      alt={branding.site_title || "Verified BM Shop official logo"}
       width={180}
-      height={38}
+      height={44}
       loading="eager"
       fetchPriority="high"
       decoding="sync"
-      className="h-9 w-auto max-w-[180px] object-contain"
+      className="h-11 w-auto max-w-[200px] object-contain"
     />
   );
 
