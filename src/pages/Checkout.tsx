@@ -277,11 +277,11 @@ const Checkout = () => {
       const path = `${orderId}/proof.${ext}`;
       const { error: upErr } = await supabase.storage.from("payment-proofs").upload(path, proofFile, { upsert: true });
       if (upErr) throw upErr;
-      const { data: urlData } = supabase.storage.from("payment-proofs").getPublicUrl(path);
+      // Store the storage path only; admins fetch a short-lived signed URL when viewing.
       const { error: updateErr } = await supabase
         .from("orders")
         .update({
-          proof_image_url: urlData.publicUrl,
+          proof_image_url: path,
           proof_uploaded_at: new Date().toISOString(),
           status: "processing",
         })
