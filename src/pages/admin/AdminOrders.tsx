@@ -344,7 +344,21 @@ const AdminOrders = () => {
                 <div>
                   <h4 className="text-sm font-semibold text-foreground mb-2">Payment Proof</h4>
                   <div className="flex items-center gap-3">
-                    <Button variant="outline" size="sm" className="gap-2" onClick={() => { setProofUrl(selectedOrder.proof_image_url!); setProofOpen(true); }}>
+                    <Button variant="outline" size="sm" className="gap-2" onClick={async () => {
+                      const raw = selectedOrder.proof_image_url!;
+                      // Support both newly-stored paths and legacy full public URLs
+                      const marker = "/payment-proofs/";
+                      const path = raw.includes(marker) ? raw.split(marker)[1] : raw;
+                      const { data, error } = await supabase.storage
+                        .from("payment-proofs")
+                        .createSignedUrl(path, 300);
+                      if (error || !data?.signedUrl) {
+                        toast.error("Could not load payment proof");
+                        return;
+                      }
+                      setProofUrl(data.signedUrl);
+                      setProofOpen(true);
+                    }}>
                       <ImageIcon className="w-4 h-4" /> View Proof
                     </Button>
                     {selectedOrder.proof_uploaded_at && (
