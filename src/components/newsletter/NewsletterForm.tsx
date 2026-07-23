@@ -22,7 +22,7 @@ const NewsletterForm = ({ variant = "footer" }: { variant?: "footer" | "modal" }
 
     const result = emailSchema.safeParse(email);
     if (!result.success) {
-      toast.error(result.error.errors[0].message);
+      toast.error(result.error.issues[0].message);
       return;
     }
 
