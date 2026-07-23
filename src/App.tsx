@@ -30,6 +30,9 @@ const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
 const ReplacementGuarantee = lazy(() => import("./pages/ReplacementGuarantee"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Login = lazy(() => import("./pages/Login"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
+
 
 // Admin routes — heavy, rarely visited
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
@@ -106,7 +109,10 @@ const App = () => (
             <Route path="/replacement-guarantee" element={<ReplacementGuarantee />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route path="/admin/login" element={<AdminLogin />} />
+
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               <Route path="posts" element={<AdminPosts />} />
